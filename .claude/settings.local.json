@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(git push)",
+      "Bash(git commit:*)",
+      "Bash(gdlint --list:*)",
+      "Bash(gdlint:*)",
+      "Bash(gdformat:*)",
+      "Bash(cat:*)",
+      "Bash(git add:*)",
+      "Bash(git -C C:/Users/vinco/Projects/false_witness status)",
+      "Bash(git -C C:/Users/vinco/Projects/false_witness log:*)",
+      "Bash(git -C C:/Users/vinco/Projects/false_witness add:*)",
+      "Bash(git -C C:/Users/vinco/Projects/false_witness diff:*)",
+      "Bash(git -C C:/Users/vinco/Projects/false_witness push)",
+      "Bash(git -C C:/Users/vinco/Projects/false_witness commit:*)",
+      "Bash(dir:*)",
+      "Bash(pip show:*)",
+      "Bash(where:*)",
+      "Bash(python:*)",
+      "Bash(\"C:\\\\Users\\\\vinco\\\\Projects\\\\tooling\\\\Godot_v4.4.1-stable_win64.exe\":*)",
+      "WebSearch",
+      "Edit(tickets/**)",
+      "Write(tickets/**)",
+      "Bash(\"C:/Users/vinco/Projects/tooling/Godot_v4.4.1-stable_win64.exe\" --headless --path C:/Users/vinco/Projects/false_witness -s:*)"
+    ]
+  }
+}

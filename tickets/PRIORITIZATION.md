@@ -4,7 +4,7 @@ This file tracks the order in which tickets should be worked on.
 
 ## Current Status
 
-**NEXT**: FW-003
+**NEXT**: FW-011
 
 *Note: MVP focuses on vertical slice - one map, one entity, core evidence system, basic Cultist mechanics, 4-player networking. Design Supplement priorities 1-5 integrated into MVP.*
 
@@ -54,7 +54,7 @@ Based on competitive analysis (Phasmophobia, R.E.P.O., Demonologist):
 |----------|--------|-------|--------|------------|
 | 1 | FW-001 | Initialize Godot 4.4 project with folder structure | for_review | - |
 | 2 | FW-002 | Create core autoload architecture | for_review | FW-001 |
-| 3 | FW-003 | Implement core game state machine | ready | FW-002 |
+| 3 | FW-003 | Implement core game state machine | for_review | FW-002 |
 | 4 | FW-011 | Set up P2P networking foundation | ready | FW-002 |
 | 5 | FW-021 | Create first-person player controller | ready | FW-001 |
 | 6 | FW-091 | Establish audio system foundation | ready | FW-001 |
@@ -201,6 +201,7 @@ FW-001 (Project Init)
 
 | Ticket ID | Title |
 |-----------|-------|
+| FW-003 | Implement core game state machine |
 | FW-002 | Create core autoload architecture |
 | FW-001 | Initialize Godot 4.4 project with folder structure |
 

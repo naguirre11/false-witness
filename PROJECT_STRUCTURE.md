@@ -62,8 +62,9 @@ src/
 ```
 tests/
 ├── test_example.gd           # Example test (can be deleted)
-├── test_event_bus.gd         # EventBus signal tests
-└── test_game_manager.gd      # GameManager state tests
+├── test_event_bus.gd         # EventBus signal tests (19 tests)
+├── test_game_manager.gd      # GameManager state tests (15 tests)
+└── test_game_manager_timer.gd # GameManager timer tests (14 tests)
 ```
 
 ## Key Systems
@@ -105,6 +106,11 @@ NONE -> LOBBY -> SETUP -> INVESTIGATION <-> HUNT -> RESULTS
 - `deliberation_started()`
 - `vote_cast(voter_id: int, target_id: int)`
 - `match_ended(result: String)`
+
+**Timer:**
+- `phase_timer_tick(time_remaining: float)` - Every second during timed phases
+- `phase_timer_expired(state: int)` - When timer hits zero
+- `phase_timer_extended(additional_seconds: float)` - On time extension
 
 ## Configuration Files
 

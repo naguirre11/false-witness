@@ -136,3 +136,63 @@ func test_multiple_listeners() -> void:
 	bus.hunt_started.emit()
 
 	assert_eq(count["value"], 3, "All three listeners should receive the signal")
+
+
+# --- Timer Signal Tests ---
+
+
+func test_phase_timer_tick_signal_exists() -> void:
+	assert_true(bus.has_signal("phase_timer_tick"), "Should have phase_timer_tick signal")
+
+
+func test_phase_timer_expired_signal_exists() -> void:
+	assert_true(bus.has_signal("phase_timer_expired"), "Should have phase_timer_expired signal")
+
+
+func test_phase_timer_extended_signal_exists() -> void:
+	assert_true(bus.has_signal("phase_timer_extended"), "Should have phase_timer_extended signal")
+
+
+func test_phase_timer_tick_emission() -> void:
+	var state := {"received": false, "time": 0.0}
+
+	bus.phase_timer_tick.connect(
+		func(time_remaining: float):
+			state["received"] = true
+			state["time"] = time_remaining
+	)
+
+	bus.phase_timer_tick.emit(600.0)
+
+	assert_true(state["received"], "Phase timer tick should be received")
+	assert_eq(state["time"], 600.0, "Time remaining should be 600")
+
+
+func test_phase_timer_expired_emission() -> void:
+	var state := {"received": false, "state": -1}
+
+	bus.phase_timer_expired.connect(
+		func(expired_state: int):
+			state["received"] = true
+			state["state"] = expired_state
+	)
+
+	bus.phase_timer_expired.emit(3)  # INVESTIGATION = 3
+
+	assert_true(state["received"], "Phase timer expired should be received")
+	assert_eq(state["state"], 3, "Expired state should be INVESTIGATION (3)")
+
+
+func test_phase_timer_extended_emission() -> void:
+	var state := {"received": false, "additional": 0.0}
+
+	bus.phase_timer_extended.connect(
+		func(additional_seconds: float):
+			state["received"] = true
+			state["additional"] = additional_seconds
+	)
+
+	bus.phase_timer_extended.emit(60.0)
+
+	assert_true(state["received"], "Phase timer extended should be received")
+	assert_eq(state["additional"], 60.0, "Additional seconds should be 60")

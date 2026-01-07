@@ -66,6 +66,18 @@ signal vote_cast(voter_id: int, target_id: int)
 ## Emitted when the match ends with a result.
 signal match_ended(result: String)
 
+# --- Timer Signals ---
+
+## Emitted every second during timed phases (investigation, deliberation).
+## time_remaining is in seconds.
+signal phase_timer_tick(time_remaining: float)
+
+## Emitted when a timed phase expires.
+signal phase_timer_expired(state: int)
+
+## Emitted when phase time is extended (e.g., by finding evidence).
+signal phase_timer_extended(additional_seconds: float)
+
 
 func _ready() -> void:
 	print("[EventBus] Initialized - Global signal hub ready")

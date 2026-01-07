@@ -34,7 +34,7 @@ These are custom commands to be used whenever a particular function starting wit
 
 ## %tickets / %t
 
-   Wrapper for doing a combination of %i, then %h, then %e, then %g.
+   Wrapper for doing a combination of %i, then %h, then %e, then %g -f.
 
    The most common workflow. Pick up the latest ready ticket, work on it, test it. Make a handoff. If ticket work is deemed ready for review, update the project repo, commit changes to git. 
 

@@ -4,7 +4,7 @@ This file tracks the order in which tickets should be worked on.
 
 ## Current Status
 
-**NEXT**: FW-024
+**NEXT**: FW-031 (Core evidence system)
 
 *Note: MVP focuses on vertical slice - one map, one entity, core evidence system, basic Cultist mechanics, 4-player networking. Design Supplement priorities 1-5 integrated into MVP.*
 
@@ -72,7 +72,7 @@ Based on competitive analysis (Phasmophobia, R.E.P.O., Demonologist):
 | Priority | Ticket | Title | Status | Blocked By |
 |----------|--------|-------|--------|------------|
 | 1 | FW-012 | Implement lobby system | ready | FW-011 |
-| 1 | FW-024 | Implement hunt protection items | ready | FW-023 |
+| 1 | FW-024 | Implement hunt protection items | for_review | FW-023 |
 | 2 | FW-031 | Create core evidence system | ready | FW-002, FW-023 |
 | 2 | FW-041 | Create core entity AI with behavioral tells | ready | FW-002, FW-003 |
 | 2 | FW-081 | Create main menu and lobby UI | ready | FW-012 |
@@ -201,6 +201,7 @@ FW-001 (Project Init)
 
 | Ticket ID | Title |
 |-----------|-------|
+| FW-024 | Implement hunt protection items |
 | FW-023 | Create equipment slot system |
 | FW-022 | Implement player interaction system |
 | FW-021 | Create first-person player controller |

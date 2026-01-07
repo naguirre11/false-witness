@@ -66,7 +66,11 @@ src/
 ├── equipment/
 │   ├── equipment.gd          # Equipment base class (Node3D)
 │   ├── equipment_slot.gd     # EquipmentSlot resource for slot management
-│   └── equipment_manager.gd  # EquipmentManager for player loadout
+│   ├── equipment_manager.gd  # EquipmentManager for player loadout
+│   ├── protection_item.gd    # ProtectionItem base class (extends Equipment)
+│   ├── crucifix.gd           # Crucifix hunt prevention item
+│   ├── sage_bundle.gd        # Sage Bundle entity blinding item
+│   └── salt.gd               # Salt footstep detection item
 ├── interaction/
 │   ├── interactable.gd       # Base class for interactable objects
 │   ├── interaction_manager.gd # Raycast detection and input handling
@@ -100,7 +104,11 @@ tests/
 ├── test_interaction_prompt_ui.gd # InteractionPromptUI tests (12 tests)
 ├── test_equipment.gd          # Equipment base class tests (36 tests)
 ├── test_equipment_slot.gd     # EquipmentSlot tests (30 tests)
-└── test_equipment_manager.gd  # EquipmentManager tests (40 tests)
+├── test_equipment_manager.gd  # EquipmentManager tests (40 tests)
+├── test_protection_item.gd    # ProtectionItem tests (29 tests)
+├── test_crucifix.gd           # Crucifix tests (25 tests)
+├── test_sage_bundle.gd        # SageBundle tests (25 tests)
+└── test_salt.gd               # Salt tests (32 tests)
 ```
 
 ## Key Systems
@@ -169,7 +177,7 @@ Raycast-based interaction system for interacting with environment objects.
 3-slot equipment loadout for investigation tools.
 
 **Equipment** (Node3D base class):
-- Types: EMF_READER, SPIRIT_BOX, JOURNAL, THERMOMETER, UV_FLASHLIGHT, DOTS_PROJECTOR, VIDEO_CAMERA, PARABOLIC_MIC
+- Types: EMF_READER, SPIRIT_BOX, JOURNAL, THERMOMETER, UV_FLASHLIGHT, DOTS_PROJECTOR, VIDEO_CAMERA, PARABOLIC_MIC, CRUCIFIX, SAGE_BUNDLE, SALT
 - Use modes: HOLD, TOGGLE, INSTANT
 - States: INACTIVE, ACTIVE, COOLDOWN
 - Virtual methods: `_use_impl()`, `_stop_using_impl()`, `get_detectable_evidence()`
@@ -197,6 +205,37 @@ Raycast-based interaction system for interacting with environment objects.
 - `equipment_used(slot: int, equipment: Equipment)`
 - `equipment_locked`
 
+### Protection System
+
+Protection items provide counterplay against entity hunts.
+
+**ProtectionItem** (extends Equipment):
+- Placement modes: HELD (sage) vs PLACED (crucifix, salt)
+- Charge management (max_charges, consume_charge)
+- Demon modifiers for radius/duration
+- Network sync for charges and placement
+
+**Signals:**
+- `charge_used(remaining: int)`
+- `placed(location: Vector3)`
+- `triggered(location: Vector3)`
+- `depleted`
+
+**Crucifix**:
+- 2 charges, 3m radius (2m for Demon)
+- Must be placed BEFORE hunt begins
+- Listens to `hunt_starting`, emits `hunt_prevented`
+
+**Sage Bundle**:
+- 1 charge, HELD mode
+- Blinds entity 5s during hunt
+- Prevents hunts for 60s (30s Demon)
+
+**Salt**:
+- 3 charges, creates detection area
+- Reveals entity footsteps (UV-visible)
+- Wraith ignores salt (behavioral tell)
+
 ### EventBus Signals
 
 **Game State:**
@@ -213,9 +252,19 @@ Raycast-based interaction system for interacting with environment objects.
 - `evidence_recorded(evidence_type: String, equipment_type: String)`
 
 **Entity:**
-- `hunt_started()`
-- `hunt_ended()`
+- `hunt_starting(entity_position: Vector3, entity: Node)` - Pre-hunt, allows prevention
+- `hunt_started`
+- `hunt_ended`
 - `entity_tell_triggered(tell_type: String)`
+
+**Protection:**
+- `hunt_prevented(location: Vector3, charges_remaining: int)`
+- `entity_blinded(duration: float)`
+- `hunt_prevention_started(duration: float)`
+- `hunt_prevention_ended`
+- `salt_triggered(location: Vector3)`
+- `protection_item_placed(item_type: String, location: Vector3)`
+- `protection_item_depleted(item_type: String, location: Vector3)`
 
 **Cultist:**
 - `cultist_ability_used(ability_type: String)`

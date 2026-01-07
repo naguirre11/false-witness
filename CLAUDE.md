@@ -60,15 +60,20 @@ Avoid using these as function names: `assert`, `print`, `str`, `to_string`, `dup
 
 ## Build Commands
 
-```bash
-# Check compilation
-godot --headless --check-only
+Godot executable is located at `../tooling/Godot_v4.4.1-stable_win64_console.exe` (relative to project root).
 
-# Run specific script
-godot --headless --script test.gd
+```bash
+# Set alias for convenience (optional)
+GODOT="../tooling/Godot_v4.4.1-stable_win64_console.exe"
+
+# Import/reimport project (run this after adding new scripts)
+$GODOT --headless --import
 
 # Run GUT tests
-godot --headless -s addons/gut/gut_cmdln.gd
+$GODOT --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gprefix=test_ -gsuffix=.gd -gexit
+
+# Run specific test file
+$GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=test_example.gd -gexit
 ```
 ## Code Quality
 

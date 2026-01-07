@@ -87,6 +87,9 @@ static func type_to_name(type: int) -> String:
 		5: "DOTS Projector",
 		6: "Video Camera",
 		7: "Parabolic Mic",
+		8: "Crucifix",
+		9: "Sage Bundle",
+		10: "Salt",
 	}
 	return names.get(type, "Unknown")
 
@@ -102,6 +105,9 @@ static func name_to_type(equipment_name: String) -> int:
 		"DOTS Projector": 5,
 		"Video Camera": 6,
 		"Parabolic Mic": 7,
+		"Crucifix": 8,
+		"Sage Bundle": 9,
+		"Salt": 10,
 	}
 	return types.get(equipment_name, -1)
 
@@ -117,5 +123,8 @@ static func get_scene_path(type: int) -> String:
 		5: "res://scenes/equipment/dots_projector.tscn",
 		6: "res://scenes/equipment/video_camera.tscn",
 		7: "res://scenes/equipment/parabolic_mic.tscn",
+		8: "res://scenes/equipment/crucifix.tscn",
+		9: "res://scenes/equipment/sage_bundle.tscn",
+		10: "res://scenes/equipment/salt.tscn",
 	}
 	return paths.get(type, "")

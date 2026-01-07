@@ -25,7 +25,12 @@
       "Edit(tickets/**)",
       "Write(tickets/**)",
       "Bash(\"C:/Users/vinco/Projects/tooling/Godot_v4.4.1-stable_win64.exe\" --headless --path C:/Users/vinco/Projects/false_witness -s:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(../tooling/Godot_v4.4-stable_win64.exe --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/test_network_manager.gd)",
+      "Bash(\"C:/Users/vinco/Projects/tooling/Godot_v4.4.1-stable_win64_console.exe\" --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/test_network_manager.gd)",
+      "Bash(godot:*)",
+      "Bash(cmd.exe /c \"where godot 2>&1\")",
+      "Bash(cmd.exe /c \"dir /s /b C:\\\\*.exe 2>nul | findstr -i godot\")"
     ]
   }
 }

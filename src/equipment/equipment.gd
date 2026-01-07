@@ -25,6 +25,10 @@ enum EquipmentType {
 	DOTS_PROJECTOR,
 	VIDEO_CAMERA,
 	PARABOLIC_MIC,
+	# Protection Items
+	CRUCIFIX,
+	SAGE_BUNDLE,
+	SALT,
 }
 
 enum EquipmentState {

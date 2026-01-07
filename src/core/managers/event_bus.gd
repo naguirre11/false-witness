@@ -38,7 +38,12 @@ signal evidence_recorded(evidence_type: String, equipment_type: String)
 
 # --- Entity Signals ---
 
-## Emitted when an entity enters hunt mode.
+## Emitted before a hunt starts, allowing prevention (e.g., by crucifix).
+## entity_position is where the entity is trying to start the hunt.
+## entity is the Node reference to the entity.
+signal hunt_starting(entity_position: Vector3, entity: Node)
+
+## Emitted when an entity enters hunt mode (after prevention checks).
 signal hunt_started
 
 ## Emitted when a hunt ends.
@@ -46,6 +51,33 @@ signal hunt_ended
 
 ## Emitted when an entity exhibits a behavioral tell.
 signal entity_tell_triggered(tell_type: String)
+
+# --- Protection Item Signals ---
+
+## Emitted when a crucifix prevents a hunt from starting.
+## location is where the crucifix is placed, charges_remaining after prevention.
+signal hunt_prevented(location: Vector3, charges_remaining: int)
+
+## Emitted when sage blinds an entity during a hunt.
+## duration is how long the entity is blinded.
+signal entity_blinded(duration: float)
+
+## Emitted when sage prevents new hunts.
+## duration is how long hunts are prevented.
+signal hunt_prevention_started(duration: float)
+
+## Emitted when hunt prevention from sage expires.
+signal hunt_prevention_ended
+
+## Emitted when salt detects entity footsteps.
+## location is where the footsteps appeared.
+signal salt_triggered(location: Vector3)
+
+## Emitted when a protection item is placed in the world.
+signal protection_item_placed(item_type: String, location: Vector3)
+
+## Emitted when a protection item is depleted (all charges used).
+signal protection_item_depleted(item_type: String, location: Vector3)
 
 # --- Cultist Signals ---
 

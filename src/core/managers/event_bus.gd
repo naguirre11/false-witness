@@ -55,6 +55,15 @@ signal cultist_ability_used(ability_type: String)
 ## Emitted when contamination affects evidence.
 signal evidence_contaminated(evidence_type: String)
 
+# --- Interaction Signals ---
+
+## Emitted when a player interacts with an object.
+## player_id is the peer ID, interactable_path is the node path.
+signal player_interacted(player_id: int, interactable_path: String)
+
+## Emitted when an interactable's state changes (for network sync).
+signal interactable_state_changed(interactable_path: String, state: Dictionary)
+
 # --- Match Flow Signals ---
 
 ## Emitted when deliberation phase begins.

@@ -1,6 +1,6 @@
 # Project Structure
 
-**Last Updated**: 2026-01-07
+**Last Updated**: 2026-01-08
 
 ## Directory Overview
 
@@ -18,13 +18,15 @@ false_witness/
 ├── handoffs/                 # Session handoffs for context management
 │   └── session_summaries/    # End-of-session context dumps
 ├── scenes/                   # Godot scene files (.tscn)
-│   └── player/              # Player-related scenes
+│   ├── player/              # Player-related scenes
+│   └── ui/                  # UI scenes
 ├── src/                      # Source code
 │   ├── core/                 # Core systems
 │   │   ├── managers/         # Autoload managers
 │   │   ├── networking/       # Network-related resources
 │   │   ├── steam_manager.gd  # Steam initialization
 │   │   └── network_manager.gd # Lobby & P2P networking
+│   ├── interaction/          # Interaction system
 │   └── player/              # Player systems
 ├── tests/                    # GUT test files
 ├── tickets/                  # Development tickets
@@ -60,6 +62,10 @@ src/
 │   │   └── player_data.gd    # Synchronized player state (PlayerData resource)
 │   ├── steam_manager.gd      # Steam init
 │   └── network_manager.gd    # Dual backend networking (Steam + ENet)
+├── interaction/
+│   ├── interactable.gd       # Base class for interactable objects
+│   ├── interaction_manager.gd # Raycast detection and input handling
+│   └── interaction_prompt_ui.gd # UI component for interaction prompts
 └── player/
     └── player_controller.gd  # First-person movement, look, sprint, crouch
 ```
@@ -68,8 +74,10 @@ src/
 
 ```
 scenes/
-└── player/
-    └── player.tscn           # Player scene (CharacterBody3D)
+├── player/
+│   └── player.tscn           # Player scene (CharacterBody3D + InteractionManager)
+└── ui/
+    └── interaction_prompt.tscn # Interaction prompt UI
 ```
 
 ### Test Files
@@ -81,7 +89,10 @@ tests/
 ├── test_game_manager.gd       # GameManager state tests (15 tests)
 ├── test_game_manager_timer.gd # GameManager timer tests (14 tests)
 ├── test_network_manager.gd    # NetworkManager + PlayerData tests (17 tests)
-└── test_player_controller.gd  # PlayerController tests (45 tests)
+├── test_player_controller.gd  # PlayerController tests (45 tests)
+├── test_interactable.gd       # Interactable base class tests (30 tests)
+├── test_interaction_manager.gd # InteractionManager tests (24 tests)
+└── test_interaction_prompt_ui.gd # InteractionPromptUI tests (12 tests)
 ```
 
 ## Key Systems
@@ -118,7 +129,31 @@ Player (CharacterBody3D)
     - Camera3D
     - EquipmentHolder (Node3D)
   - FootstepPlayer (AudioStreamPlayer3D)
+  - InteractionManager (Node)
 ```
+
+### Interaction System
+
+Raycast-based interaction system for interacting with environment objects.
+
+**Interactable** (Node3D base class):
+- Interaction types: USE, PICKUP, TOGGLE, EXAMINE
+- Configurable: prompt, range (2.5m), cooldown (0.2s), one_shot
+- Network sync via EventBus signals
+- Virtual methods: `_can_interact_impl()`, `_interact_impl()`, `_sync_interaction()`
+
+**Signals:**
+- `interacted(player: Node)`
+- `interaction_enabled_changed(enabled: bool)`
+
+**InteractionManager** (Node):
+- Raycasts from camera center at 20Hz
+- Physics layer 4 detection (mask = 8)
+- E key triggers interaction
+
+**Signals:**
+- `target_changed(new_target: Interactable)`
+- `interaction_performed(target: Interactable, success: bool)`
 
 ### EventBus Signals
 
@@ -143,6 +178,10 @@ Player (CharacterBody3D)
 **Cultist:**
 - `cultist_ability_used(ability_type: String)`
 - `evidence_contaminated(evidence_type: String)`
+
+**Interaction:**
+- `player_interacted(player_id: int, interactable_path: String)`
+- `interactable_state_changed(interactable_path: String, state: Dictionary)`
 
 **Match Flow:**
 - `deliberation_started()`

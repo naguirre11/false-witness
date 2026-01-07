@@ -24,7 +24,8 @@
       "WebSearch",
       "Edit(tickets/**)",
       "Write(tickets/**)",
-      "Bash(\"C:/Users/vinco/Projects/tooling/Godot_v4.4.1-stable_win64.exe\" --headless --path C:/Users/vinco/Projects/false_witness -s:*)"
+      "Bash(\"C:/Users/vinco/Projects/tooling/Godot_v4.4.1-stable_win64.exe\" --headless --path C:/Users/vinco/Projects/false_witness -s:*)",
+      "Bash(git push:*)"
     ]
   }
 }

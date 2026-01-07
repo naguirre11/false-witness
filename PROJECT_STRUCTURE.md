@@ -18,11 +18,14 @@ false_witness/
 ├── handoffs/                 # Session handoffs for context management
 │   └── session_summaries/    # End-of-session context dumps
 ├── scenes/                   # Godot scene files (.tscn)
+│   └── player/              # Player-related scenes
 ├── src/                      # Source code
-│   └── core/                 # Core systems
-│       ├── managers/         # Autoload managers
-│       ├── steam_manager.gd  # Steam initialization
-│       └── network_manager.gd # Lobby & P2P networking
+│   ├── core/                 # Core systems
+│   │   ├── managers/         # Autoload managers
+│   │   ├── networking/       # Network-related resources
+│   │   ├── steam_manager.gd  # Steam initialization
+│   │   └── network_manager.gd # Lobby & P2P networking
+│   └── player/              # Player systems
 ├── tests/                    # GUT test files
 ├── tickets/                  # Development tickets
 │   ├── completed/           # Finished tickets
@@ -49,14 +52,24 @@ false_witness/
 
 ```
 src/
-└── core/
-    ├── managers/
-    │   ├── event_bus.gd      # Global signals
-    │   └── game_manager.gd   # State machine
-    ├── networking/
-    │   └── player_data.gd    # Synchronized player state (PlayerData resource)
-    ├── steam_manager.gd      # Steam init
-    └── network_manager.gd    # Dual backend networking (Steam + ENet)
+├── core/
+│   ├── managers/
+│   │   ├── event_bus.gd      # Global signals
+│   │   └── game_manager.gd   # State machine
+│   ├── networking/
+│   │   └── player_data.gd    # Synchronized player state (PlayerData resource)
+│   ├── steam_manager.gd      # Steam init
+│   └── network_manager.gd    # Dual backend networking (Steam + ENet)
+└── player/
+    └── player_controller.gd  # First-person movement, look, sprint, crouch
+```
+
+### Scene Files
+
+```
+scenes/
+└── player/
+    └── player.tscn           # Player scene (CharacterBody3D)
 ```
 
 ### Test Files
@@ -67,7 +80,8 @@ tests/
 ├── test_event_bus.gd          # EventBus signal tests (19 tests)
 ├── test_game_manager.gd       # GameManager state tests (15 tests)
 ├── test_game_manager_timer.gd # GameManager timer tests (14 tests)
-└── test_network_manager.gd    # NetworkManager + PlayerData tests (17 tests)
+├── test_network_manager.gd    # NetworkManager + PlayerData tests (17 tests)
+└── test_player_controller.gd  # PlayerController tests (45 tests)
 ```
 
 ## Key Systems
@@ -79,6 +93,31 @@ NONE -> LOBBY -> SETUP -> INVESTIGATION <-> HUNT -> RESULTS
                               |                       |
                               v                       |
                         DELIBERATION -----------------+
+```
+
+### PlayerController
+
+First-person character controller with:
+- WASD movement (walk 4.0, sprint 7.0, crouch 2.0 m/s)
+- Mouse look with sensitivity settings
+- Sprint with stamina (100 max, 20/s drain, 15/s regen after 1s)
+- Crouch with collision height adjustment
+- Head bob (optional, configurable)
+- Footstep signals for audio
+
+**Signals:**
+- `stamina_changed(current: float, maximum: float)`
+- `crouched(is_crouching: bool)`
+- `footstep`
+
+**Player Scene Structure:**
+```
+Player (CharacterBody3D)
+  - CollisionShape3D (CapsuleShape3D)
+  - Head (Node3D)
+    - Camera3D
+    - EquipmentHolder (Node3D)
+  - FootstepPlayer (AudioStreamPlayer3D)
 ```
 
 ### EventBus Signals

@@ -4,7 +4,7 @@ This file tracks the order in which tickets should be worked on.
 
 ## Current Status
 
-**NEXT**: FW-021
+**NEXT**: FW-022
 
 *Note: MVP focuses on vertical slice - one map, one entity, core evidence system, basic Cultist mechanics, 4-player networking. Design Supplement priorities 1-5 integrated into MVP.*
 
@@ -56,7 +56,7 @@ Based on competitive analysis (Phasmophobia, R.E.P.O., Demonologist):
 | 2 | FW-002 | Create core autoload architecture | for_review | FW-001 |
 | 3 | FW-003 | Implement core game state machine | for_review | FW-002 |
 | 4 | FW-011 | Set up P2P networking foundation | for_review | FW-002 |
-| 5 | FW-021 | Create first-person player controller | ready | FW-001 |
+| 5 | FW-021 | Create first-person player controller | for_review | FW-001 |
 | 6 | FW-091 | Establish audio system foundation | ready | FW-001 |
 
 **Milestone**: Basic networked movement with 4 players.
@@ -201,6 +201,7 @@ FW-001 (Project Init)
 
 | Ticket ID | Title |
 |-----------|-------|
+| FW-021 | Create first-person player controller |
 | FW-011 | Set up P2P networking foundation |
 | FW-003 | Implement core game state machine |
 | FW-002 | Create core autoload architecture |

@@ -41,7 +41,7 @@ false_witness/
 | #  | Autoload | Path | Purpose |
 |----|----------|------|---------|
 | 1 | SteamManager | `src/core/steam_manager.gd` | Steam API initialization |
-| 2 | NetworkManager | `src/core/network_manager.gd` | Steam lobbies and P2P |
+| 2 | NetworkManager | `src/core/network_manager.gd` | Dual backend (Steam + ENet) networking |
 | 3 | EventBus | `src/core/managers/event_bus.gd` | Global signal hub |
 | 4 | GameManager | `src/core/managers/game_manager.gd` | Game state machine |
 
@@ -53,18 +53,21 @@ src/
     ├── managers/
     │   ├── event_bus.gd      # Global signals
     │   └── game_manager.gd   # State machine
+    ├── networking/
+    │   └── player_data.gd    # Synchronized player state (PlayerData resource)
     ├── steam_manager.gd      # Steam init
-    └── network_manager.gd    # Networking
+    └── network_manager.gd    # Dual backend networking (Steam + ENet)
 ```
 
 ### Test Files
 
 ```
 tests/
-├── test_example.gd           # Example test (can be deleted)
-├── test_event_bus.gd         # EventBus signal tests (19 tests)
-├── test_game_manager.gd      # GameManager state tests (15 tests)
-└── test_game_manager_timer.gd # GameManager timer tests (14 tests)
+├── test_example.gd            # Example test (can be deleted)
+├── test_event_bus.gd          # EventBus signal tests (19 tests)
+├── test_game_manager.gd       # GameManager state tests (15 tests)
+├── test_game_manager_timer.gd # GameManager timer tests (14 tests)
+└── test_network_manager.gd    # NetworkManager + PlayerData tests (17 tests)
 ```
 
 ## Key Systems

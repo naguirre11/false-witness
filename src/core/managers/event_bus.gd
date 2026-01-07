@@ -64,6 +64,17 @@ signal player_interacted(player_id: int, interactable_path: String)
 ## Emitted when an interactable's state changes (for network sync).
 signal interactable_state_changed(interactable_path: String, state: Dictionary)
 
+# --- Equipment Signals ---
+
+## Emitted when a player's equipment loadout changes during SETUP.
+signal equipment_loadout_changed(player_id: int, loadout: Array)
+
+## Emitted when a player switches their active equipment slot.
+signal equipment_slot_changed(player_id: int, slot_index: int)
+
+## Emitted when equipment is used or stopped being used.
+signal equipment_used(player_id: int, equipment_path: String, is_using: bool)
+
 # --- Match Flow Signals ---
 
 ## Emitted when deliberation phase begins.

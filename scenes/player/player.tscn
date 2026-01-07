@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://cvqx7h6hxjm5r"]
+[gd_scene load_steps=6 format=3 uid="uid://cvqx7h6hxjm5r"]
 
 [ext_resource type="Script" path="res://src/player/player_controller.gd" id="1_player"]
 [ext_resource type="Script" path="res://src/interaction/interaction_manager.gd" id="2_interaction"]
+[ext_resource type="Script" path="res://src/equipment/equipment_manager.gd" id="3_equipment"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.35
@@ -36,3 +37,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, -0.2, -0.4)
 
 [node name="InteractionManager" type="Node" parent="."]
 script = ExtResource("2_interaction")
+
+[node name="EquipmentManager" type="Node" parent="."]
+script = ExtResource("3_equipment")
+equipment_holder_path = NodePath("../Head/EquipmentHolder")

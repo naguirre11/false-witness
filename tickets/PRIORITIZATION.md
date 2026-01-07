@@ -4,7 +4,7 @@ This file tracks the order in which tickets should be worked on.
 
 ## Current Status
 
-**NEXT**: FW-023
+**NEXT**: FW-024
 
 *Note: MVP focuses on vertical slice - one map, one entity, core evidence system, basic Cultist mechanics, 4-player networking. Design Supplement priorities 1-5 integrated into MVP.*
 
@@ -58,7 +58,8 @@ Based on competitive analysis (Phasmophobia, R.E.P.O., Demonologist):
 | 4 | FW-011 | Set up P2P networking foundation | for_review | FW-002 |
 | 5 | FW-021 | Create first-person player controller | for_review | FW-001 |
 | 6 | FW-022 | Implement player interaction system | for_review | FW-021 |
-| 7 | FW-091 | Establish audio system foundation | ready | FW-001 |
+| 7 | FW-023 | Create equipment slot system | for_review | FW-022 |
+| 8 | FW-091 | Establish audio system foundation | ready | FW-001 |
 
 **Milestone**: Basic networked movement with 4 players.
 
@@ -71,9 +72,7 @@ Based on competitive analysis (Phasmophobia, R.E.P.O., Demonologist):
 | Priority | Ticket | Title | Status | Blocked By |
 |----------|--------|-------|--------|------------|
 | 1 | FW-012 | Implement lobby system | ready | FW-011 |
-| 1 | FW-022 | Implement interaction system | ready | FW-021 |
-| 1 | FW-023 | Create equipment slot system | ready | FW-022 |
-| 2 | FW-024 | Implement hunt protection items | ready | FW-022, FW-023 |
+| 1 | FW-024 | Implement hunt protection items | ready | FW-023 |
 | 2 | FW-031 | Create core evidence system | ready | FW-002, FW-023 |
 | 2 | FW-041 | Create core entity AI with behavioral tells | ready | FW-002, FW-003 |
 | 2 | FW-081 | Create main menu and lobby UI | ready | FW-012 |
@@ -202,6 +201,7 @@ FW-001 (Project Init)
 
 | Ticket ID | Title |
 |-----------|-------|
+| FW-023 | Create equipment slot system |
 | FW-022 | Implement player interaction system |
 | FW-021 | Create first-person player controller |
 | FW-011 | Set up P2P networking foundation |

@@ -26,6 +26,7 @@ false_witness/
 │   │   ├── networking/       # Network-related resources
 │   │   ├── steam_manager.gd  # Steam initialization
 │   │   └── network_manager.gd # Lobby & P2P networking
+│   ├── equipment/            # Equipment system
 │   ├── interaction/          # Interaction system
 │   └── player/              # Player systems
 ├── tests/                    # GUT test files
@@ -62,6 +63,10 @@ src/
 │   │   └── player_data.gd    # Synchronized player state (PlayerData resource)
 │   ├── steam_manager.gd      # Steam init
 │   └── network_manager.gd    # Dual backend networking (Steam + ENet)
+├── equipment/
+│   ├── equipment.gd          # Equipment base class (Node3D)
+│   ├── equipment_slot.gd     # EquipmentSlot resource for slot management
+│   └── equipment_manager.gd  # EquipmentManager for player loadout
 ├── interaction/
 │   ├── interactable.gd       # Base class for interactable objects
 │   ├── interaction_manager.gd # Raycast detection and input handling
@@ -75,7 +80,7 @@ src/
 ```
 scenes/
 ├── player/
-│   └── player.tscn           # Player scene (CharacterBody3D + InteractionManager)
+│   └── player.tscn           # Player scene (CharacterBody3D + managers)
 └── ui/
     └── interaction_prompt.tscn # Interaction prompt UI
 ```
@@ -92,7 +97,10 @@ tests/
 ├── test_player_controller.gd  # PlayerController tests (45 tests)
 ├── test_interactable.gd       # Interactable base class tests (30 tests)
 ├── test_interaction_manager.gd # InteractionManager tests (24 tests)
-└── test_interaction_prompt_ui.gd # InteractionPromptUI tests (12 tests)
+├── test_interaction_prompt_ui.gd # InteractionPromptUI tests (12 tests)
+├── test_equipment.gd          # Equipment base class tests (36 tests)
+├── test_equipment_slot.gd     # EquipmentSlot tests (30 tests)
+└── test_equipment_manager.gd  # EquipmentManager tests (40 tests)
 ```
 
 ## Key Systems
@@ -124,12 +132,13 @@ First-person character controller with:
 **Player Scene Structure:**
 ```
 Player (CharacterBody3D)
-  - CollisionShape3D (CapsuleShape3D)
-  - Head (Node3D)
-    - Camera3D
-    - EquipmentHolder (Node3D)
-  - FootstepPlayer (AudioStreamPlayer3D)
-  - InteractionManager (Node)
+├── CollisionShape3D (CapsuleShape3D)
+├── Head (Node3D)
+│   ├── Camera3D
+│   └── EquipmentHolder (Node3D)
+├── FootstepPlayer (AudioStreamPlayer3D)
+├── InteractionManager (Node)
+└── EquipmentManager (Node)
 ```
 
 ### Interaction System
@@ -154,6 +163,39 @@ Raycast-based interaction system for interacting with environment objects.
 **Signals:**
 - `target_changed(new_target: Interactable)`
 - `interaction_performed(target: Interactable, success: bool)`
+
+### Equipment System
+
+3-slot equipment loadout for investigation tools.
+
+**Equipment** (Node3D base class):
+- Types: EMF_READER, SPIRIT_BOX, JOURNAL, THERMOMETER, UV_FLASHLIGHT, DOTS_PROJECTOR, VIDEO_CAMERA, PARABOLIC_MIC
+- Use modes: HOLD, TOGGLE, INSTANT
+- States: INACTIVE, ACTIVE, COOLDOWN
+- Virtual methods: `_use_impl()`, `_stop_using_impl()`, `get_detectable_evidence()`
+- Network sync support
+
+**Signals:**
+- `used(player: Node)`
+- `stopped_using(player: Node)`
+- `state_changed(new_state: EquipmentState)`
+
+**EquipmentSlot** (Resource):
+- Stores equipment type and instance reference
+- Serialization for network sync
+- Static helpers for type↔name conversion
+
+**EquipmentManager** (Node):
+- 3-slot loadout management
+- Scroll wheel + number keys (1-3) for slot switching
+- Loadout locking (prevents changes after investigation starts)
+- Equipment holder integration
+
+**Signals:**
+- `loadout_changed(slots: Array[EquipmentSlot])`
+- `active_slot_changed(old_slot: int, new_slot: int)`
+- `equipment_used(slot: int, equipment: Equipment)`
+- `equipment_locked`
 
 ### EventBus Signals
 
@@ -182,6 +224,11 @@ Raycast-based interaction system for interacting with environment objects.
 **Interaction:**
 - `player_interacted(player_id: int, interactable_path: String)`
 - `interactable_state_changed(interactable_path: String, state: Dictionary)`
+
+**Equipment:**
+- `equipment_loadout_changed(player_id: int, loadout: Array)`
+- `equipment_slot_changed(player_id: int, slot_index: int)`
+- `equipment_used(player_id: int, equipment_path: String, is_using: bool)`
 
 **Match Flow:**
 - `deliberation_started()`

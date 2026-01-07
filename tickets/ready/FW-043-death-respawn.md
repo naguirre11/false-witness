@@ -1,35 +1,57 @@
 ---
 id: FW-043
-title: "Implement player death and respawn system"
+title: "Implement Echo system (dead player mechanics)"
 epic: ENTITY
 priority: high
-estimated_complexity: medium
-dependencies: [FW-042]
+estimated_complexity: large
+dependencies: [FW-042, FW-014]
 created: 2026-01-07
+updated: 2026-01-07
 ---
 
 ## Description
 
-Create the death and respawn system. Death is not permanent - players become spectators briefly then respawn with reduced equipment.
+Create the Echo system for dead players. Unlike competitors where dead players become passive spectators, Echoes retain agency while preserving social deduction uncertainty. Dead Cultists can still lie about what they see.
 
 ## Acceptance Criteria
 
-- [ ] Death trigger on entity contact during hunt
+### Death Trigger
+- [ ] Death on entity contact during hunt
 - [ ] Death visual/audio feedback
-- [ ] 60-second spectator mode after death
-- [ ] Spectators can see environment but not interact
-- [ ] Spectators cannot communicate with living players
-- [ ] Respawn at map entrance after timer
-- [ ] Respawn with reduced equipment (lose 1 slot)
+- [ ] Ragdoll physics on death (body position indicates attack location)
+- [ ] Death broadcast to all players
+
+### Echo State
+- [ ] Dead players become Echoes (spectral observers)
+- [ ] Echo movement: float freely, pass through walls
+- [ ] Floaty/spectral feel (reduced gravity, glide movement)
+- [ ] Echoes can see entity at ALL times (even when not manifesting)
+- [ ] Proximity voice chat works for Echoes (ethereal reverb effect)
+- [ ] Faint visual outline shows living players where Echoes are
+
+### Echo Restrictions
+- [ ] Cannot use equipment or collect evidence
+- [ ] Cannot interact with physical objects
+- [ ] Cannot use Cultist abilities (if they were Cultist)
+- [ ] Cannot be targeted by entity
+- [ ] Entity occasionally "reacts" to Echo presence (head turns, pauses)
+
+### Revival Mechanic
+- [ ] Living player spends 30 seconds at Echo's death location to revive
+- [ ] Revival interruptible by entity hunts
+- [ ] Revived players return with 50% sanity, no equipment
+- [ ] Each player can only be revived ONCE per investigation
+
+### Aggression
 - [ ] Each death increases entity aggression slightly
 
 ## Technical Notes
 
-Per GDD: "Keeps all players engaged while still making death consequential."
+**Why this works for social deduction**: A dead Cultist loses contamination abilities (significant penalty) but retains their voice. They can still lie: "The entity went to the basement" - but did it really? Living players must weigh Echo testimony against possible deception.
 
-Death is broadcast to all players. Respawn location is fixed (entrance).
+Strategic consideration: Cultist might intentionally die to become a "trusted" Echo who can mislead without suspicion of planting evidence.
 
 ## Out of Scope
 
-- Spectator camera controls
+- Spectator camera for non-Echo viewing
 - Death statistics tracking

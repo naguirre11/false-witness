@@ -191,6 +191,28 @@ If you don't need a return value, omit the assignment entirely.
 
 ## Architecture
 
+### Template Decision (2026-01-07)
+
+**Chosen approach**: GodotSteam Template base + custom systems
+
+After evaluating available templates (see `docs/False_Witness_GDD.md` Section 17), we decided:
+
+1. **Base**: [GodotSteam Template](https://github.com/wahan-h/GodotSteam-Template) for Steam lobby/P2P networking
+2. **FPS Controller**: Build custom, referencing [Quality First Person Controller v2](https://godotengine.org/asset-library/asset/2418)
+3. **Interaction/Inventory**: Build custom, referencing [Cogito](https://github.com/Phazorknight/Cogito) patterns
+4. **Evidence/Cultist systems**: Built from scratch (no existing template covers social deduction)
+
+**Why not Cogito directly?** Cogito is single-player focused. The community multiplayer fork (cogito-arcana) has 34 open issues and is experimental. Retrofitting multiplayer into Cogito's architecture would be more work than building systems designed for multiplayer from the start.
+
+**Why GodotSteam?** Steam provides NAT hole-punching with relay fallback, lobby management, and voice chat infrastructure. GodotSteam integrates with Godot's high-level MultiplayerPeer for clean RPC patterns.
+
+### Networking Architecture
+
+- **Transport**: Steam P2P via GodotSteam
+- **Topology**: Host-based (one player hosts, others join via Steam lobby)
+- **Sync strategy**: Server-authoritative for game state, client-predicted for movement
+- **Voice**: Steam voice chat (proximity-based in-game)
+
 ### Core Systems
 
 ## Repository Structure

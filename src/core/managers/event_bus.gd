@@ -36,6 +36,16 @@ signal evidence_detected(evidence_type: String, location: Vector3, strength: flo
 ## Emitted when evidence is recorded to the board.
 signal evidence_recorded(evidence_type: String, equipment_type: String)
 
+## Emitted when evidence is formally collected and added to the board.
+## evidence_uid is the unique identifier, evidence_data is the serialized Evidence.
+signal evidence_collected(evidence_uid: String, evidence_data: Dictionary)
+
+## Emitted when evidence verification state changes.
+signal evidence_verification_changed(evidence_uid: String, new_state: int)
+
+## Emitted when a player disputes collected evidence.
+signal evidence_contested(evidence_uid: String, contester_id: int)
+
 # --- Entity Signals ---
 
 ## Emitted before a hunt starts, allowing prevention (e.g., by crucifix).
@@ -106,6 +116,28 @@ signal equipment_slot_changed(player_id: int, slot_index: int)
 
 ## Emitted when equipment is used or stopped being used.
 signal equipment_used(player_id: int, equipment_path: String, is_using: bool)
+
+# --- EMF Reader Signals ---
+
+## Emitted when EMF reader beeps (for audio system).
+signal emf_beep(level: int)
+
+## Emitted when EMF reader hits Level 5 spike (evidence detected).
+signal emf_level_5_spike
+
+## Emitted when EMF reader state changes (for network sync).
+signal emf_state_changed(player_id: int, level: int, direction: Vector3, quality: int)
+
+# --- Thermometer Signals ---
+
+## Emitted when thermometer detects freezing temperature (for audio system).
+signal thermometer_freezing(temperature: float)
+
+## Emitted when thermometer detects extreme cold (for audio/visual effects).
+signal thermometer_extreme_cold(temperature: float)
+
+## Emitted when thermometer state changes (for network sync).
+signal thermometer_state_changed(player_id: int, temperature: float, quality: int)
 
 # --- Match Flow Signals ---
 

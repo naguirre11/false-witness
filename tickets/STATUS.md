@@ -19,7 +19,7 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-024-protection-items | Hunt protection items | for_review |
 | FW-031-evidence-core | Core evidence system | for_review |
 | FW-032-emf-evidence | EMF Reader | for_review |
-| FW-033-thermometer-evidence | Thermometer | ready |
+| FW-033-thermometer-evidence | Thermometer | for_review |
 | FW-034-spirit-box-evidence | Spirit Box (DEFERRED) | draft |
 | FW-035-evidence-board-ui | Evidence board UI | ready |
 | FW-036-cross-verification | Cross-verification system | ready |

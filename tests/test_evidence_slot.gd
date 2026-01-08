@@ -24,7 +24,7 @@ func test_slot_has_required_nodes() -> void:
 
 
 func test_slot_has_minimum_size() -> void:
-	assert_eq(_slot.custom_minimum_size, Vector2(120, 80))
+	assert_eq(_slot.custom_minimum_size, Vector2(120, 100))
 
 
 func test_setup_sets_evidence_type() -> void:
@@ -187,10 +187,7 @@ func test_tooltip_contains_trust_name() -> void:
 	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
 	await get_tree().process_frame
 	var button: Button = _slot.get_node("%SlotButton")
-	assert_true(
-		button.tooltip_text.contains("High Trust"),
-		"Tooltip should contain trust name"
-	)
+	assert_true(button.tooltip_text.contains("High Trust"), "Tooltip should contain trust name")
 
 
 func test_tooltip_contains_explanation() -> void:
@@ -198,8 +195,7 @@ func test_tooltip_contains_explanation() -> void:
 	await get_tree().process_frame
 	var button: Button = _slot.get_node("%SlotButton")
 	assert_true(
-		button.tooltip_text.contains("Equipment-verified"),
-		"Tooltip should contain explanation"
+		button.tooltip_text.contains("Equipment-verified"), "Tooltip should contain explanation"
 	)
 
 
@@ -217,3 +213,249 @@ func test_weak_reading_reduced_alpha() -> void:
 	await get_tree().process_frame
 	var icon: TextureRect = _slot.get_node("%Icon")
 	assert_almost_eq(icon.modulate.a, 0.6, 0.01, "Weak reading should have 0.6 alpha")
+
+
+# --- Collector Attribution & Verification Tests (FW-035c) ---
+
+
+func test_slot_has_verification_icon_node() -> void:
+	assert_not_null(_slot.get_node_or_null("%VerificationIcon"), "Should have VerificationIcon")
+
+
+func test_slot_has_collector_row_node() -> void:
+	assert_not_null(_slot.get_node_or_null("%CollectorRow"), "Should have CollectorRow")
+
+
+func test_verification_icon_empty_when_not_collected() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	await get_tree().process_frame
+	var icon: Label = _slot.get_node("%VerificationIcon")
+	assert_eq(icon.text, "", "Verification icon should be empty when not collected")
+
+
+func test_verification_icon_shows_checkmark_for_unverified() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	var evidence := Evidence.create(
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		1,  # collector_id
+		Vector3.ZERO,
+		EvidenceEnums.ReadingQuality.STRONG
+	)
+	_slot.set_collected(true, EvidenceEnums.ReadingQuality.STRONG, evidence)
+	await get_tree().process_frame
+	var icon: Label = _slot.get_node("%VerificationIcon")
+	assert_eq(icon.text, "\u2713", "Should show single checkmark for unverified")
+
+
+func test_verification_icon_shows_double_checkmark_for_verified() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	var evidence := Evidence.create(
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		1,
+		Vector3.ZERO,
+		EvidenceEnums.ReadingQuality.STRONG
+	)
+	evidence.verify()
+	_slot.set_collected(true, EvidenceEnums.ReadingQuality.STRONG, evidence)
+	await get_tree().process_frame
+	var icon: Label = _slot.get_node("%VerificationIcon")
+	assert_eq(icon.text, "\u2713\u2713", "Should show double checkmark for verified")
+
+
+func test_verification_icon_shows_warning_for_contested() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	var evidence := Evidence.create(
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		1,
+		Vector3.ZERO,
+		EvidenceEnums.ReadingQuality.STRONG
+	)
+	evidence.contest()
+	_slot.set_collected(true, EvidenceEnums.ReadingQuality.STRONG, evidence)
+	await get_tree().process_frame
+	var icon: Label = _slot.get_node("%VerificationIcon")
+	assert_eq(icon.text, "\u26A0", "Should show warning for contested")
+
+
+func test_verification_icon_green_for_verified() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	var evidence := Evidence.create(
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		1,
+		Vector3.ZERO,
+		EvidenceEnums.ReadingQuality.STRONG
+	)
+	evidence.verify()
+	_slot.set_collected(true, EvidenceEnums.ReadingQuality.STRONG, evidence)
+	await get_tree().process_frame
+	var icon: Label = _slot.get_node("%VerificationIcon")
+	assert_eq(icon.modulate, Color.GREEN, "Verified should be green")
+
+
+func test_verification_icon_orange_for_contested() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	var evidence := Evidence.create(
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		1,
+		Vector3.ZERO,
+		EvidenceEnums.ReadingQuality.STRONG
+	)
+	evidence.contest()
+	_slot.set_collected(true, EvidenceEnums.ReadingQuality.STRONG, evidence)
+	await get_tree().process_frame
+	var icon: Label = _slot.get_node("%VerificationIcon")
+	assert_eq(icon.modulate, Color.ORANGE, "Contested should be orange")
+
+
+func test_collector_row_empty_when_not_collected() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	await get_tree().process_frame
+	var row: HBoxContainer = _slot.get_node("%CollectorRow")
+	assert_eq(row.get_child_count(), 0, "Collector row should be empty when not collected")
+
+
+func test_collector_row_shows_one_collector() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	var evidence := Evidence.create(
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		123,  # collector_id
+		Vector3.ZERO,
+		EvidenceEnums.ReadingQuality.STRONG
+	)
+	_slot.set_collected(true, EvidenceEnums.ReadingQuality.STRONG, evidence)
+	await get_tree().process_frame
+	await get_tree().process_frame  # Extra frame for queue_free to process
+	var row: HBoxContainer = _slot.get_node("%CollectorRow")
+	assert_eq(row.get_child_count(), 1, "Should show one collector")
+
+
+func test_collector_row_shows_two_collectors_for_cooperative() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.PRISM_READING)
+	var evidence := Evidence.create_cooperative(
+		EvidenceEnums.EvidenceType.PRISM_READING,
+		1,  # primary
+		2,  # secondary
+		Vector3.ZERO,
+		EvidenceEnums.ReadingQuality.STRONG
+	)
+	_slot.set_collected(true, EvidenceEnums.ReadingQuality.STRONG, evidence)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var row: HBoxContainer = _slot.get_node("%CollectorRow")
+	assert_eq(row.get_child_count(), 2, "Should show two collectors for cooperative")
+
+
+func test_get_evidence_returns_evidence_object() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	var evidence := Evidence.create(
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		1,
+		Vector3.ZERO,
+		EvidenceEnums.ReadingQuality.STRONG
+	)
+	_slot.set_collected(true, EvidenceEnums.ReadingQuality.STRONG, evidence)
+	assert_eq(_slot.get_evidence(), evidence, "Should return the evidence object")
+
+
+func test_get_evidence_returns_null_when_not_collected() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	assert_null(_slot.get_evidence(), "Should return null when not collected")
+
+
+func test_get_verification_state_returns_unverified_default() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	assert_eq(
+		_slot.get_verification_state(),
+		EvidenceEnums.VerificationState.UNVERIFIED,
+		"Default should be UNVERIFIED"
+	)
+
+
+func test_get_verification_state_returns_evidence_state() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	var evidence := Evidence.create(
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		1,
+		Vector3.ZERO,
+		EvidenceEnums.ReadingQuality.STRONG
+	)
+	evidence.verify()
+	_slot.set_collected(true, EvidenceEnums.ReadingQuality.STRONG, evidence)
+	assert_eq(
+		_slot.get_verification_state(),
+		EvidenceEnums.VerificationState.VERIFIED,
+		"Should return VERIFIED"
+	)
+
+
+func test_tooltip_contains_collector_when_collected() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	var evidence := Evidence.create(
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		42,
+		Vector3.ZERO,
+		EvidenceEnums.ReadingQuality.STRONG
+	)
+	_slot.set_collected(true, EvidenceEnums.ReadingQuality.STRONG, evidence)
+	await get_tree().process_frame
+	var button: Button = _slot.get_node("%SlotButton")
+	assert_true(button.tooltip_text.contains("Collected by"), "Tooltip should show collector info")
+
+
+func test_tooltip_contains_timestamp_when_collected() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	var evidence := Evidence.create(
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		1,
+		Vector3.ZERO,
+		EvidenceEnums.ReadingQuality.STRONG
+	)
+	_slot.set_collected(true, EvidenceEnums.ReadingQuality.STRONG, evidence)
+	await get_tree().process_frame
+	var button: Button = _slot.get_node("%SlotButton")
+	assert_true(button.tooltip_text.contains("Time:"), "Tooltip should show timestamp")
+
+
+func test_tooltip_contains_location_when_collected() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	var evidence := Evidence.create(
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		1,
+		Vector3(10, 5, 20),
+		EvidenceEnums.ReadingQuality.STRONG
+	)
+	_slot.set_collected(true, EvidenceEnums.ReadingQuality.STRONG, evidence)
+	await get_tree().process_frame
+	var button: Button = _slot.get_node("%SlotButton")
+	assert_true(button.tooltip_text.contains("Location:"), "Tooltip should show location")
+
+
+func test_tooltip_contains_verification_status_when_collected() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.EMF_SIGNATURE)
+	var evidence := Evidence.create(
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		1,
+		Vector3.ZERO,
+		EvidenceEnums.ReadingQuality.STRONG
+	)
+	_slot.set_collected(true, EvidenceEnums.ReadingQuality.STRONG, evidence)
+	await get_tree().process_frame
+	var button: Button = _slot.get_node("%SlotButton")
+	assert_true(button.tooltip_text.contains("Status:"), "Tooltip should show verification status")
+
+
+func test_tooltip_shows_secondary_collector_for_cooperative() -> void:
+	_slot.setup(EvidenceEnums.EvidenceType.AURA_PATTERN)
+	var evidence := Evidence.create_cooperative(
+		EvidenceEnums.EvidenceType.AURA_PATTERN,
+		1,
+		2,
+		Vector3.ZERO,
+		EvidenceEnums.ReadingQuality.STRONG
+	)
+	_slot.set_collected(true, EvidenceEnums.ReadingQuality.STRONG, evidence)
+	await get_tree().process_frame
+	var button: Button = _slot.get_node("%SlotButton")
+	assert_true(
+		button.tooltip_text.contains("Assisted by"), "Tooltip should show secondary collector"
+	)

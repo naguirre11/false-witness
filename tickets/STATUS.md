@@ -2,7 +2,7 @@
 
 Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move.ps1`.
 
-**NEXT**: FW-035c-collector-attribution
+**NEXT**: FW-036-cross-verification
 
 | Ticket | Title | Status |
 |--------|-------|--------|
@@ -24,7 +24,7 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-035-evidence-board-ui | Evidence board UI (Epic) | ready |
 | FW-035a-evidence-board-core | Evidence Board Core UI | for_review |
 | FW-035b-trust-visualization | Trust Level Visualization | for_review |
-| FW-035c-collector-attribution | Collector Attribution & Verification | draft |
+| FW-035c-collector-attribution | Collector Attribution & Verification | for_review |
 | FW-035d-entity-matrix | Entity Possibility Matrix | draft |
 | FW-036-cross-verification | Cross-verification system | ready |
 | FW-037-spectral-prism-rig | Spectral Prism Rig (cooperative symmetric) | ready |

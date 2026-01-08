@@ -2,7 +2,7 @@
 
 Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move.ps1`.
 
-**NEXT**: FW-033-thermometer-evidence
+**NEXT**: FW-035c-collector-attribution
 
 | Ticket | Title | Status |
 |--------|-------|--------|
@@ -21,7 +21,11 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-032-emf-evidence | EMF Reader | for_review |
 | FW-033-thermometer-evidence | Thermometer | for_review |
 | FW-034-spirit-box-evidence | Spirit Box (DEFERRED) | draft |
-| FW-035-evidence-board-ui | Evidence board UI | ready |
+| FW-035-evidence-board-ui | Evidence board UI (Epic) | ready |
+| FW-035a-evidence-board-core | Evidence Board Core UI | for_review |
+| FW-035b-trust-visualization | Trust Level Visualization | for_review |
+| FW-035c-collector-attribution | Collector Attribution & Verification | draft |
+| FW-035d-entity-matrix | Entity Possibility Matrix | draft |
 | FW-036-cross-verification | Cross-verification system | ready |
 | FW-037-spectral-prism-rig | Spectral Prism Rig (cooperative symmetric) | ready |
 | FW-038-dowsing-aura-imager | Dowsing Rods + Aura Imager (cooperative asymmetric) | ready |

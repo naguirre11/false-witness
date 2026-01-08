@@ -7,9 +7,7 @@ const Interactable = preload("res://src/interaction/interactable.gd")
 
 class MockCamera3D:
 	extends Camera3D
-
-	func get_world_3d():
-		return get_viewport().world_3d if get_viewport() else null
+	# No special methods needed - native get_world_3d() works when in tree
 
 
 class MockInteractable:
@@ -230,7 +228,8 @@ func test_set_camera_updates_reference() -> void:
 	add_child(new_camera)
 
 	manager.set_camera(new_camera)
-	# Verify indirectly - camera reference is private
+
+	assert_eq(manager.get_camera(), new_camera, "Camera should be updated")
 
 	new_camera.queue_free()
 
@@ -240,7 +239,8 @@ func test_set_player_updates_reference() -> void:
 	add_child(new_player)
 
 	manager.set_player(new_player)
-	# Verify indirectly - player reference is private
+
+	assert_eq(manager.get_player(), new_player, "Player should be updated")
 
 	new_player.queue_free()
 

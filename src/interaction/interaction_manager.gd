@@ -118,11 +118,11 @@ func _perform_raycast() -> Interactable:
 	if result.is_empty():
 		return null
 
-	var collider := result.get("collider")
+	var collider: Object = result.get("collider")
 	if not collider:
 		return null
 
-	var interactable := _find_interactable(collider)
+	var interactable: Interactable = _find_interactable(collider)
 	if not interactable:
 		return null
 
@@ -224,9 +224,19 @@ func set_camera(camera: Camera3D) -> void:
 	_camera = camera
 
 
+## Gets the current camera reference.
+func get_camera() -> Camera3D:
+	return _camera
+
+
 ## Sets the player node reference.
 func set_player(player: Node) -> void:
 	_player = player
+
+
+## Gets the current player reference.
+func get_player() -> Node:
+	return _player
 
 
 ## Forces an immediate target update (useful after teleporting).

@@ -58,6 +58,3 @@ gut_results.xml
 
 # Temporary test output
 test_output.txt
-
-# Bug reports (not project-specific)
-claude-code-bug-report.md

@@ -30,6 +30,8 @@ enum EquipmentType {
 	SPECTRAL_PRISM_LENS,
 	DOWSING_RODS,
 	AURA_IMAGER,
+	# Triggered Test Equipment
+	GHOST_WRITING_BOOK,
 	# Protection Items
 	CRUCIFIX,
 	SAGE_BUNDLE,

@@ -38,7 +38,7 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-038a-aura-equipment-base | Aura Equipment Base | for_review |
 | FW-038b-dowsing-rods | Dowsing Rods Unit | for_review |
 | FW-038c-aura-imager | Aura Imager Unit | for_review |
-| FW-039-ghost-writing-book | Ghost Writing Book (triggered test) | ready |
+| FW-039-ghost-writing-book | Ghost Writing Book (triggered test) | for_review |
 | FW-040-readily-apparent-evidence | Readily-Apparent Evidence system | ready |
 | FW-041-entity-core | Core entity AI with behavioral tells | ready |
 | FW-042-hunt-mechanics | Hunt mechanics with depth | ready |

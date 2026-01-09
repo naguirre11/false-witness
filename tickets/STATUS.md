@@ -2,7 +2,7 @@
 
 Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move.ps1`.
 
-**NEXT**: FW-036-cross-verification
+**NEXT**: FW-037b-calibrator-unit
 
 | Ticket | Title | Status |
 |--------|-------|--------|
@@ -26,8 +26,14 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-035b-trust-visualization | Trust Level Visualization | for_review |
 | FW-035c-collector-attribution | Collector Attribution & Verification | for_review |
 | FW-035d-entity-matrix | Entity Possibility Matrix | draft |
-| FW-036-cross-verification | Cross-verification system | ready |
-| FW-037-spectral-prism-rig | Spectral Prism Rig (cooperative symmetric) | ready |
+| FW-036-cross-verification | Cross-Verification System (Epic) | ready |
+| FW-036a-verification-rules | Verification Rules Engine | for_review |
+| FW-036b-behavioral-conflict | Behavioral Conflict Detection | draft |
+| FW-036c-verification-timing | Verification Timing | draft |
+| FW-037-spectral-prism-rig | Spectral Prism Rig (Epic) | ready |
+| FW-037a-spectral-prism-base | Spectral Prism Equipment Base | for_review |
+| FW-037b-calibrator-unit | Calibrator Unit | for_review |
+| FW-037c-lens-reader-unit | Lens Reader Unit | draft |
 | FW-038-dowsing-aura-imager | Dowsing Rods + Aura Imager (cooperative asymmetric) | ready |
 | FW-039-ghost-writing-book | Ghost Writing Book (triggered test) | ready |
 | FW-040-readily-apparent-evidence | Readily-Apparent Evidence system | ready |

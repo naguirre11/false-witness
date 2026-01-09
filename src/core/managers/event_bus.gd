@@ -53,6 +53,15 @@ signal evidence_contested(evidence_uid: String, contester_id: int)
 ## entity is the Node reference to the entity.
 signal hunt_starting(entity_position: Vector3, entity: Node)
 
+## Emitted when the warning phase begins (lights flicker, equipment static, etc.).
+## entity_position is where the entity is starting the warning from.
+## duration is the warning phase duration in seconds.
+signal hunt_warning_started(entity_position: Vector3, duration: float)
+
+## Emitted when the warning phase ends (hunt is about to begin or was prevented).
+## hunt_proceeding is true if the hunt will start, false if prevented.
+signal hunt_warning_ended(hunt_proceeding: bool)
+
 ## Emitted when an entity enters hunt mode (after prevention checks).
 signal hunt_started
 

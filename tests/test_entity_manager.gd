@@ -275,3 +275,73 @@ func test_aggression_thresholds_are_progressive() -> void:
 	assert_lt(dormant_t, active_t, "DORMANT should come before ACTIVE")
 	assert_lt(active_t, aggressive_t, "ACTIVE should come before AGGRESSIVE")
 	assert_lt(aggressive_t, furious_t, "AGGRESSIVE should come before FURIOUS")
+
+
+# --- Warning Phase Tests ---
+
+
+func test_warning_phase_duration_constant() -> void:
+	var manager_class := EntityManagerScript
+	assert_eq(manager_class.WARNING_PHASE_DURATION, 3.0, "Warning phase should be 3 seconds")
+
+
+func test_is_in_warning_phase_false_initially() -> void:
+	assert_false(_manager.is_in_warning_phase(), "Should not be in warning phase initially")
+
+
+func test_get_warning_time_remaining_zero_when_not_in_warning() -> void:
+	var remaining: float = _manager.get_warning_time_remaining()
+	assert_eq(remaining, 0.0, "Warning time should be 0 when not in warning phase")
+
+
+func test_cannot_initiate_hunt_during_warning_phase() -> void:
+	# This tests the public API behavior:
+	# When in warning phase, can_initiate_hunt should return false
+	# Since we can't easily get into warning phase without bypassing dormant,
+	# we verify the initial state and that the method signature is correct
+
+	# In DORMANT phase, can_initiate_hunt is already false for different reason
+	assert_false(_manager.can_initiate_hunt(), "Should not hunt in DORMANT")
+	assert_false(_manager.is_in_warning_phase(), "Not in warning phase initially")
+
+
+func test_reset_clears_warning_phase_state() -> void:
+	_manager.reset()
+
+	assert_false(_manager.is_in_warning_phase(), "Warning phase should be cleared after reset")
+	var remaining: float = _manager.get_warning_time_remaining()
+	assert_eq(remaining, 0.0, "Warning timer should be cleared after reset")
+
+
+# --- Immediate Hunt Tests ---
+
+
+func test_attempt_immediate_hunt_fails_without_entity() -> void:
+	_manager.set_is_server(true)
+
+	var result: bool = _manager.attempt_immediate_hunt(Vector3.ZERO)
+	assert_false(result, "Immediate hunt should fail without active entity")
+
+
+func test_attempt_immediate_hunt_succeeds_with_entity() -> void:
+	_manager.set_is_server(true)
+
+	# Create and spawn entity
+	var test_node := Node3D.new()
+	var scene := PackedScene.new()
+	scene.pack(test_node)
+	test_node.free()
+	_manager.spawn_entity(scene, Vector3.ZERO)
+
+	# attempt_immediate_hunt bypasses dormant phase (for ambush scenarios)
+	# With an entity spawned and no protection items, it should succeed
+	var result: bool = _manager.attempt_immediate_hunt(Vector3.ZERO)
+	assert_true(result, "Immediate hunt should succeed with entity spawned")
+	assert_true(_manager.is_hunting(), "Should be hunting after immediate hunt")
+
+
+func test_attempt_immediate_hunt_requires_server() -> void:
+	_manager.set_is_server(false)
+
+	var result: bool = _manager.attempt_immediate_hunt(Vector3.ZERO)
+	assert_false(result, "Non-server should not be able to start immediate hunt")

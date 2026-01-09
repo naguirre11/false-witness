@@ -2,7 +2,7 @@
 
 Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move.ps1`.
 
-**NEXT**: FW-042-hunt-mechanics
+**NEXT**: FW-042b-detection-mechanics
 
 | Ticket | Title | Status |
 |--------|-------|--------|
@@ -41,7 +41,11 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-039-ghost-writing-book | Ghost Writing Book (triggered test) | for_review |
 | FW-040-readily-apparent-evidence | Readily-Apparent Evidence system | ready |
 | FW-041-entity-core | Core entity AI with behavioral tells | for_review |
-| FW-042-hunt-mechanics | Hunt mechanics with depth | ready |
+| FW-042-hunt-mechanics | Hunt mechanics with depth (Epic) | dev_in_progress |
+| FW-042a-warning-phase | Hunt warning phase | for_review |
+| FW-042b-detection-mechanics | Detection mechanics | draft |
+| FW-042c-hiding-mechanics | Hiding mechanics | draft |
+| FW-042d-hunt-variations | Entity-specific hunt variations | draft |
 | FW-043-death-respawn | Echo system (dead players) | ready |
 | FW-044-first-entity-phantom | First entity: Phantom | ready |
 | FW-046-listener-entity | Listener entity (voice-reactive) | ready |

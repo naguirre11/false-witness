@@ -47,6 +47,9 @@ const HUNT_COOLDOWNS := {
 	AggressionPhase.FURIOUS: 25.0,      # 25 seconds
 }
 
+## Warning phase duration in seconds before hunt starts
+const WARNING_PHASE_DURATION := 3.0
+
 # --- State ---
 
 ## Currently active entity (only one per match)
@@ -66,6 +69,15 @@ var _is_hunting: bool = false
 
 ## Whether hunt was prevented this cycle (for cooldown tracking)
 var _hunt_was_prevented: bool = false
+
+## Whether we're in the warning phase before a hunt
+var _in_warning_phase: bool = false
+
+## Timer for warning phase countdown
+var _warning_timer: float = 0.0
+
+## Entity position when warning phase started (for hunt_starting signal)
+var _warning_entity_position := Vector3.ZERO
 
 ## Designated entity room (favorite room)
 var _favorite_room: String = ""
@@ -93,6 +105,7 @@ func _process(delta: float) -> void:
 	_match_time += delta
 	_update_aggression_phase()
 	_update_hunt_cooldown(delta)
+	_update_warning_phase(delta)
 
 
 # --- Public API ---
@@ -200,6 +213,9 @@ func can_initiate_hunt() -> bool:
 	if _is_hunting:
 		return false
 
+	if _in_warning_phase:
+		return false
+
 	if _aggression_phase == AggressionPhase.DORMANT:
 		return false
 
@@ -227,7 +243,8 @@ func get_favorite_room() -> String:
 
 
 ## Attempts to start a hunt from the entity's current position.
-## Returns true if the hunt started, false if prevented.
+## Returns true if warning phase started, false if cannot hunt.
+## Note: Hunt doesn't start immediately - goes through warning phase first.
 func attempt_hunt(entity_position: Vector3) -> bool:
 	if not _is_server:
 		return false
@@ -238,19 +255,49 @@ func attempt_hunt(entity_position: Vector3) -> bool:
 	if not has_active_entity():
 		return false
 
-	# Emit pre-hunt signal for protection items (crucifix)
+	# Start warning phase
+	_start_warning_phase(entity_position)
+	return true
+
+
+## Attempts to start an immediate hunt (skips warning phase).
+## Used for ambush scenarios when entity is already at player.
+## Returns true if the hunt started, false if prevented.
+func attempt_immediate_hunt(entity_position: Vector3) -> bool:
+	if not _is_server:
+		return false
+
+	if _is_hunting or _in_warning_phase:
+		return false
+
+	if not has_active_entity():
+		return false
+
+	# Skip warning phase - emit hunt_starting for prevention check
 	EventBus.hunt_starting.emit(entity_position, _active_entity)
 
 	# Check if hunt was prevented
 	if _hunt_was_prevented:
 		_hunt_was_prevented = false
 		_hunt_cooldown_timer = 0.0
-		print("[EntityManager] Hunt prevented by protection item")
+		print("[EntityManager] Immediate hunt prevented by protection item")
 		return false
 
-	# Hunt proceeds
+	# Hunt proceeds immediately
 	_start_hunt()
 	return true
+
+
+## Returns true if currently in warning phase.
+func is_in_warning_phase() -> bool:
+	return _in_warning_phase
+
+
+## Gets the remaining warning phase time in seconds.
+func get_warning_time_remaining() -> float:
+	if not _in_warning_phase:
+		return 0.0
+	return _warning_timer
 
 
 ## Ends the current hunt.
@@ -287,6 +334,9 @@ func reset() -> void:
 	_hunt_cooldown_timer = 0.0
 	_is_hunting = false
 	_hunt_was_prevented = false
+	_in_warning_phase = false
+	_warning_timer = 0.0
+	_warning_entity_position = Vector3.ZERO
 	_favorite_room = ""
 	print("[EntityManager] Reset for new match")
 
@@ -326,8 +376,49 @@ func _update_aggression_phase() -> void:
 
 
 func _update_hunt_cooldown(delta: float) -> void:
-	if not _is_hunting:
+	if not _is_hunting and not _in_warning_phase:
 		_hunt_cooldown_timer += delta
+
+
+func _update_warning_phase(delta: float) -> void:
+	if not _in_warning_phase:
+		return
+
+	_warning_timer -= delta
+
+	if _warning_timer <= 0.0:
+		_end_warning_phase()
+
+
+func _start_warning_phase(entity_position: Vector3) -> void:
+	_in_warning_phase = true
+	_warning_timer = WARNING_PHASE_DURATION
+	_warning_entity_position = entity_position
+
+	# Emit warning started signal for effects (lights flicker, equipment static)
+	EventBus.hunt_warning_started.emit(entity_position, WARNING_PHASE_DURATION)
+
+	# Emit hunt_starting for protection items (crucifix can still prevent)
+	EventBus.hunt_starting.emit(entity_position, _active_entity)
+
+	print("[EntityManager] Warning phase started (%.1fs)" % WARNING_PHASE_DURATION)
+
+
+func _end_warning_phase() -> void:
+	_in_warning_phase = false
+	_warning_timer = 0.0
+
+	# Check if hunt was prevented during warning phase
+	if _hunt_was_prevented:
+		_hunt_was_prevented = false
+		_hunt_cooldown_timer = 0.0
+		EventBus.hunt_warning_ended.emit(false)
+		print("[EntityManager] Hunt prevented during warning phase")
+		return
+
+	# Hunt proceeds
+	EventBus.hunt_warning_ended.emit(true)
+	_start_hunt()
 
 
 func _start_hunt() -> void:

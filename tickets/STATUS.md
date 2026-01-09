@@ -2,7 +2,7 @@
 
 Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move.ps1`.
 
-**NEXT**: FW-037b-calibrator-unit
+**NEXT**: FW-037c-lens-reader-unit
 
 | Ticket | Title | Status |
 |--------|-------|--------|
@@ -33,7 +33,7 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-037-spectral-prism-rig | Spectral Prism Rig (Epic) | ready |
 | FW-037a-spectral-prism-base | Spectral Prism Equipment Base | for_review |
 | FW-037b-calibrator-unit | Calibrator Unit | for_review |
-| FW-037c-lens-reader-unit | Lens Reader Unit | draft |
+| FW-037c-lens-reader-unit | Lens Reader Unit | ready |
 | FW-038-dowsing-aura-imager | Dowsing Rods + Aura Imager (cooperative asymmetric) | ready |
 | FW-039-ghost-writing-book | Ghost Writing Book (triggered test) | ready |
 | FW-040-readily-apparent-evidence | Readily-Apparent Evidence system | ready |

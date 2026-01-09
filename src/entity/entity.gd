@@ -205,9 +205,7 @@ func _process_manifesting_behavior(_delta: float) -> void:
 func get_current_speed() -> float:
 	match _state:
 		EntityState.HUNTING:
-			if _is_aware_of_target:
-				return hunt_aware_speed
-			return hunt_unaware_speed
+			return get_hunt_speed_for_awareness(_is_aware_of_target)
 		EntityState.ACTIVE:
 			return base_speed
 		_:
@@ -227,6 +225,59 @@ func _select_hunt_target(players: Array) -> Node:
 ## Override in subclasses for entity-specific behavior (e.g., Wraith ignores hiding).
 func can_ignore_hiding_spots() -> bool:
 	return false
+
+
+# --- Hunt Variation Virtual Methods ---
+# Override these in subclasses to customize entity-specific hunt behavior.
+
+
+## Returns the sanity threshold at which this entity can initiate hunts.
+## Override for entity-specific thresholds (e.g., Demon: 70%, Shade: 35%).
+func get_hunt_sanity_threshold() -> float:
+	return hunt_sanity_threshold
+
+
+## Returns true if this entity ignores team sanity and only checks target's sanity.
+## Override in subclasses (e.g., Banshee targets one player, ignores team sanity).
+func should_ignore_team_sanity() -> bool:
+	return false
+
+
+## Returns true if voice input can trigger a hunt regardless of sanity threshold.
+## Override in subclasses (e.g., Listener can be voice-triggered).
+func can_voice_trigger_hunt() -> bool:
+	return false
+
+
+## Returns the hunt speed based on whether the entity is aware of target position.
+## Override for entity-specific speed behaviors.
+func get_hunt_speed_for_awareness(aware: bool) -> float:
+	return hunt_aware_speed if aware else hunt_unaware_speed
+
+
+## Called each frame during hunt to update speed (e.g., Revenant acceleration).
+## Override in subclasses that have dynamic speed changes during hunts.
+func _update_hunt_speed(_delta: float) -> void:
+	pass
+
+
+## Returns true if this entity can hunt under current environmental conditions.
+## Override for condition-specific entities (e.g., Mare can't hunt in lit rooms).
+func can_hunt_in_current_conditions() -> bool:
+	return true
+
+
+## Returns the hunt duration for this entity (in seconds).
+## Override for entity-specific durations.
+func get_hunt_duration() -> float:
+	return hunt_duration
+
+
+## Returns the hunt cooldown for this entity (in seconds).
+## Base cooldown is 25 seconds, modified by hunt_cooldown_multiplier.
+## Override for entity-specific cooldowns (e.g., Demon: 20s).
+func get_hunt_cooldown() -> float:
+	return 25.0 * hunt_cooldown_multiplier
 
 
 # --- Public API ---
@@ -307,7 +358,7 @@ func change_state(new_state: EntityState) -> void:
 ## Called by EntityManager when a hunt starts.
 func on_hunt_started() -> void:
 	change_state(EntityState.HUNTING)
-	_hunt_timer = hunt_duration
+	_hunt_timer = get_hunt_duration()
 
 
 ## Called by EntityManager when a hunt ends.
@@ -518,6 +569,10 @@ func _process_hunting(delta: float) -> void:
 				_target_last_position = Vector3.ZERO
 
 	_process_hunting_behavior(delta)
+
+	# Allow entity-specific speed updates (e.g., Revenant acceleration)
+	_update_hunt_speed(delta)
+
 	_move_along_path(delta)
 
 	# Check for behavioral tell during hunt

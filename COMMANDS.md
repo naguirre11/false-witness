@@ -52,7 +52,7 @@ These are custom commands to be used whenever a particular function starting wit
 
 ## %flowchart / %f
 
-   Read and follow the decision tree in `FLOWCHART.md`. This guides you through:
+   Read and follow the decision tree in `./FLOWCHART.md` (project root). This guides you through:
    1. Checking the latest handoff for emergencies or non-ticketed work
    2. Selecting the correct ticket (active in dev_in_progress, or NEXT from STATUS.md)
    3. Verifying dependencies and blockers before starting

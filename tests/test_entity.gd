@@ -552,3 +552,209 @@ func test_on_hunt_ended_cancels_hiding_spot_search() -> void:
 	assert_false(_entity.is_searching_hiding_spot())
 
 	hiding_spot.queue_free()
+
+
+# --- Hunt Variation Virtual Methods Tests ---
+
+
+func test_get_hunt_sanity_threshold_returns_default() -> void:
+	assert_eq(_entity.get_hunt_sanity_threshold(), 50.0)
+
+
+func test_get_hunt_sanity_threshold_reflects_export_value() -> void:
+	_entity.hunt_sanity_threshold = 70.0
+	assert_eq(_entity.get_hunt_sanity_threshold(), 70.0)
+
+
+func test_should_ignore_team_sanity_returns_false_by_default() -> void:
+	assert_false(_entity.should_ignore_team_sanity())
+
+
+func test_can_voice_trigger_hunt_returns_false_by_default() -> void:
+	assert_false(_entity.can_voice_trigger_hunt())
+
+
+func test_get_hunt_speed_for_awareness_returns_aware_speed_when_true() -> void:
+	_entity.hunt_aware_speed = 3.0
+	_entity.hunt_unaware_speed = 1.0
+	assert_eq(_entity.get_hunt_speed_for_awareness(true), 3.0)
+
+
+func test_get_hunt_speed_for_awareness_returns_unaware_speed_when_false() -> void:
+	_entity.hunt_aware_speed = 3.0
+	_entity.hunt_unaware_speed = 1.0
+	assert_eq(_entity.get_hunt_speed_for_awareness(false), 1.0)
+
+
+func test_can_hunt_in_current_conditions_returns_true_by_default() -> void:
+	assert_true(_entity.can_hunt_in_current_conditions())
+
+
+func test_get_hunt_duration_returns_default() -> void:
+	assert_eq(_entity.get_hunt_duration(), 30.0)
+
+
+func test_get_hunt_duration_reflects_export_value() -> void:
+	_entity.hunt_duration = 45.0
+	assert_eq(_entity.get_hunt_duration(), 45.0)
+
+
+func test_get_hunt_cooldown_returns_base_value() -> void:
+	# Default multiplier is 1.0, so cooldown should be 25.0
+	assert_eq(_entity.get_hunt_cooldown(), 25.0)
+
+
+func test_get_hunt_cooldown_applies_multiplier() -> void:
+	_entity.hunt_cooldown_multiplier = 0.8
+	assert_almost_eq(_entity.get_hunt_cooldown(), 20.0, 0.01)
+
+
+func test_on_hunt_started_uses_get_hunt_duration() -> void:
+	_entity.hunt_duration = 45.0
+	_entity.on_hunt_started()
+	# The internal _hunt_timer should be set to get_hunt_duration()
+	# We can verify this through the network state
+	var state := _entity.get_network_state()
+	assert_eq(state.hunt_timer, 45.0)
+
+
+func test_get_current_speed_uses_get_hunt_speed_for_awareness() -> void:
+	# This verifies the wiring between get_current_speed and get_hunt_speed_for_awareness
+	_entity.hunt_aware_speed = 4.0
+	_entity.hunt_unaware_speed = 1.5
+	_entity.on_hunt_started()
+
+	_entity.set_aware_of_target(true)
+	assert_eq(_entity.get_current_speed(), 4.0)
+
+	_entity.set_aware_of_target(false)
+	assert_eq(_entity.get_current_speed(), 1.5)
+
+
+# --- Hunt Variation Subclass Override Tests ---
+
+
+class CustomEntity:
+	extends Entity
+
+	var custom_threshold: float = 70.0
+	var custom_ignores_team: bool = true
+	var custom_voice_trigger: bool = true
+	var custom_aware_speed: float = 4.0
+	var custom_unaware_speed: float = 2.0
+	var custom_can_hunt: bool = false
+	var custom_duration: float = 45.0
+	var custom_cooldown: float = 20.0
+	var speed_update_called: bool = false
+
+	func get_hunt_sanity_threshold() -> float:
+		return custom_threshold
+
+	func should_ignore_team_sanity() -> bool:
+		return custom_ignores_team
+
+	func can_voice_trigger_hunt() -> bool:
+		return custom_voice_trigger
+
+	func get_hunt_speed_for_awareness(aware: bool) -> float:
+		return custom_aware_speed if aware else custom_unaware_speed
+
+	func _update_hunt_speed(_delta: float) -> void:
+		speed_update_called = true
+
+	func can_hunt_in_current_conditions() -> bool:
+		return custom_can_hunt
+
+	func get_hunt_duration() -> float:
+		return custom_duration
+
+	func get_hunt_cooldown() -> float:
+		return custom_cooldown
+
+
+func test_subclass_can_override_sanity_threshold() -> void:
+	var custom := CustomEntity.new()
+	add_child(custom)
+
+	assert_eq(custom.get_hunt_sanity_threshold(), 70.0)
+
+	custom.queue_free()
+
+
+func test_subclass_can_override_ignore_team_sanity() -> void:
+	var custom := CustomEntity.new()
+	add_child(custom)
+
+	assert_true(custom.should_ignore_team_sanity())
+
+	custom.queue_free()
+
+
+func test_subclass_can_override_voice_trigger() -> void:
+	var custom := CustomEntity.new()
+	add_child(custom)
+
+	assert_true(custom.can_voice_trigger_hunt())
+
+	custom.queue_free()
+
+
+func test_subclass_can_override_hunt_speed_for_awareness() -> void:
+	var custom := CustomEntity.new()
+	add_child(custom)
+
+	assert_eq(custom.get_hunt_speed_for_awareness(true), 4.0)
+	assert_eq(custom.get_hunt_speed_for_awareness(false), 2.0)
+
+	custom.queue_free()
+
+
+func test_subclass_can_override_can_hunt_conditions() -> void:
+	var custom := CustomEntity.new()
+	add_child(custom)
+
+	assert_false(custom.can_hunt_in_current_conditions())
+
+	custom.queue_free()
+
+
+func test_subclass_can_override_hunt_duration() -> void:
+	var custom := CustomEntity.new()
+	add_child(custom)
+
+	assert_eq(custom.get_hunt_duration(), 45.0)
+
+	custom.queue_free()
+
+
+func test_subclass_can_override_hunt_cooldown() -> void:
+	var custom := CustomEntity.new()
+	add_child(custom)
+
+	assert_eq(custom.get_hunt_cooldown(), 20.0)
+
+	custom.queue_free()
+
+
+func test_subclass_speed_override_used_by_get_current_speed() -> void:
+	var custom := CustomEntity.new()
+	add_child(custom)
+
+	custom.on_hunt_started()
+	custom.set_aware_of_target(true)
+
+	assert_eq(custom.get_current_speed(), 4.0)
+
+	custom.queue_free()
+
+
+func test_subclass_duration_override_used_by_on_hunt_started() -> void:
+	var custom := CustomEntity.new()
+	add_child(custom)
+
+	custom.on_hunt_started()
+
+	var state := custom.get_network_state()
+	assert_eq(state.hunt_timer, 45.0)
+
+	custom.queue_free()

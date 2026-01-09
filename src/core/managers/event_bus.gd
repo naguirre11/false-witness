@@ -62,6 +62,35 @@ signal hunt_ended
 ## Emitted when an entity exhibits a behavioral tell.
 signal entity_tell_triggered(tell_type: String)
 
+## Emitted when an entity spawns into the match.
+signal entity_spawned(entity_type: String, room: String)
+
+## Emitted when an entity is removed from the match.
+signal entity_removed
+
+## Emitted when entity aggression level changes.
+signal entity_aggression_changed(phase: int, phase_name: String)
+
+## Emitted when entity starts a manifestation (becomes visible).
+signal entity_manifesting(position: Vector3)
+
+## Emitted when entity stops manifesting.
+signal entity_manifestation_ended
+
+## Emitted when entity state changes.
+signal entity_state_changed(old_state: int, new_state: int)
+
+# --- Sanity Signals ---
+
+## Emitted when a player's sanity changes.
+signal player_sanity_changed(player_id: int, new_sanity: float)
+
+## Emitted when team average sanity changes significantly.
+signal team_sanity_changed(team_average: float)
+
+## Emitted when team sanity crosses below a threshold.
+signal sanity_threshold_crossed(threshold: float, team_sanity: float)
+
 # --- Protection Item Signals ---
 
 ## Emitted when a crucifix prevents a hunt from starting.

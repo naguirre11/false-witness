@@ -25,6 +25,8 @@ EventBus="*res://src/core/managers/event_bus.gd"
 GameManager="*res://src/core/managers/game_manager.gd"
 EvidenceManager="*res://src/evidence/evidence_manager.gd"
 VerificationManager="*res://src/evidence/verification_manager.gd"
+EntityManager="*res://src/entity/entity_manager.gd"
+SanityManager="*res://src/entity/sanity_manager.gd"
 
 [display]
 

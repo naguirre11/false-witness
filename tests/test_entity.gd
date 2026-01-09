@@ -1,0 +1,346 @@
+extends GutTest
+## Tests for Entity base class.
+
+
+# --- Test Helpers ---
+
+var _entity: Entity = null
+
+
+func before_each() -> void:
+	_entity = Entity.new()
+	_entity.entity_type = "TestEntity"
+	add_child(_entity)
+
+
+func after_each() -> void:
+	if _entity:
+		_entity.queue_free()
+		_entity = null
+
+
+# --- Initialization Tests ---
+
+
+func test_entity_initializes_with_dormant_state() -> void:
+	assert_eq(_entity.get_state(), Entity.EntityState.DORMANT)
+	assert_eq(_entity.get_state_name(), "Dormant")
+
+
+func test_entity_type_returns_configured_value() -> void:
+	assert_eq(_entity.get_entity_type(), "TestEntity")
+
+
+func test_entity_default_export_values() -> void:
+	assert_eq(_entity.base_speed, 1.5, "Base speed should be 1.5")
+	assert_eq(_entity.hunt_speed, 2.5, "Hunt speed should be 2.5")
+	assert_eq(_entity.hunt_sanity_threshold, 50.0, "Default hunt threshold should be 50")
+	assert_eq(_entity.hunt_duration, 30.0, "Hunt duration should be 30s")
+
+
+func test_entity_not_visible_initially() -> void:
+	assert_false(_entity.is_visible_to_players(), "Should not be visible initially")
+
+
+func test_entity_not_hunting_initially() -> void:
+	assert_false(_entity.is_hunting())
+
+
+# --- State Machine Tests ---
+
+
+func test_change_state_updates_state() -> void:
+	_entity.change_state(Entity.EntityState.ACTIVE)
+	assert_eq(_entity.get_state(), Entity.EntityState.ACTIVE)
+	assert_eq(_entity.get_state_name(), "Active")
+
+
+func test_change_state_emits_signal() -> void:
+	var signal_received := {"called": false, "old": -1, "new": -1}
+	_entity.state_changed.connect(func(old: Entity.EntityState, new: Entity.EntityState):
+		signal_received["called"] = true
+		signal_received["old"] = old
+		signal_received["new"] = new
+	)
+
+	_entity.change_state(Entity.EntityState.ACTIVE)
+
+	assert_true(signal_received["called"], "state_changed should be emitted")
+	assert_eq(signal_received["old"], Entity.EntityState.DORMANT)
+	assert_eq(signal_received["new"], Entity.EntityState.ACTIVE)
+
+
+func test_change_state_to_same_state_does_nothing() -> void:
+	var signal_received := {"count": 0}
+	_entity.state_changed.connect(func(_old, _new):
+		signal_received["count"] += 1
+	)
+
+	_entity.change_state(Entity.EntityState.DORMANT)
+
+	assert_eq(signal_received["count"], 0, "Should not emit when state unchanged")
+
+
+func test_all_states_have_valid_names() -> void:
+	var states := [
+		Entity.EntityState.DORMANT,
+		Entity.EntityState.ACTIVE,
+		Entity.EntityState.HUNTING,
+		Entity.EntityState.MANIFESTING,
+	]
+	var expected_names := ["Dormant", "Active", "Hunting", "Manifesting"]
+
+	for i in states.size():
+		_entity.change_state(states[i])
+		assert_eq(_entity.get_state_name(), expected_names[i])
+
+
+# --- Hunt State Tests ---
+
+
+func test_on_hunt_started_changes_to_hunting_state() -> void:
+	_entity.on_hunt_started()
+
+	assert_eq(_entity.get_state(), Entity.EntityState.HUNTING)
+	assert_true(_entity.is_hunting())
+
+
+func test_on_hunt_ended_changes_to_active_state() -> void:
+	_entity.on_hunt_started()
+	_entity.on_hunt_ended()
+
+	assert_eq(_entity.get_state(), Entity.EntityState.ACTIVE)
+	assert_false(_entity.is_hunting())
+
+
+func test_hunt_clears_target_on_end() -> void:
+	var mock_target := Node3D.new()
+	add_child(mock_target)
+
+	_entity.on_hunt_started()
+	_entity.set_hunt_target(mock_target)
+	assert_eq(_entity.get_hunt_target(), mock_target)
+
+	_entity.on_hunt_ended()
+	assert_null(_entity.get_hunt_target(), "Target should be cleared on hunt end")
+
+	mock_target.queue_free()
+
+
+# --- Movement Speed Tests ---
+
+
+func test_get_current_speed_returns_zero_in_dormant() -> void:
+	assert_eq(_entity.get_current_speed(), 0.0, "Dormant entities don't move")
+
+
+func test_get_current_speed_returns_base_speed_in_active() -> void:
+	_entity.change_state(Entity.EntityState.ACTIVE)
+	assert_eq(_entity.get_current_speed(), _entity.base_speed)
+
+
+func test_get_current_speed_returns_hunt_unaware_speed_when_not_aware() -> void:
+	_entity.on_hunt_started()
+	_entity.set_aware_of_target(false)
+	assert_eq(_entity.get_current_speed(), _entity.hunt_unaware_speed)
+
+
+func test_get_current_speed_returns_hunt_aware_speed_when_aware() -> void:
+	_entity.on_hunt_started()
+	_entity.set_aware_of_target(true)
+	assert_eq(_entity.get_current_speed(), _entity.hunt_aware_speed)
+
+
+# --- Manifestation Tests ---
+
+
+func test_start_manifestation_changes_state() -> void:
+	_entity.change_state(Entity.EntityState.ACTIVE)
+	var result := _entity.start_manifestation()
+
+	assert_true(result, "Manifestation should start")
+	assert_eq(_entity.get_state(), Entity.EntityState.MANIFESTING)
+	assert_true(_entity.is_visible_to_players())
+
+
+func test_start_manifestation_blocked_during_hunt() -> void:
+	_entity.on_hunt_started()
+	var result := _entity.start_manifestation()
+
+	assert_false(result, "Cannot manifest during hunt")
+	assert_eq(_entity.get_state(), Entity.EntityState.HUNTING)
+
+
+func test_end_manifestation_returns_to_active() -> void:
+	_entity.change_state(Entity.EntityState.ACTIVE)
+	_entity.start_manifestation()
+	_entity.end_manifestation()
+
+	assert_eq(_entity.get_state(), Entity.EntityState.ACTIVE)
+	assert_false(_entity.is_visible_to_players())
+
+
+func test_manifestation_cooldown_prevents_immediate_remanifest() -> void:
+	_entity.change_state(Entity.EntityState.ACTIVE)
+	_entity.start_manifestation()
+	_entity.end_manifestation()
+
+	# Immediate attempt should fail due to cooldown
+	var result := _entity.start_manifestation()
+	assert_false(result, "Should be on cooldown")
+
+
+func test_visibility_changed_signal_emitted() -> void:
+	var signal_received := {"called": false, "visible": false}
+	_entity.entity_visibility_changed.connect(func(is_visible: bool):
+		signal_received["called"] = true
+		signal_received["visible"] = is_visible
+	)
+
+	_entity.change_state(Entity.EntityState.ACTIVE)
+	_entity.start_manifestation()
+
+	assert_true(signal_received["called"])
+	assert_true(signal_received["visible"])
+
+
+# --- Behavioral Tell Tests ---
+
+
+func test_get_behavioral_tell_type_returns_unknown_by_default() -> void:
+	assert_eq(_entity.get_behavioral_tell_type(), "unknown")
+
+
+func test_trigger_behavioral_tell_emits_signal() -> void:
+	var signal_received := {"called": false, "type": ""}
+	_entity.behavioral_tell_triggered.connect(func(tell_type: String):
+		signal_received["called"] = true
+		signal_received["type"] = tell_type
+	)
+
+	_entity.trigger_behavioral_tell()
+
+	assert_true(signal_received["called"])
+	assert_eq(signal_received["type"], "unknown")
+
+
+# --- Favorite Room Tests ---
+
+
+func test_favorite_room_empty_initially() -> void:
+	assert_eq(_entity.get_favorite_room(), "")
+
+
+func test_set_favorite_room_updates_value() -> void:
+	_entity.set_favorite_room("Kitchen")
+	assert_eq(_entity.get_favorite_room(), "Kitchen")
+
+
+# --- Manager Integration Tests ---
+
+
+func test_set_manager_stores_reference() -> void:
+	var mock_manager := Node.new()
+	add_child(mock_manager)
+
+	_entity.set_manager(mock_manager)
+	assert_eq(_entity.get_manager(), mock_manager)
+
+	mock_manager.queue_free()
+
+
+# --- Hunt Target Tests ---
+
+
+func test_set_hunt_target_stores_target() -> void:
+	var target := Node3D.new()
+	target.global_position = Vector3(5, 0, 5)
+	add_child(target)
+
+	_entity.set_hunt_target(target)
+
+	assert_eq(_entity.get_hunt_target(), target)
+
+	target.queue_free()
+
+
+func test_set_hunt_target_sets_awareness() -> void:
+	var target := Node3D.new()
+	add_child(target)
+
+	_entity.set_hunt_target(target)
+
+	# Setting a target should make entity aware
+	_entity.on_hunt_started()
+	assert_eq(_entity.get_current_speed(), _entity.hunt_aware_speed)
+
+	target.queue_free()
+
+
+# --- Network State Tests ---
+
+
+func test_get_network_state_includes_all_fields() -> void:
+	_entity.change_state(Entity.EntityState.ACTIVE)
+	_entity.global_position = Vector3(10, 0, 20)
+	_entity.rotation.y = 1.5
+
+	var state := _entity.get_network_state()
+
+	assert_has(state, "state", "Should include state")
+	assert_has(state, "position", "Should include position")
+	assert_has(state, "rotation_y", "Should include rotation")
+	assert_has(state, "is_visible", "Should include visibility")
+	assert_has(state, "hunt_timer", "Should include hunt timer")
+	assert_has(state, "manifestation_timer", "Should include manifestation timer")
+
+
+func test_apply_network_state_updates_entity() -> void:
+	var state := {
+		"state": Entity.EntityState.ACTIVE,
+		"position": {"x": 5.0, "y": 0.0, "z": 10.0},
+		"rotation_y": 2.0,
+		"is_visible": true,
+		"hunt_timer": 15.0,
+		"manifestation_timer": 3.0,
+	}
+
+	_entity.apply_network_state(state)
+
+	assert_eq(_entity.get_state(), Entity.EntityState.ACTIVE)
+	assert_almost_eq(_entity.global_position.x, 5.0, 0.01)
+	assert_almost_eq(_entity.global_position.z, 10.0, 0.01)
+	assert_almost_eq(_entity.rotation.y, 2.0, 0.01)
+	assert_true(_entity.is_visible_to_players())
+
+
+# --- Navigation Tests ---
+
+
+func test_navigation_agent_created_on_ready() -> void:
+	# NavigationAgent3D should be created in _ready
+	var nav_agent: NavigationAgent3D = null
+	for child in _entity.get_children():
+		if child is NavigationAgent3D:
+			nav_agent = child
+			break
+
+	assert_not_null(nav_agent, "NavigationAgent3D should be created")
+
+
+func test_is_navigation_finished_returns_true_initially() -> void:
+	# With no target set, navigation should be "finished"
+	assert_true(_entity.is_navigation_finished())
+
+
+# --- Collision Layer Tests ---
+
+
+func test_entity_on_correct_collision_layer() -> void:
+	# Layer 3 = bit 2 (0-indexed) = value 4
+	assert_eq(_entity.collision_layer, 4, "Should be on Entity layer (3)")
+
+
+func test_entity_collision_mask_includes_world_and_player() -> void:
+	# World (1) + Player (2) = 3
+	assert_eq(_entity.collision_mask, 3, "Should collide with World and Player")

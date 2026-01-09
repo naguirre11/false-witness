@@ -1,0 +1,550 @@
+extends Node
+## Server-authoritative evidence collection and tracking manager.
+## Autoload: EvidenceManager
+##
+## Manages all collected evidence during investigation. Evidence collection
+## is server-authoritative to prevent cheating and ensure consistency.
+##
+## The evidence system supports social deduction through trust levels:
+## - UNFALSIFIABLE evidence (hunt behavior) cannot be disputed
+## - HIGH trust evidence has shared displays
+## - LOW trust evidence relies on player reports
+## - SABOTAGE_RISK evidence can be corrupted before collection
+##
+## Note: No class_name to avoid conflicts with autoload singleton name.
+
+# --- Signals ---
+
+## Emitted when new evidence is collected (server broadcasts to all).
+signal evidence_collected(evidence: Evidence)
+
+## Emitted when evidence verification state changes.
+signal evidence_verification_changed(evidence: Evidence)
+
+## Emitted when conflicting evidence reports are received.
+signal evidence_contested(evidence: Evidence, contesting_player_id: int)
+
+## Emitted when all evidence is cleared (new round).
+signal evidence_cleared
+
+# --- State ---
+
+## All collected evidence indexed by UID.
+var _evidence_by_uid: Dictionary = {}
+
+## Evidence indexed by type for fast queries.
+var _evidence_by_type: Dictionary = {}
+
+## Evidence indexed by collector ID for fast queries.
+var _evidence_by_collector: Dictionary = {}
+
+## Whether evidence collection is currently allowed.
+var _collection_enabled: bool = false
+
+
+func _ready() -> void:
+	_connect_to_event_bus()
+	_initialize_type_index()
+	print("[EvidenceManager] Initialized - Evidence tracking ready")
+
+
+func _connect_to_event_bus() -> void:
+	var event_bus := _get_event_bus()
+	if event_bus:
+		if event_bus.has_signal("game_state_changed"):
+			event_bus.game_state_changed.connect(_on_game_state_changed)
+
+
+func _initialize_type_index() -> void:
+	for evidence_type: int in EvidenceEnums.EvidenceType.values():
+		_evidence_by_type[evidence_type] = []
+
+
+func _get_event_bus() -> Node:
+	if has_node("/root/EventBus"):
+		return get_node("/root/EventBus")
+	return null
+
+
+func _get_network_manager() -> Node:
+	if has_node("/root/NetworkManager"):
+		return get_node("/root/NetworkManager")
+	return null
+
+
+func _get_verification_manager() -> Node:
+	if has_node("/root/VerificationManager"):
+		return get_node("/root/VerificationManager")
+	return null
+
+
+# --- Public API: Collection ---
+
+
+## Collects evidence from a player. Server-authoritative.
+## Returns the created Evidence if successful, null if rejected.
+func collect_evidence(
+	evidence_type: EvidenceEnums.EvidenceType,
+	collector_id: int,
+	location: Vector3,
+	quality: EvidenceEnums.ReadingQuality = EvidenceEnums.ReadingQuality.STRONG,
+	equipment: String = ""
+) -> Evidence:
+	if not _collection_enabled:
+		push_warning("[EvidenceManager] Collection attempted while disabled")
+		return null
+
+	if not _is_server():
+		_request_collect_evidence(evidence_type, collector_id, location, quality, equipment)
+		return null
+
+	var evidence := Evidence.create(evidence_type, collector_id, location, quality)
+	evidence.equipment_used = equipment
+
+	_add_evidence(evidence)
+	_broadcast_evidence_collected(evidence)
+
+	return evidence
+
+
+## Collects cooperative evidence requiring two players.
+func collect_cooperative_evidence(
+	evidence_type: EvidenceEnums.EvidenceType,
+	primary_collector: int,
+	secondary_collector: int,
+	location: Vector3,
+	quality: EvidenceEnums.ReadingQuality = EvidenceEnums.ReadingQuality.STRONG,
+	equipment: String = ""
+) -> Evidence:
+	if not _collection_enabled:
+		push_warning("[EvidenceManager] Collection attempted while disabled")
+		return null
+
+	if not EvidenceEnums.is_cooperative(evidence_type):
+		push_warning("[EvidenceManager] Non-cooperative evidence type used with cooperative collection")
+		return collect_evidence(evidence_type, primary_collector, location, quality, equipment)
+
+	if not _is_server():
+		_request_collect_cooperative_evidence(
+			evidence_type, primary_collector, secondary_collector, location, quality, equipment
+		)
+		return null
+
+	var evidence := Evidence.create_cooperative(
+		evidence_type, primary_collector, secondary_collector, location, quality
+	)
+	evidence.equipment_used = equipment
+
+	_add_evidence(evidence)
+	_broadcast_evidence_collected(evidence)
+
+	return evidence
+
+
+## Verifies evidence by UID. Called when another player corroborates.
+## Uses VerificationManager to validate against trust-level rules.
+func verify_evidence(uid: String, verifier_id: int) -> bool:
+	if not _is_server():
+		_request_verify_evidence(uid, verifier_id)
+		return false
+
+	var evidence: Evidence = _evidence_by_uid.get(uid)
+	if evidence == null:
+		return false
+
+	# Use VerificationManager for trust-level validation
+	var verification_manager := _get_verification_manager()
+	if verification_manager:
+		var result: Dictionary = verification_manager.try_verify(evidence, verifier_id)
+		if not result.get("success", false):
+			return false
+
+	# Perform the actual verification
+	evidence.verify()
+	evidence.verifier_id = verifier_id
+	evidence_verification_changed.emit(evidence)
+	_broadcast_verification_changed(evidence)
+	_emit_verification_to_event_bus(evidence)
+
+	return true
+
+
+## Contests evidence by UID. Called when a player disputes a report.
+## Uses VerificationManager to validate (UNFALSIFIABLE cannot be contested).
+func contest_evidence(uid: String, contester_id: int) -> bool:
+	if not _is_server():
+		_request_contest_evidence(uid, contester_id)
+		return false
+
+	var evidence: Evidence = _evidence_by_uid.get(uid)
+	if evidence == null:
+		return false
+
+	# Use VerificationManager for trust-level validation
+	var verification_manager := _get_verification_manager()
+	if verification_manager:
+		var result: Dictionary = verification_manager.try_contest(evidence, contester_id)
+		if not result.get("success", false):
+			return false
+
+	evidence.contest()
+	evidence_verification_changed.emit(evidence)
+	evidence_contested.emit(evidence, contester_id)
+	_broadcast_verification_changed(evidence)
+	_emit_verification_to_event_bus(evidence)
+	_emit_contested_to_event_bus(evidence, contester_id)
+
+	return true
+
+
+func _emit_verification_to_event_bus(evidence: Evidence) -> void:
+	var event_bus := _get_event_bus()
+	if event_bus and event_bus.has_signal("evidence_verification_changed"):
+		event_bus.evidence_verification_changed.emit(evidence.uid, evidence.verification_state)
+
+
+func _emit_contested_to_event_bus(evidence: Evidence, contester_id: int) -> void:
+	var event_bus := _get_event_bus()
+	if event_bus and event_bus.has_signal("evidence_contested"):
+		event_bus.evidence_contested.emit(evidence.uid, contester_id)
+
+
+# --- Public API: Queries ---
+
+
+## Returns all collected evidence.
+func get_all_evidence() -> Array[Evidence]:
+	var result: Array[Evidence] = []
+	for evidence: Evidence in _evidence_by_uid.values():
+		result.append(evidence)
+	return result
+
+
+## Returns evidence of a specific type.
+func get_evidence_by_type(evidence_type: EvidenceEnums.EvidenceType) -> Array[Evidence]:
+	var result: Array[Evidence] = []
+	var evidence_list: Array = _evidence_by_type.get(evidence_type, [])
+	for evidence: Evidence in evidence_list:
+		result.append(evidence)
+	return result
+
+
+## Returns all evidence collected by a specific player.
+func get_evidence_by_collector(collector_id: int) -> Array[Evidence]:
+	var result: Array[Evidence] = []
+	var evidence_list: Array = _evidence_by_collector.get(collector_id, [])
+	for evidence: Evidence in evidence_list:
+		result.append(evidence)
+	return result
+
+
+## Returns evidence by its UID.
+func get_evidence_by_uid(uid: String) -> Evidence:
+	return _evidence_by_uid.get(uid)
+
+
+## Returns all verified evidence.
+func get_verified_evidence() -> Array[Evidence]:
+	var result: Array[Evidence] = []
+	for evidence: Evidence in _evidence_by_uid.values():
+		if evidence.is_verified():
+			result.append(evidence)
+	return result
+
+
+## Returns all contested evidence.
+func get_contested_evidence() -> Array[Evidence]:
+	var result: Array[Evidence] = []
+	for evidence: Evidence in _evidence_by_uid.values():
+		if evidence.is_contested():
+			result.append(evidence)
+	return result
+
+
+## Returns all strong/definitive evidence.
+func get_definitive_evidence() -> Array[Evidence]:
+	var result: Array[Evidence] = []
+	for evidence: Evidence in _evidence_by_uid.values():
+		if evidence.is_definitive():
+			result.append(evidence)
+	return result
+
+
+## Returns true if evidence of this type has been collected.
+func has_evidence_type(evidence_type: EvidenceEnums.EvidenceType) -> bool:
+	return not _evidence_by_type.get(evidence_type, []).is_empty()
+
+
+## Returns the count of collected evidence.
+func get_evidence_count() -> int:
+	return _evidence_by_uid.size()
+
+
+## Returns true if collection is currently enabled.
+func is_collection_enabled() -> bool:
+	return _collection_enabled
+
+
+# --- Public API: Management ---
+
+
+## Enables evidence collection. Called when investigation starts.
+func enable_collection() -> void:
+	_collection_enabled = true
+	print("[EvidenceManager] Evidence collection enabled")
+
+
+## Disables evidence collection. Called when investigation ends.
+func disable_collection() -> void:
+	_collection_enabled = false
+	print("[EvidenceManager] Evidence collection disabled")
+
+
+## Clears all collected evidence. Called at round start.
+func clear_evidence() -> void:
+	_evidence_by_uid.clear()
+	_initialize_type_index()
+	_evidence_by_collector.clear()
+	evidence_cleared.emit()
+	print("[EvidenceManager] All evidence cleared")
+
+
+## Syncs evidence state to a late-joining player.
+func sync_to_player(peer_id: int) -> void:
+	if not _is_server():
+		return
+
+	var all_data: Array[Dictionary] = []
+	for evidence: Evidence in _evidence_by_uid.values():
+		all_data.append(evidence.to_network_dict())
+
+	_rpc_sync_all_evidence.rpc_id(peer_id, all_data)
+
+
+# --- Internal: Evidence Management ---
+
+
+func _add_evidence(evidence: Evidence) -> void:
+	_evidence_by_uid[evidence.uid] = evidence
+
+	if not _evidence_by_type.has(evidence.type):
+		_evidence_by_type[evidence.type] = []
+	_evidence_by_type[evidence.type].append(evidence)
+
+	if not _evidence_by_collector.has(evidence.collector_id):
+		_evidence_by_collector[evidence.collector_id] = []
+	_evidence_by_collector[evidence.collector_id].append(evidence)
+
+	evidence_collected.emit(evidence)
+
+	var event_bus := _get_event_bus()
+	if event_bus:
+		if event_bus.has_signal("evidence_recorded"):
+			var type_name := EvidenceEnums.get_evidence_name(evidence.type)
+			event_bus.evidence_recorded.emit(type_name, evidence.equipment_used)
+		if event_bus.has_signal("evidence_collected"):
+			event_bus.evidence_collected.emit(evidence.uid, evidence.to_network_dict())
+
+
+func _remove_evidence(uid: String) -> void:
+	var evidence: Evidence = _evidence_by_uid.get(uid)
+	if evidence == null:
+		return
+
+	_evidence_by_uid.erase(uid)
+
+	var type_list: Array = _evidence_by_type.get(evidence.type, [])
+	type_list.erase(evidence)
+
+	var collector_list: Array = _evidence_by_collector.get(evidence.collector_id, [])
+	collector_list.erase(evidence)
+
+
+# --- Internal: Game State ---
+
+
+func _on_game_state_changed(old_state: int, new_state: int) -> void:
+	const INVESTIGATION := 3
+	const HUNT := 4
+	const LOBBY := 1
+
+	match new_state:
+		INVESTIGATION:
+			enable_collection()
+		HUNT:
+			pass
+		LOBBY:
+			clear_evidence()
+			disable_collection()
+
+	if old_state == INVESTIGATION and new_state != HUNT:
+		disable_collection()
+
+
+# --- Internal: Networking ---
+
+
+func _is_server() -> bool:
+	if not multiplayer:
+		return true
+	if not multiplayer.has_multiplayer_peer():
+		return true
+	return multiplayer.is_server()
+
+
+func _broadcast_evidence_collected(evidence: Evidence) -> void:
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		return
+
+	var data := evidence.to_network_dict()
+	_rpc_evidence_collected.rpc(data)
+
+
+func _broadcast_verification_changed(evidence: Evidence) -> void:
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		return
+
+	_rpc_verification_changed.rpc(evidence.uid, evidence.verification_state)
+
+
+# --- RPC: Client Requests ---
+
+
+func _request_collect_evidence(
+	evidence_type: EvidenceEnums.EvidenceType,
+	collector_id: int,
+	location: Vector3,
+	quality: EvidenceEnums.ReadingQuality,
+	equipment: String
+) -> void:
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		return
+
+	_rpc_request_collect.rpc_id(1, evidence_type, collector_id, location, quality, equipment)
+
+
+func _request_collect_cooperative_evidence(
+	evidence_type: EvidenceEnums.EvidenceType,
+	primary_collector: int,
+	secondary_collector: int,
+	location: Vector3,
+	quality: EvidenceEnums.ReadingQuality,
+	equipment: String
+) -> void:
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		return
+
+	_rpc_request_collect_coop.rpc_id(
+		1, evidence_type, primary_collector, secondary_collector, location, quality, equipment
+	)
+
+
+func _request_verify_evidence(uid: String, verifier_id: int) -> void:
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		return
+
+	_rpc_request_verify.rpc_id(1, uid, verifier_id)
+
+
+func _request_contest_evidence(uid: String, contester_id: int) -> void:
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		return
+
+	_rpc_request_contest.rpc_id(1, uid, contester_id)
+
+
+# --- RPC: Server Handlers ---
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_request_collect(
+	evidence_type: int,
+	collector_id: int,
+	location: Vector3,
+	quality: int,
+	equipment: String
+) -> void:
+	if not _is_server():
+		return
+
+	collect_evidence(
+		evidence_type as EvidenceEnums.EvidenceType,
+		collector_id,
+		location,
+		quality as EvidenceEnums.ReadingQuality,
+		equipment
+	)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_request_collect_coop(
+	evidence_type: int,
+	primary_collector: int,
+	secondary_collector: int,
+	location: Vector3,
+	quality: int,
+	equipment: String
+) -> void:
+	if not _is_server():
+		return
+
+	collect_cooperative_evidence(
+		evidence_type as EvidenceEnums.EvidenceType,
+		primary_collector,
+		secondary_collector,
+		location,
+		quality as EvidenceEnums.ReadingQuality,
+		equipment
+	)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_request_verify(uid: String, verifier_id: int) -> void:
+	if not _is_server():
+		return
+
+	verify_evidence(uid, verifier_id)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_request_contest(uid: String, contester_id: int) -> void:
+	if not _is_server():
+		return
+
+	contest_evidence(uid, contester_id)
+
+
+# --- RPC: Server Broadcasts ---
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_evidence_collected(data: Dictionary) -> void:
+	if _is_server():
+		return
+
+	var evidence := Evidence.from_network_dict(data)
+	_add_evidence(evidence)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_verification_changed(uid: String, new_state: int) -> void:
+	if _is_server():
+		return
+
+	var evidence: Evidence = _evidence_by_uid.get(uid)
+	if evidence:
+		evidence.verification_state = new_state as EvidenceEnums.VerificationState
+		evidence_verification_changed.emit(evidence)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_sync_all_evidence(all_data: Array) -> void:
+	if _is_server():
+		return
+
+	clear_evidence()
+	for data: Dictionary in all_data:
+		var evidence := Evidence.from_network_dict(data)
+		_add_evidence(evidence)
+
+	print("[EvidenceManager] Synced %d evidence items from server" % all_data.size())

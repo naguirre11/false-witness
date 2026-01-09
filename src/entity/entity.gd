@@ -103,6 +103,9 @@ var _is_visible: bool = false
 ## Last known position of target (for pathfinding)
 var _target_last_position: Vector3 = Vector3.ZERO
 
+## Hiding spot currently being searched (null if none).
+var _searching_hiding_spot: Node = null
+
 ## Sync data for network interpolation
 var _sync_position: Vector3 = Vector3.ZERO
 var _sync_rotation: float = 0.0
@@ -220,6 +223,12 @@ func _select_hunt_target(players: Array) -> Node:
 	return players[randi() % players.size()]
 
 
+## Returns true if this entity can ignore hiding spots and detect players inside.
+## Override in subclasses for entity-specific behavior (e.g., Wraith ignores hiding).
+func can_ignore_hiding_spots() -> bool:
+	return false
+
+
 # --- Public API ---
 
 
@@ -303,6 +312,7 @@ func on_hunt_started() -> void:
 
 ## Called by EntityManager when a hunt ends.
 func on_hunt_ended() -> void:
+	_cancel_hiding_spot_search()
 	_hunt_target = null
 	_is_aware_of_target = false
 	change_state(EntityState.ACTIVE)
@@ -477,8 +487,14 @@ func _process_hunting(delta: float) -> void:
 
 	if _hunt_timer <= 0:
 		# Hunt ended - EntityManager will call on_hunt_ended()
+		_cancel_hiding_spot_search()
 		if _manager and _manager.has_method("end_hunt"):
 			_manager.end_hunt()
+		return
+
+	# Check if we're searching a hiding spot
+	if _searching_hiding_spot and is_instance_valid(_searching_hiding_spot):
+		_process_hiding_spot_search(delta)
 		return
 
 	# Process detection and target tracking
@@ -493,9 +509,13 @@ func _process_hunting(delta: float) -> void:
 		# Lost awareness - navigate to last known position
 		navigate_to(_target_last_position)
 
-		# Clear last known position if we've reached it
+		# Check for nearby hiding spots when we reach last known position
 		if is_navigation_finished():
-			_target_last_position = Vector3.ZERO
+			var hiding_spot := _find_nearby_hiding_spot(_target_last_position)
+			if hiding_spot:
+				_start_hiding_spot_search(hiding_spot)
+			else:
+				_target_last_position = Vector3.ZERO
 
 	_process_hunting_behavior(delta)
 	_move_along_path(delta)
@@ -643,3 +663,114 @@ func is_aware_of_target() -> bool:
 ## Gets the last known position of the target.
 func get_last_known_target_position() -> Vector3:
 	return _target_last_position
+
+
+## Returns the hiding spot currently being searched, or null.
+func get_searching_hiding_spot() -> Node:
+	return _searching_hiding_spot
+
+
+## Returns true if entity is currently searching a hiding spot.
+func is_searching_hiding_spot() -> bool:
+	return _searching_hiding_spot != null and is_instance_valid(_searching_hiding_spot)
+
+
+# --- Hiding Spot Methods ---
+
+
+## Finds a hiding spot near the given position.
+## Returns the nearest hiding spot within search radius, or null if none.
+func _find_nearby_hiding_spot(position: Vector3, search_radius: float = 5.0) -> Node:
+	var hiding_spots := get_tree().get_nodes_in_group("hiding_spots")
+
+	var nearest_spot: Node = null
+	var nearest_distance := search_radius
+
+	for spot in hiding_spots:
+		if not is_instance_valid(spot) or not spot is Node3D:
+			continue
+
+		# Skip spots we can ignore (entity-specific)
+		if can_ignore_hiding_spots():
+			continue
+
+		var distance: float = (spot as Node3D).global_position.distance_to(position)
+		if distance < nearest_distance:
+			nearest_distance = distance
+			nearest_spot = spot
+
+	return nearest_spot
+
+
+## Starts searching a hiding spot for hidden players.
+func _start_hiding_spot_search(spot: Node) -> void:
+	if not is_instance_valid(spot):
+		return
+
+	_searching_hiding_spot = spot
+
+	# Tell the hiding spot we're searching it
+	if spot.has_method("start_entity_search"):
+		spot.start_entity_search(self)
+
+	# Navigate to the hiding spot entrance
+	if spot is Node3D:
+		navigate_to((spot as Node3D).global_position)
+
+
+## Processes hiding spot search each frame.
+func _process_hiding_spot_search(_delta: float) -> void:
+	if not _searching_hiding_spot or not is_instance_valid(_searching_hiding_spot):
+		_searching_hiding_spot = null
+		return
+
+	var spot := _searching_hiding_spot
+
+	# Check if search is complete
+	if spot.has_method("is_being_searched") and not spot.is_being_searched():
+		# Search ended (timer expired)
+		_end_hiding_spot_search(false)
+		return
+
+	# Check if we can now detect players inside (door opened)
+	if spot.has_method("can_entity_detect_inside") and spot.can_entity_detect_inside():
+		# Door opened! Check for players inside
+		if spot.has_method("has_occupants") and spot.has_occupants():
+			# Found them! Resume normal detection
+			_end_hiding_spot_search(true)
+			return
+
+	# Stay at hiding spot entrance during search
+	if spot is Node3D:
+		var spot_pos: Vector3 = (spot as Node3D).global_position
+		var dist := global_position.distance_to(spot_pos)
+
+		# Move towards spot if not close enough
+		if dist > 1.5:
+			navigate_to(spot_pos)
+			_move_along_path(_delta)
+
+
+## Ends hiding spot search.
+## If found_player is true, will resume detection to find the revealed player.
+func _end_hiding_spot_search(found_player: bool) -> void:
+	if _searching_hiding_spot and is_instance_valid(_searching_hiding_spot):
+		if _searching_hiding_spot.has_method("cancel_search"):
+			_searching_hiding_spot.cancel_search()
+
+	_searching_hiding_spot = null
+
+	if found_player:
+		# Player was revealed - immediately check detection again
+		_update_hunt_detection()
+	else:
+		# Didn't find anyone - clear last known position and wander
+		_target_last_position = Vector3.ZERO
+
+
+## Cancels any active hiding spot search (called when hunt ends).
+func _cancel_hiding_spot_search() -> void:
+	if _searching_hiding_spot and is_instance_valid(_searching_hiding_spot):
+		if _searching_hiding_spot.has_method("cancel_search"):
+			_searching_hiding_spot.cancel_search()
+	_searching_hiding_spot = null

@@ -61,10 +61,15 @@ static func is_player_in_range(entity_pos: Vector3, player: Node) -> bool:
 ## Checks if entity has line-of-sight to player.
 ## Uses raycast from entity eye position to player eye position.
 ## Returns true if there are no obstacles blocking the view.
+## Also checks if player is protected by a hiding spot.
 static func has_line_of_sight(
 	entity: Node3D, player: Node, space_state: PhysicsDirectSpaceState3D
 ) -> bool:
 	if not is_instance_valid(entity) or not is_instance_valid(player):
+		return false
+
+	# Check if player is protected by a hiding spot
+	if _is_player_protected_by_hiding_spot(entity, player):
 		return false
 
 	var entity_eye := entity.global_position + Vector3.UP * EYE_HEIGHT_OFFSET
@@ -224,3 +229,49 @@ static func _player_is_using_voice(player: Node) -> bool:
 
 	# Placeholder - voice chat integration (FW-014) not yet implemented
 	return false
+
+
+## Checks if player is protected by a hiding spot with a closed door.
+## Returns true if player is inside a hiding spot that blocks entity detection.
+static func _is_player_protected_by_hiding_spot(entity: Node3D, player: Node) -> bool:
+	# Get player ID
+	var player_id := _get_player_id(player)
+	if player_id < 0:
+		return false
+
+	# Check if entity can ignore hiding spots
+	if entity.has_method("can_ignore_hiding_spots") and entity.can_ignore_hiding_spots():
+		return false
+
+	# Check all hiding spots for this player
+	if not player.is_inside_tree():
+		return false
+
+	var hiding_spots := player.get_tree().get_nodes_in_group("hiding_spots")
+
+	for spot in hiding_spots:
+		if not is_instance_valid(spot):
+			continue
+
+		# Check if player is in this spot
+		if spot.has_method("has_player") and spot.has_player(player_id):
+			# Check if spot is protecting occupants
+			if spot.has_method("is_protecting_occupants") and spot.is_protecting_occupants():
+				return true
+
+	return false
+
+
+## Gets player ID from player node.
+static func _get_player_id(player: Node) -> int:
+	if player.has_method("get_peer_id"):
+		return player.get_peer_id()
+	if player.get("peer_id") != null:
+		return player.peer_id
+	if player.has_method("get_player_id"):
+		return player.get_player_id()
+	if player.get("player_id") != null:
+		return player.player_id
+	if player.is_inside_tree():
+		return player.get_multiplayer_authority()
+	return -1

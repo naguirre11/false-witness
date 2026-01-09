@@ -10,6 +10,7 @@ class MockPlayer:
 
 	var equipment_manager: MockEquipmentManager = null
 	var voice_active: bool = false
+	var peer_id: int = 1
 
 	func _init() -> void:
 		equipment_manager = MockEquipmentManager.new()
@@ -19,6 +20,9 @@ class MockPlayer:
 
 	func is_voice_active() -> bool:
 		return voice_active
+
+	func get_peer_id() -> int:
+		return peer_id
 
 
 class MockEquipmentManager:
@@ -290,3 +294,124 @@ func test_find_nearest_player_includes_has_line_of_sight_field() -> void:
 
 	assert_has(result, "has_line_of_sight")
 	assert_false(result.has_line_of_sight, "Without space_state, should be false")
+
+
+# --- Hiding Spot Protection Tests ---
+
+
+class MockHidingSpot:
+	extends Node3D
+
+	var _occupants: Array[int] = []
+	var _protecting: bool = false
+
+	func _init() -> void:
+		add_to_group("hiding_spots")
+
+	func has_player(player_id: int) -> bool:
+		return player_id in _occupants
+
+	func is_protecting_occupants() -> bool:
+		return _protecting
+
+	func add_occupant(player_id: int) -> void:
+		if player_id not in _occupants:
+			_occupants.append(player_id)
+
+	func set_protecting(protecting: bool) -> void:
+		_protecting = protecting
+
+
+class MockEntityWithIgnore:
+	extends Node3D
+
+	var _ignore_hiding: bool = false
+
+	func can_ignore_hiding_spots() -> bool:
+		return _ignore_hiding
+
+
+func test_player_protected_by_hiding_spot_not_detected() -> void:
+	# Clear any existing hiding spots from previous tests
+	for spot in get_tree().get_nodes_in_group("hiding_spots"):
+		spot.remove_from_group("hiding_spots")
+
+	# Create a hiding spot with player inside
+	var hiding_spot := MockHidingSpot.new()
+	add_child(hiding_spot)
+
+	# Player must have a peer_id for detection
+	_player.peer_id = 42
+	hiding_spot.add_occupant(42)
+	hiding_spot.set_protecting(true)
+
+	# Test protection check
+	var protected := HuntDetection._is_player_protected_by_hiding_spot(_entity, _player)
+	assert_true(protected, "Player in protected hiding spot should be protected")
+
+	hiding_spot.queue_free()
+
+
+func test_player_not_in_hiding_spot_not_protected() -> void:
+	# Clear any existing hiding spots from previous tests
+	for spot in get_tree().get_nodes_in_group("hiding_spots"):
+		spot.remove_from_group("hiding_spots")
+
+	var hiding_spot := MockHidingSpot.new()
+	add_child(hiding_spot)
+
+	hiding_spot.set_protecting(true)
+	# Player NOT added to occupants
+
+	var protected := HuntDetection._is_player_protected_by_hiding_spot(_entity, _player)
+	assert_false(protected, "Player not in hiding spot should not be protected")
+
+	hiding_spot.queue_free()
+
+
+func test_player_in_unprotected_hiding_spot_not_protected() -> void:
+	# Clear any existing hiding spots from previous tests
+	for spot in get_tree().get_nodes_in_group("hiding_spots"):
+		spot.remove_from_group("hiding_spots")
+
+	var hiding_spot := MockHidingSpot.new()
+	add_child(hiding_spot)
+
+	_player.peer_id = 42
+	hiding_spot.add_occupant(42)
+	hiding_spot.set_protecting(false)  # Door is open
+
+	var protected := HuntDetection._is_player_protected_by_hiding_spot(_entity, _player)
+	assert_false(protected, "Player in unprotected hiding spot should not be protected")
+
+	hiding_spot.queue_free()
+
+
+func test_entity_that_ignores_hiding_spots_detects_protected_player() -> void:
+	# Clear any existing hiding spots from previous tests
+	for spot in get_tree().get_nodes_in_group("hiding_spots"):
+		spot.remove_from_group("hiding_spots")
+
+	var hiding_spot := MockHidingSpot.new()
+	add_child(hiding_spot)
+
+	_player.peer_id = 42
+	hiding_spot.add_occupant(42)
+	hiding_spot.set_protecting(true)
+
+	# Use entity that ignores hiding spots
+	var ignore_entity := MockEntityWithIgnore.new()
+	ignore_entity._ignore_hiding = true
+	add_child(ignore_entity)
+
+	var protected := HuntDetection._is_player_protected_by_hiding_spot(ignore_entity, _player)
+	assert_false(protected, "Entity that ignores hiding spots should detect player")
+
+	hiding_spot.queue_free()
+	ignore_entity.queue_free()
+
+
+func test_get_player_id_extracts_peer_id() -> void:
+	_player.peer_id = 123
+	var player_id := HuntDetection._get_player_id(_player)
+	assert_eq(player_id, 123)

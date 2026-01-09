@@ -1,3 +1,4 @@
+# gdlint: ignore=max-public-methods
 extends GutTest
 ## Tests for Entity base class.
 
@@ -422,3 +423,132 @@ func test_speed_depends_on_awareness_during_hunt() -> void:
 	# Aware = fast speed
 	_entity.set_aware_of_target(true)
 	assert_eq(_entity.get_current_speed(), _entity.hunt_aware_speed)
+
+
+# --- Hiding Spot Tests ---
+
+
+func test_can_ignore_hiding_spots_returns_false_by_default() -> void:
+	assert_false(_entity.can_ignore_hiding_spots())
+
+
+func test_is_searching_hiding_spot_false_initially() -> void:
+	assert_false(_entity.is_searching_hiding_spot())
+	assert_null(_entity.get_searching_hiding_spot())
+
+
+class MockHidingSpotForEntity:
+	extends Node3D
+
+	var _search_started: bool = false
+	var _search_cancelled: bool = false
+
+	func _init() -> void:
+		add_to_group("hiding_spots")
+
+	func start_entity_search(_entity: Node) -> void:
+		_search_started = true
+
+	func cancel_search() -> void:
+		_search_cancelled = true
+
+	func is_being_searched() -> bool:
+		return _search_started and not _search_cancelled
+
+
+func test_find_nearby_hiding_spot_finds_spot_in_range() -> void:
+	# Clear any existing hiding spots from previous tests
+	for spot in get_tree().get_nodes_in_group("hiding_spots"):
+		spot.remove_from_group("hiding_spots")
+
+	var hiding_spot := MockHidingSpotForEntity.new()
+	add_child(hiding_spot)
+	hiding_spot.global_position = Vector3(3, 0, 0)
+
+	var found := _entity._find_nearby_hiding_spot(Vector3(0, 0, 0), 5.0)
+
+	assert_not_null(found, "Should find hiding spot within range")
+	assert_eq(found, hiding_spot)
+
+	hiding_spot.queue_free()
+
+
+func test_find_nearby_hiding_spot_ignores_out_of_range() -> void:
+	# Clear any existing hiding spots from previous tests
+	for spot in get_tree().get_nodes_in_group("hiding_spots"):
+		spot.remove_from_group("hiding_spots")
+
+	var hiding_spot := MockHidingSpotForEntity.new()
+	add_child(hiding_spot)
+	# Must set position after adding to tree
+	hiding_spot.global_position = Vector3(10, 0, 0)
+
+	# Position entity at origin
+	_entity.global_position = Vector3.ZERO
+
+	var found := _entity._find_nearby_hiding_spot(Vector3(0, 0, 0), 5.0)
+
+	assert_null(found, "Should not find hiding spot out of range")
+
+	hiding_spot.queue_free()
+
+
+func test_start_hiding_spot_search_sets_searching_state() -> void:
+	var hiding_spot := MockHidingSpotForEntity.new()
+	add_child(hiding_spot)
+
+	_entity._start_hiding_spot_search(hiding_spot)
+
+	assert_true(_entity.is_searching_hiding_spot())
+	assert_eq(_entity.get_searching_hiding_spot(), hiding_spot)
+
+	hiding_spot.queue_free()
+
+
+func test_start_hiding_spot_search_notifies_spot() -> void:
+	var hiding_spot := MockHidingSpotForEntity.new()
+	add_child(hiding_spot)
+
+	_entity._start_hiding_spot_search(hiding_spot)
+
+	assert_true(hiding_spot._search_started)
+
+	hiding_spot.queue_free()
+
+
+func test_cancel_hiding_spot_search_clears_state() -> void:
+	var hiding_spot := MockHidingSpotForEntity.new()
+	add_child(hiding_spot)
+
+	_entity._start_hiding_spot_search(hiding_spot)
+	_entity._cancel_hiding_spot_search()
+
+	assert_false(_entity.is_searching_hiding_spot())
+	assert_null(_entity.get_searching_hiding_spot())
+
+	hiding_spot.queue_free()
+
+
+func test_cancel_hiding_spot_search_notifies_spot() -> void:
+	var hiding_spot := MockHidingSpotForEntity.new()
+	add_child(hiding_spot)
+
+	_entity._start_hiding_spot_search(hiding_spot)
+	_entity._cancel_hiding_spot_search()
+
+	assert_true(hiding_spot._search_cancelled)
+
+	hiding_spot.queue_free()
+
+
+func test_on_hunt_ended_cancels_hiding_spot_search() -> void:
+	var hiding_spot := MockHidingSpotForEntity.new()
+	add_child(hiding_spot)
+
+	_entity.on_hunt_started()
+	_entity._start_hiding_spot_search(hiding_spot)
+	_entity.on_hunt_ended()
+
+	assert_false(_entity.is_searching_hiding_spot())
+
+	hiding_spot.queue_free()

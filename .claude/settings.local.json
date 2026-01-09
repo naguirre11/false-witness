@@ -30,7 +30,18 @@
       "Bash(\"C:/Users/vinco/Projects/tooling/Godot_v4.4.1-stable_win64_console.exe\" --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/test_network_manager.gd)",
       "Bash(godot:*)",
       "Bash(cmd.exe /c \"where godot 2>&1\")",
-      "Bash(cmd.exe /c \"dir /s /b C:\\\\*.exe 2>nul | findstr -i godot\")"
+      "Bash(cmd.exe /c \"dir /s /b C:\\\\*.exe 2>nul | findstr -i godot\")",
+      "Bash($env:GODOT:*)",
+      "Bash($GODOT:*)",
+      "Bash(powershell:*)",
+      "Bash(pwsh:*)",
+      "Bash(cc_workflow/scripts/session-context.ps1)",
+      "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless --import)",
+      "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gprefix=test_ -gsuffix=.gd -gexit)",
+      "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/test_emf_source.gd -gexit)",
+      "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=test_temperature_zone.gd -gtest=test_thermometer.gd -gexit)",
+      "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gprefix=test_temperature -gsuffix=.gd -gexit)",
+      "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/test_calibrator.gd -gexit)"
     ]
   }
 }

@@ -27,6 +27,7 @@ false_witness/
 │   │   ├── steam_manager.gd  # Steam initialization
 │   │   └── network_manager.gd # Lobby & P2P networking
 │   ├── equipment/            # Equipment system
+│   ├── evidence/             # Evidence system (collection, tracking)
 │   ├── interaction/          # Interaction system
 │   └── player/              # Player systems
 ├── tests/                    # GUT test files
@@ -50,6 +51,7 @@ false_witness/
 | 2 | NetworkManager | `src/core/network_manager.gd` | Dual backend (Steam + ENet) networking |
 | 3 | EventBus | `src/core/managers/event_bus.gd` | Global signal hub |
 | 4 | GameManager | `src/core/managers/game_manager.gd` | Game state machine |
+| 5 | EvidenceManager | `src/evidence/evidence_manager.gd` | Evidence collection and tracking |
 
 ### Source Code Structure
 
@@ -71,12 +73,19 @@ src/
 │   ├── crucifix.gd           # Crucifix hunt prevention item
 │   ├── sage_bundle.gd        # Sage Bundle entity blinding item
 │   └── salt.gd               # Salt footstep detection item
+├── evidence/
+│   ├── evidence_enums.gd     # Evidence type/category/trust enums
+│   ├── evidence.gd           # Evidence resource class
+│   └── evidence_manager.gd   # Evidence collection autoload
 ├── interaction/
 │   ├── interactable.gd       # Base class for interactable objects
 │   ├── interaction_manager.gd # Raycast detection and input handling
 │   └── interaction_prompt_ui.gd # UI component for interaction prompts
-└── player/
-    └── player_controller.gd  # First-person movement, look, sprint, crouch
+├── player/
+│   └── player_controller.gd  # First-person movement, look, sprint, crouch
+└── ui/
+    ├── evidence_board.gd     # Evidence board panel (displays all evidence)
+    └── evidence_slot.gd      # Individual evidence type slot
 ```
 
 ### Scene Files
@@ -86,7 +95,9 @@ scenes/
 ├── player/
 │   └── player.tscn           # Player scene (CharacterBody3D + managers)
 └── ui/
-    └── interaction_prompt.tscn # Interaction prompt UI
+    ├── interaction_prompt.tscn # Interaction prompt UI
+    ├── evidence_board.tscn     # Evidence board panel
+    └── evidence_slot.tscn      # Evidence slot component
 ```
 
 ### Test Files
@@ -99,16 +110,21 @@ tests/
 ├── test_game_manager_timer.gd # GameManager timer tests (14 tests)
 ├── test_network_manager.gd    # NetworkManager + PlayerData tests (17 tests)
 ├── test_player_controller.gd  # PlayerController tests (45 tests)
-├── test_interactable.gd       # Interactable base class tests (30 tests)
+├── test_interactable.gd       # Interactable base class tests (24 tests)
 ├── test_interaction_manager.gd # InteractionManager tests (24 tests)
-├── test_interaction_prompt_ui.gd # InteractionPromptUI tests (12 tests)
-├── test_equipment.gd          # Equipment base class tests (36 tests)
-├── test_equipment_slot.gd     # EquipmentSlot tests (30 tests)
-├── test_equipment_manager.gd  # EquipmentManager tests (40 tests)
+├── test_interaction_prompt_ui.gd # InteractionPromptUI tests (13 tests)
+├── test_equipment.gd          # Equipment base class tests (30 tests)
+├── test_equipment_slot.gd     # EquipmentSlot tests (36 tests)
+├── test_equipment_manager.gd  # EquipmentManager tests (41 tests)
 ├── test_protection_item.gd    # ProtectionItem tests (29 tests)
 ├── test_crucifix.gd           # Crucifix tests (25 tests)
 ├── test_sage_bundle.gd        # SageBundle tests (25 tests)
-└── test_salt.gd               # Salt tests (32 tests)
+├── test_salt.gd               # Salt tests (32 tests)
+├── test_evidence.gd           # Evidence resource tests (42 tests)
+├── test_evidence_enums.gd     # EvidenceEnums tests (51 tests)
+├── test_evidence_manager.gd   # EvidenceManager tests (47 tests)
+├── test_evidence_board.gd     # EvidenceBoard UI tests (20 tests)
+└── test_evidence_slot.gd      # EvidenceSlot UI tests (14 tests)
 ```
 
 ## Key Systems
@@ -236,6 +252,58 @@ Protection items provide counterplay against entity hunts.
 - Reveals entity footsteps (UV-visible)
 - Wraith ignores salt (behavioral tell)
 
+### Evidence System
+
+Server-authoritative evidence collection and tracking for investigation gameplay.
+
+**Evidence Categories (EvidenceCategory enum):**
+- READILY_APPARENT - Visible to all nearby players (visual/physical manifestation)
+- EQUIPMENT_DERIVED - Requires equipment to detect (EMF, thermometer, etc.)
+- TRIGGERED_TEST - Requires player setup and entity response (ghost writing)
+- BEHAVIOR_BASED - Observed through entity actions during hunts
+
+**Evidence Types (8 total):**
+| Type | Category | Trust Level | Equipment |
+|------|----------|-------------|-----------|
+| FREEZING_TEMPERATURE | Equipment-Derived | HIGH | Thermometer |
+| EMF_SIGNATURE | Equipment-Derived | HIGH | EMF Reader |
+| PRISM_READING | Equipment-Derived | LOW | Spectral Prism (cooperative) |
+| AURA_PATTERN | Equipment-Derived | VARIABLE | Dowsing Rods + Imager (cooperative) |
+| GHOST_WRITING | Triggered Test | SABOTAGE_RISK | Ghost Writing Book |
+| VISUAL_MANIFESTATION | Readily-Apparent | HIGH | None |
+| PHYSICAL_INTERACTION | Readily-Apparent | HIGH | None |
+| HUNT_BEHAVIOR | Behavior-Based | UNFALSIFIABLE | None |
+
+**Reading Quality:**
+- STRONG - Definitive evidence (proper conditions met)
+- WEAK - Suggestive only (suboptimal conditions)
+
+**Trust Levels:**
+- UNFALSIFIABLE - Cannot be faked (all players witness it)
+- HIGH - Difficult to fake (shared displays, omission only)
+- VARIABLE - Depends on collection method (one party can lie)
+- LOW - Easy to dispute (both parties can lie)
+- SABOTAGE_RISK - Can be corrupted before collection
+
+**Verification States:**
+- UNVERIFIED - No second opinion yet
+- VERIFIED - Corroborated by another player
+- CONTESTED - Conflicting reports exist
+
+**EvidenceManager Signals:**
+- `evidence_collected(evidence: Evidence)` - New evidence added
+- `evidence_verification_changed(evidence: Evidence)` - Verification state changed
+- `evidence_contested(evidence: Evidence, contesting_player_id: int)` - Dispute raised
+- `evidence_cleared` - All evidence removed (new round)
+
+**Key Methods:**
+- `collect_evidence(type, collector_id, location, quality, equipment)` - Collect evidence
+- `collect_cooperative_evidence(type, primary, secondary, location, quality, equipment)` - Cooperative
+- `verify_evidence(uid, verifier_id)` - Mark as verified
+- `contest_evidence(uid, contester_id)` - Dispute evidence
+- `get_evidence_by_type(type)` / `get_evidence_by_collector(id)` - Queries
+- `get_verified_evidence()` / `get_contested_evidence()` / `get_definitive_evidence()` - Filtered queries
+
 ### EventBus Signals
 
 **Game State:**
@@ -250,6 +318,9 @@ Protection items provide counterplay against entity hunts.
 **Evidence:**
 - `evidence_detected(evidence_type: String, location: Vector3, strength: float)`
 - `evidence_recorded(evidence_type: String, equipment_type: String)`
+- `evidence_collected(evidence_uid: String, evidence_data: Dictionary)`
+- `evidence_verification_changed(evidence_uid: String, new_state: int)`
+- `evidence_contested(evidence_uid: String, contester_id: int)`
 
 **Entity:**
 - `hunt_starting(entity_position: Vector3, entity: Node)` - Pre-hunt, allows prevention
@@ -321,3 +392,4 @@ Protection items provide counterplay against entity hunts.
 | interact | E |
 | use_equipment | Left Mouse |
 | toggle_flashlight | F |
+| toggle_evidence_board | Tab |

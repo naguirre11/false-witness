@@ -52,3 +52,12 @@ gut_results.xml
 
 # Local development overrides
 *.local
+
+# Claude Code settings (may contain secrets)
+.claude/settings.json
+
+# Temporary test output
+test_output.txt
+
+# Bug reports (not project-specific)
+claude-code-bug-report.md

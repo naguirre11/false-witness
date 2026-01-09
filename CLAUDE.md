@@ -20,6 +20,7 @@ This project uses custom Claude commands defined in `COMMANDS.md`:
 | `%newtickets` | `%n` | Evaluate project state, create new tickets, update prioritization |
 | `%eval` | `%e` | Update PROJECT_STRUCTURE.md with session changes |
 | `%describe` | `%d` | Update PROJECT_STATE.md with current project analysis |
+| `%flowchart` | `%f` | Follow FLOWCHART.md decision tree for systematic workflow |
 
 Shorthand markers (from `SHORTHAND.md`):
 - `^future` / `^f`: Document something for future Claude instances
@@ -34,7 +35,14 @@ Tickets are managed in `tickets/` with the following workflow:
 - `tickets/for_review/` - Completed work awaiting review
 - `tickets/completed/` - Finished tickets
 
-Prioritization is tracked in `tickets/PRIORITIZATION.md`.
+Status tracking:
+- `tickets/STATUS.md` - Quick ticket-to-status lookup (updated by scripts)
+- `tickets/PRIORITIZATION_ROADMAP.md` - Detailed planning, dependencies, phases
+
+To move tickets, use the PowerShell script:
+```powershell
+cc_workflow/scripts/ticket-move.ps1 FW-024 for_review
+```
 
 ## Godot 4.4 Technical Requirements
 
@@ -60,12 +68,11 @@ Avoid using these as function names: `assert`, `print`, `str`, `to_string`, `dup
 
 ## Build Commands
 
+**Windows Shell**: Prefer PowerShell over CMD or Git Bash. Use `2>$null` (not `2>nul`) to suppress stderr, and `$env:VARNAME` for environment variables. Git Bash doesn't recognize Windows reserved names like `nul`, which creates literal files instead of discarding output.
+
 Godot executable is located at `../tooling/Godot_v4.4.1-stable_win64_console.exe` (relative to project root).
 
 ```bash
-# Set alias for convenience (optional)
-GODOT="../tooling/Godot_v4.4.1-stable_win64_console.exe"
-
 # Import/reimport project (run this after adding new scripts)
 $GODOT --headless --import
 
@@ -247,7 +254,6 @@ Two files provide fast context for new sessions:
 ## Design Philosophy
 
 
-
 ## Core Development Principles
 
 ### Single-Agent with Structured Thinking
@@ -269,7 +275,8 @@ Before implementing any feature:
 
 ```
 tickets/
-├── PRIORITIZATION.md # Ordered queue of next tickets - UPDATE THIS
+├── STATUS.md            # Quick ticket status lookup
+├── PRIORITIZATION_ROADMAP.md # Detailed planning and dependencies
 ├── ready/           # Tickets ready to be worked on
 ├── dev_in_progress/ # Tickets actively being worked on
 ├── for_review/      # Completed work awaiting review
@@ -313,13 +320,13 @@ created: 2026-01-05
 
 ### Ticket Lifecycle
 
-1. **Check `PRIORITIZATION.md`** - Pick the ticket marked as NEXT (or highest unblocked)
+1. **Check `STATUS.md`** - Pick the ticket marked as NEXT (or highest unblocked in `PRIORITIZATION_ROADMAP.md`)
 2. **Move to `in_progress/`** (only ONE ticket at a time)
 3. **Create/update handoff document** in `handoffs/feature_contexts/` if complex
 4. **Implement** following the structured thinking phases
 5. **Move to `for_review/`** when acceptance criteria are met
 6. **Add implementation notes** to the ticket documenting what was done. Provide testing scripts and evidence of success. NEVER try to hack tests or acceptance criteria.
-7. **Update `PRIORITIZATION.md`** - Mark completed, set new NEXT, update dependency status
+7. **Update `STATUS.md`** - Use `cc_workflow/scripts/ticket-move.ps1` or update manually
 8. **Commit and push** all changes to git with a descriptive commit message (see Git Conventions below)
 9. Human reviews and moves to `completed/` or back to `ready/` with feedback
 

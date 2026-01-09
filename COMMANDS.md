@@ -48,4 +48,14 @@ These are custom commands to be used whenever a particular function starting wit
 
 ## %describe / %d
 
-   Analyze the current state of the project and update PROJECT_STATE.md. In order to do this, you should look at previous docs to understand the high-level goals. You should look through all the tickets that have been completed or are in review. Analyze what's still missing to get to the next milestone (MVP, playtest, etc.). 
+   Analyze the current state of the project and update PROJECT_STATE.md. In order to do this, you should look at previous docs to understand the high-level goals. You should look through all the tickets that have been completed or are in review. Analyze what's still missing to get to the next milestone (MVP, playtest, etc.).
+
+## %flowchart / %f
+
+   Read and follow the decision tree in `FLOWCHART.md`. This guides you through:
+   1. Checking the latest handoff for emergencies or non-ticketed work
+   2. Selecting the correct ticket (active in dev_in_progress, or NEXT from STATUS.md)
+   3. Verifying dependencies and blockers before starting
+   4. Implementation, testing, completion, and handoff procedures
+
+   Use this command at the start of a session to ensure systematic, foolproof workflow. 

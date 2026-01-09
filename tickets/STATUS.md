@@ -2,7 +2,7 @@
 
 Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move.ps1`.
 
-**NEXT**: FW-038b-dowsing-rods
+**NEXT**: FW-038c-aura-imager
 
 | Ticket | Title | Status |
 |--------|-------|--------|
@@ -36,7 +36,7 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-037c-lens-reader-unit | Lens Reader Unit | for_review |
 | FW-038-dowsing-aura-imager | Dowsing Rods + Aura Imager (Epic) | ready |
 | FW-038a-aura-equipment-base | Aura Equipment Base | for_review |
-| FW-038b-dowsing-rods | Dowsing Rods Unit | ready |
+| FW-038b-dowsing-rods | Dowsing Rods Unit | for_review |
 | FW-038c-aura-imager | Aura Imager Unit | ready |
 | FW-039-ghost-writing-book | Ghost Writing Book (triggered test) | ready |
 | FW-040-readily-apparent-evidence | Readily-Apparent Evidence system | ready |

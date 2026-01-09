@@ -29,9 +29,9 @@ signal entity_visibility_changed(is_visible: bool)
 
 ## Entity behavior states
 enum EntityState {
-	DORMANT,      ## Passive state - may cause environmental effects
-	ACTIVE,       ## Moving around - occasional interactions
-	HUNTING,      ## Actively chasing players
+	DORMANT,  ## Passive state - may cause environmental effects
+	ACTIVE,  ## Moving around - occasional interactions
+	HUNTING,  ## Actively chasing players
 	MANIFESTING,  ## Visible manifestation (can be observed/photographed)
 }
 
@@ -287,8 +287,12 @@ func change_state(new_state: EntityState) -> void:
 	_enter_state(new_state)
 
 	state_changed.emit(old_state, new_state)
-	print("[Entity:%s] State: %s -> %s" % [entity_type, _state_to_string(old_state),
-		_state_to_string(new_state)])
+	print(
+		(
+			"[Entity:%s] State: %s -> %s"
+			% [entity_type, _state_to_string(old_state), _state_to_string(new_state)]
+		)
+	)
 
 
 ## Called by EntityManager when a hunt starts.
@@ -477,10 +481,21 @@ func _process_hunting(delta: float) -> void:
 			_manager.end_hunt()
 		return
 
-	# Update target position if we have one
-	if _hunt_target and is_instance_valid(_hunt_target) and _hunt_target is Node3D:
-		_target_last_position = (_hunt_target as Node3D).global_position
+	# Process detection and target tracking
+	_update_hunt_detection()
+
+	# Navigate to target or last known position
+	if _is_aware_of_target and _hunt_target and is_instance_valid(_hunt_target):
+		if _hunt_target is Node3D:
+			_target_last_position = (_hunt_target as Node3D).global_position
 		navigate_to(_target_last_position)
+	elif _target_last_position != Vector3.ZERO:
+		# Lost awareness - navigate to last known position
+		navigate_to(_target_last_position)
+
+		# Clear last known position if we've reached it
+		if is_navigation_finished():
+			_target_last_position = Vector3.ZERO
 
 	_process_hunting_behavior(delta)
 	_move_along_path(delta)
@@ -549,3 +564,82 @@ func _state_to_string(state: EntityState) -> String:
 		EntityState.MANIFESTING:
 			return "Manifesting"
 	return "Unknown"
+
+
+## Updates hunt detection - checks for players in range and line of sight.
+func _update_hunt_detection() -> void:
+	var players := _get_alive_players()
+	if players.is_empty():
+		return
+
+	var space_state := get_world_3d().direct_space_state
+
+	# If we have a target, check if we still detect them
+	if _hunt_target and is_instance_valid(_hunt_target):
+		var in_range := HuntDetection.is_player_in_range(global_position, _hunt_target)
+		var has_los := false
+
+		if in_range:
+			has_los = HuntDetection.has_line_of_sight(self, _hunt_target, space_state)
+
+		if has_los:
+			# Maintain awareness
+			_is_aware_of_target = true
+		elif in_range and _is_aware_of_target:
+			# Lost LoS but still in range - record last known position
+			if _hunt_target is Node3D:
+				_target_last_position = (_hunt_target as Node3D).global_position
+			_is_aware_of_target = false
+		elif not in_range:
+			# Completely lost target - transition to searching
+			if _is_aware_of_target and _hunt_target is Node3D:
+				_target_last_position = (_hunt_target as Node3D).global_position
+			_is_aware_of_target = false
+	else:
+		# No target - find nearest detectable player
+		var detection := HuntDetection.find_nearest_player(self, players, space_state)
+		if not detection.is_empty():
+			_hunt_target = detection.player
+			_is_aware_of_target = detection.has_line_of_sight
+			if _hunt_target is Node3D:
+				_target_last_position = (_hunt_target as Node3D).global_position
+
+
+## Gets all alive players for detection checks.
+## Override in subclasses for entity-specific targeting (e.g., Banshee).
+func _get_alive_players() -> Array:
+	# Try to get players from PlayerManager autoload
+	if has_node("/root/PlayerManager"):
+		var player_manager := get_node("/root/PlayerManager")
+		if player_manager.has_method("get_alive_players"):
+			return player_manager.get_alive_players()
+		if player_manager.has_method("get_all_players"):
+			return player_manager.get_all_players()
+
+	# Fallback: find players in scene tree
+	var players: Array = []
+	var player_group := get_tree().get_nodes_in_group("players")
+	for player in player_group:
+		# Filter out dead players if they have is_alive property
+		if player.get("is_alive") == false:
+			continue
+		players.append(player)
+
+	return players
+
+
+## Gets the detection radius for the current target.
+func get_target_detection_radius() -> float:
+	if _hunt_target and is_instance_valid(_hunt_target):
+		return HuntDetection.get_detection_radius(_hunt_target)
+	return HuntDetection.BASE_DETECTION_RADIUS
+
+
+## Returns true if entity is aware of target's current position.
+func is_aware_of_target() -> bool:
+	return _is_aware_of_target
+
+
+## Gets the last known position of the target.
+func get_last_known_target_position() -> Vector3:
+	return _target_last_position

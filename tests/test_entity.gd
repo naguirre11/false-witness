@@ -1,7 +1,6 @@
 extends GutTest
 ## Tests for Entity base class.
 
-
 # --- Test Helpers ---
 
 var _entity: Entity = null
@@ -57,10 +56,11 @@ func test_change_state_updates_state() -> void:
 
 func test_change_state_emits_signal() -> void:
 	var signal_received := {"called": false, "old": -1, "new": -1}
-	_entity.state_changed.connect(func(old: Entity.EntityState, new: Entity.EntityState):
-		signal_received["called"] = true
-		signal_received["old"] = old
-		signal_received["new"] = new
+	_entity.state_changed.connect(
+		func(old: Entity.EntityState, new: Entity.EntityState):
+			signal_received["called"] = true
+			signal_received["old"] = old
+			signal_received["new"] = new
 	)
 
 	_entity.change_state(Entity.EntityState.ACTIVE)
@@ -72,9 +72,7 @@ func test_change_state_emits_signal() -> void:
 
 func test_change_state_to_same_state_does_nothing() -> void:
 	var signal_received := {"count": 0}
-	_entity.state_changed.connect(func(_old, _new):
-		signal_received["count"] += 1
-	)
+	_entity.state_changed.connect(func(_old, _new): signal_received["count"] += 1)
 
 	_entity.change_state(Entity.EntityState.DORMANT)
 
@@ -192,9 +190,10 @@ func test_manifestation_cooldown_prevents_immediate_remanifest() -> void:
 
 func test_visibility_changed_signal_emitted() -> void:
 	var signal_received := {"called": false, "visible": false}
-	_entity.entity_visibility_changed.connect(func(is_visible: bool):
-		signal_received["called"] = true
-		signal_received["visible"] = is_visible
+	_entity.entity_visibility_changed.connect(
+		func(is_visible: bool):
+			signal_received["called"] = true
+			signal_received["visible"] = is_visible
 	)
 
 	_entity.change_state(Entity.EntityState.ACTIVE)
@@ -213,9 +212,10 @@ func test_get_behavioral_tell_type_returns_unknown_by_default() -> void:
 
 func test_trigger_behavioral_tell_emits_signal() -> void:
 	var signal_received := {"called": false, "type": ""}
-	_entity.behavioral_tell_triggered.connect(func(tell_type: String):
-		signal_received["called"] = true
-		signal_received["type"] = tell_type
+	_entity.behavioral_tell_triggered.connect(
+		func(tell_type: String):
+			signal_received["called"] = true
+			signal_received["type"] = tell_type
 	)
 
 	_entity.trigger_behavioral_tell()
@@ -344,3 +344,81 @@ func test_entity_on_correct_collision_layer() -> void:
 func test_entity_collision_mask_includes_world_and_player() -> void:
 	# World (1) + Player (2) = 3
 	assert_eq(_entity.collision_mask, 3, "Should collide with World and Player")
+
+
+# --- Hunt Detection Integration Tests ---
+
+
+func test_is_aware_of_target_false_initially() -> void:
+	assert_false(_entity.is_aware_of_target())
+
+
+func test_is_aware_of_target_true_after_set_hunt_target() -> void:
+	var target := Node3D.new()
+	add_child(target)
+
+	_entity.set_hunt_target(target)
+
+	# set_hunt_target sets _is_aware_of_target = true
+	assert_true(_entity.is_aware_of_target())
+
+	target.queue_free()
+
+
+func test_set_aware_of_target_updates_awareness() -> void:
+	_entity.set_aware_of_target(true)
+	assert_true(_entity.is_aware_of_target())
+
+	_entity.set_aware_of_target(false)
+	assert_false(_entity.is_aware_of_target())
+
+
+func test_get_last_known_target_position_empty_initially() -> void:
+	var pos := _entity.get_last_known_target_position()
+	assert_eq(pos, Vector3.ZERO)
+
+
+func test_set_hunt_target_records_last_known_position() -> void:
+	var target := Node3D.new()
+	target.global_position = Vector3(10, 0, 15)
+	add_child(target)
+
+	_entity.set_hunt_target(target)
+
+	# Last known position should be set
+	var pos := _entity.get_last_known_target_position()
+	assert_almost_eq(pos.x, 10.0, 0.01)
+	assert_almost_eq(pos.z, 15.0, 0.01)
+
+	target.queue_free()
+
+
+func test_on_hunt_ended_clears_awareness() -> void:
+	var target := Node3D.new()
+	add_child(target)
+
+	_entity.on_hunt_started()
+	_entity.set_hunt_target(target)
+	assert_true(_entity.is_aware_of_target())
+
+	_entity.on_hunt_ended()
+	assert_false(_entity.is_aware_of_target())
+
+	target.queue_free()
+
+
+func test_get_target_detection_radius_returns_base_without_target() -> void:
+	var radius := _entity.get_target_detection_radius()
+	assert_eq(radius, HuntDetection.BASE_DETECTION_RADIUS)
+
+
+func test_speed_depends_on_awareness_during_hunt() -> void:
+	_entity.on_hunt_started()
+
+	# Unaware = slow speed
+	_entity.set_aware_of_target(false)
+	assert_eq(_entity.get_current_speed(), _entity.hunt_unaware_speed)
+
+	# Aware = fast speed
+	_entity.set_aware_of_target(true)
+	assert_eq(_entity.get_current_speed(), _entity.hunt_aware_speed)

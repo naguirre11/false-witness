@@ -1,4 +1,5 @@
 # gdlint: ignore=max-public-methods
+# gdlint: ignore=max-file-lines
 extends GutTest
 ## Tests for Entity base class.
 
@@ -1140,3 +1141,113 @@ func test_entity_visible_to_observer_with_is_echo_property() -> void:
 	assert_true(result, "Entity should be visible to player with is_echo=true")
 
 	echo_player.queue_free()
+
+
+# --- Manifestation Witness Tracking Tests (FW-040a) ---
+
+
+func test_manifestation_witnesses_empty_initially() -> void:
+	var witnesses := _entity.get_manifestation_witnesses()
+	assert_eq(witnesses.size(), 0, "Witnesses should be empty initially")
+
+
+func test_start_manifestation_clears_witnesses() -> void:
+	# Manually set some witnesses
+	_entity._manifestation_witnesses = [1, 2, 3]
+	_entity.change_state(Entity.EntityState.ACTIVE)
+
+	_entity.start_manifestation()
+
+	var witnesses := _entity.get_manifestation_witnesses()
+	assert_eq(witnesses.size(), 0, "start_manifestation should clear previous witnesses")
+
+
+func test_start_manifestation_records_start_position() -> void:
+	_entity.global_position = Vector3(10, 0, 20)
+	_entity.change_state(Entity.EntityState.ACTIVE)
+
+	_entity.start_manifestation()
+
+	assert_almost_eq(_entity._manifestation_start_position.x, 10.0, 0.01)
+	assert_almost_eq(_entity._manifestation_start_position.z, 20.0, 0.01)
+
+
+func test_end_manifestation_emits_witnessed_signal_with_witnesses() -> void:
+	var signal_data := {"received": false, "witness_ids": [], "location": Vector3.ZERO}
+	_entity.manifestation_witnessed.connect(
+		func(ids: Array, loc: Vector3):
+			signal_data["received"] = true
+			signal_data["witness_ids"] = ids
+			signal_data["location"] = loc
+	)
+
+	# Set up manifestation with witnesses
+	_entity.global_position = Vector3(5, 0, 10)
+	_entity.change_state(Entity.EntityState.ACTIVE)
+	_entity.start_manifestation()
+	_entity._manifestation_witnesses = [101, 102, 103]  # Simulate witnessed
+
+	_entity.end_manifestation()
+
+	assert_true(signal_data["received"], "manifestation_witnessed should be emitted")
+	assert_eq(signal_data["witness_ids"].size(), 3, "Should include all witnesses")
+	assert_has(signal_data["witness_ids"], 101)
+	assert_has(signal_data["witness_ids"], 102)
+	assert_has(signal_data["witness_ids"], 103)
+
+
+func test_end_manifestation_does_not_emit_without_witnesses() -> void:
+	var signal_data := {"received": false}
+	_entity.manifestation_witnessed.connect(
+		func(_ids: Array, _loc: Vector3):
+			signal_data["received"] = true
+	)
+
+	_entity.change_state(Entity.EntityState.ACTIVE)
+	_entity.start_manifestation()
+	# No witnesses added
+
+	_entity.end_manifestation()
+
+	assert_false(signal_data["received"], "Should not emit when no witnesses")
+
+
+func test_end_manifestation_uses_start_position_in_signal() -> void:
+	var signal_data := {"location": Vector3.ZERO}
+	_entity.manifestation_witnessed.connect(
+		func(_ids: Array, loc: Vector3):
+			signal_data["location"] = loc
+	)
+
+	_entity.global_position = Vector3(15, 0, 25)
+	_entity.change_state(Entity.EntityState.ACTIVE)
+	_entity.start_manifestation()
+
+	# Move entity during manifestation
+	_entity.global_position = Vector3(100, 0, 100)
+
+	# Add a witness so signal is emitted
+	_entity._manifestation_witnesses = [999]
+	_entity.end_manifestation()
+
+	# Signal should use the START position, not current position
+	assert_almost_eq(signal_data["location"].x, 15.0, 0.01)
+	assert_almost_eq(signal_data["location"].z, 25.0, 0.01)
+
+
+func test_get_manifestation_witnesses_returns_copy() -> void:
+	_entity._manifestation_witnesses = [1, 2, 3]
+
+	var witnesses := _entity.get_manifestation_witnesses()
+	witnesses.append(4)  # Modify the returned array
+
+	# Original should be unchanged
+	assert_eq(_entity._manifestation_witnesses.size(), 3, "Original should be unmodified")
+
+
+func test_witness_range_constant_exists() -> void:
+	assert_eq(Entity.WITNESS_RANGE, 15.0, "Witness range should be 15 meters")
+
+
+func test_witness_check_interval_constant_exists() -> void:
+	assert_eq(Entity.WITNESS_CHECK_INTERVAL, 0.5, "Witness check interval should be 0.5 seconds")

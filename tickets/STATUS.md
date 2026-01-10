@@ -2,7 +2,7 @@
 
 Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move.ps1`.
 
-**NEXT**: FW-046-listener-entity
+**NEXT**: FW-091-audio-foundation (FW-046 blocked by FW-014 voice chat)
 
 | Ticket | Title | Status |
 |--------|-------|--------|
@@ -39,7 +39,10 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-038b-dowsing-rods | Dowsing Rods Unit | for_review |
 | FW-038c-aura-imager | Aura Imager Unit | for_review |
 | FW-039-ghost-writing-book | Ghost Writing Book (triggered test) | for_review |
-| FW-040-readily-apparent-evidence | Readily-Apparent Evidence system | ready |
+| FW-040-readily-apparent-evidence | Readily-Apparent Evidence system (Epic) | ready |
+| FW-040a-manifestation-evidence | Manifestation Evidence Capture | for_review |
+| FW-040b-physical-interaction-framework | Physical Interaction Framework | draft |
+| FW-040c-photo-evidence-system | Photo Evidence System | draft |
 | FW-041-entity-core | Core entity AI with behavioral tells | for_review |
 | FW-042-hunt-mechanics | Hunt mechanics with depth (Epic) | for_review |
 | FW-042a-warning-phase | Hunt warning phase | for_review |

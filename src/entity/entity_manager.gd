@@ -25,26 +25,26 @@ signal aggression_changed(level: int, phase_name: String)
 
 ## Aggression phases based on match time
 enum AggressionPhase {
-	DORMANT,     ## 0-5 min: Passive manifestations only
-	ACTIVE,      ## 5-10 min: Occasional hunts
+	DORMANT,  ## 0-5 min: Passive manifestations only
+	ACTIVE,  ## 5-10 min: Occasional hunts
 	AGGRESSIVE,  ## 10-15 min: Frequent hunts
-	FURIOUS,     ## 15+ min: Near-constant hunting
+	FURIOUS,  ## 15+ min: Near-constant hunting
 }
 
 ## Time thresholds for aggression phases (in seconds)
 const AGGRESSION_THRESHOLDS := {
 	AggressionPhase.DORMANT: 0.0,
-	AggressionPhase.ACTIVE: 300.0,      # 5 minutes
+	AggressionPhase.ACTIVE: 300.0,  # 5 minutes
 	AggressionPhase.AGGRESSIVE: 600.0,  # 10 minutes
-	AggressionPhase.FURIOUS: 900.0,     # 15 minutes
+	AggressionPhase.FURIOUS: 900.0,  # 15 minutes
 }
 
 ## Base hunt cooldowns per aggression phase (in seconds)
 const HUNT_COOLDOWNS := {
-	AggressionPhase.DORMANT: INF,       # Cannot hunt
-	AggressionPhase.ACTIVE: 120.0,      # 2 minutes
-	AggressionPhase.AGGRESSIVE: 60.0,   # 1 minute
-	AggressionPhase.FURIOUS: 25.0,      # 25 seconds
+	AggressionPhase.DORMANT: INF,  # Cannot hunt
+	AggressionPhase.ACTIVE: 120.0,  # 2 minutes
+	AggressionPhase.AGGRESSIVE: 60.0,  # 1 minute
+	AggressionPhase.FURIOUS: 25.0,  # 25 seconds
 }
 
 ## Warning phase duration in seconds before hunt starts
@@ -124,8 +124,9 @@ func _process(delta: float) -> void:
 ## entity_scene: PackedScene of the entity to spawn
 ## spawn_position: Where to spawn the entity
 ## favorite_room: The room ID the entity will prefer
-func spawn_entity(entity_scene: PackedScene, spawn_position: Vector3,
-		favorite_room: String = "") -> Node:
+func spawn_entity(
+	entity_scene: PackedScene, spawn_position: Vector3, favorite_room: String = ""
+) -> Node:
 	if not _is_server:
 		push_warning("[EntityManager] Only server can spawn entities")
 		return null
@@ -145,6 +146,10 @@ func spawn_entity(entity_scene: PackedScene, spawn_position: Vector3,
 
 	if entity is Node3D:
 		(entity as Node3D).global_position = spawn_position
+
+	# Connect manifestation witness signal for evidence generation
+	if entity.has_signal("manifestation_witnessed"):
+		entity.manifestation_witnessed.connect(_on_entity_manifestation_witnessed)
 
 	_favorite_room = favorite_room
 	if entity.has_method("set_favorite_room"):
@@ -387,8 +392,10 @@ func register_death(player_id: int, location: Vector3) -> void:
 	_death_aggression_modifier *= DEATH_AGGRESSION_MULTIPLIER
 
 	print(
-		"[EntityManager] Player %d died at %v (deaths: %d, modifier: %.2f)"
-		% [player_id, location, _death_count, _death_aggression_modifier]
+		(
+			"[EntityManager] Player %d died at %v (deaths: %d, modifier: %.2f)"
+			% [player_id, location, _death_count, _death_aggression_modifier]
+		)
 	)
 
 
@@ -419,11 +426,12 @@ func _update_aggression_phase() -> void:
 		_aggression_phase = new_phase
 		aggression_changed.emit(new_phase, get_aggression_phase_name())
 		EventBus.entity_aggression_changed.emit(new_phase, get_aggression_phase_name())
-		print("[EntityManager] Aggression phase: %s -> %s (%.1fs)" % [
-			_phase_to_string(old_phase),
-			_phase_to_string(new_phase),
-			_match_time
-		])
+		print(
+			(
+				"[EntityManager] Aggression phase: %s -> %s (%.1fs)"
+				% [_phase_to_string(old_phase), _phase_to_string(new_phase), _match_time]
+			)
+		)
 
 
 func _update_hunt_cooldown(delta: float) -> void:
@@ -550,3 +558,54 @@ func _phase_to_string(phase: AggressionPhase) -> String:
 		AggressionPhase.FURIOUS:
 			return "Furious"
 	return "Unknown"
+
+
+# --- Manifestation Evidence ---
+
+
+## Called when an entity manifestation ends with witnesses.
+## Generates VISUAL_MANIFESTATION evidence through EvidenceManager.
+func _on_entity_manifestation_witnessed(witness_ids: Array, location: Vector3) -> void:
+	if not _is_server:
+		return
+
+	if witness_ids.is_empty():
+		return
+
+	var evidence_manager := _get_evidence_manager()
+	if not evidence_manager:
+		push_warning("[EntityManager] EvidenceManager not available for manifestation evidence")
+		return
+
+	# Determine quality based on witness count
+	# Multiple witnesses = STRONG (harder for Cultist to dispute)
+	# Single witness = WEAK (easier to dispute as "I didn't see it")
+	var quality: int = EvidenceEnums.ReadingQuality.STRONG
+	if witness_ids.size() == 1:
+		quality = EvidenceEnums.ReadingQuality.WEAK
+
+	# Use first witness as primary collector
+	var collector_id: int = witness_ids[0]
+
+	# Collect the evidence
+	var evidence: Evidence = evidence_manager.collect_evidence(
+		EvidenceEnums.EvidenceType.VISUAL_MANIFESTATION, collector_id, location, quality, ""  # No equipment used
+	)
+
+	if evidence:
+		# Add all witnesses to the evidence
+		for witness_id in witness_ids:
+			evidence.add_witness(witness_id)
+
+		print(
+			(
+				"[EntityManager] VISUAL_MANIFESTATION evidence generated: %d witnesses at %v"
+				% [witness_ids.size(), location]
+			)
+		)
+
+
+func _get_evidence_manager() -> Node:
+	if has_node("/root/EvidenceManager"):
+		return get_node("/root/EvidenceManager")
+	return null

@@ -31,6 +31,10 @@ signal player_killed(player: Node)
 ## Emitted when the entity reacts to an Echo's presence (cosmetic only).
 signal echo_reaction_triggered(echo: Node)
 
+## Emitted when a manifestation ends with witness data.
+## Used by evidence system to generate VISUAL_MANIFESTATION evidence.
+signal manifestation_witnessed(witness_ids: Array, location: Vector3)
+
 # --- Enums ---
 
 ## Entity behavior states
@@ -45,6 +49,12 @@ enum EntityState {
 
 ## Kill range - distance at which entity kills player during hunt
 const KILL_RANGE := 1.0
+
+## Maximum distance for witnessing manifestations (meters)
+const WITNESS_RANGE := 15.0
+
+## Interval between witness detection checks during manifestation (seconds)
+const WITNESS_CHECK_INTERVAL := 0.5
 
 # --- Echo Reaction Constants (FW-043c) ---
 
@@ -127,6 +137,15 @@ var _hunt_timer: float = 0.0
 
 ## Whether entity is currently visible to players
 var _is_visible: bool = false
+
+## Players who have witnessed the current manifestation (peer IDs)
+var _manifestation_witnesses: Array[int] = []
+
+## Timer for witness check during manifestation
+var _witness_check_timer: float = 0.0
+
+## Position where manifestation started (for evidence location)
+var _manifestation_start_position: Vector3 = Vector3.ZERO
 
 ## Last known position of target (for pathfinding)
 var _target_last_position: Vector3 = Vector3.ZERO
@@ -449,6 +468,9 @@ func start_manifestation() -> bool:
 
 	change_state(EntityState.MANIFESTING)
 	_manifestation_timer = manifestation_duration
+	_manifestation_start_position = global_position
+	_manifestation_witnesses.clear()
+	_witness_check_timer = 0.0  # Force immediate witness check
 	_set_visible(true)
 	return true
 
@@ -460,6 +482,12 @@ func end_manifestation() -> void:
 
 	_set_visible(false)
 	_manifestation_cooldown_timer = manifestation_cooldown
+
+	# Emit witnessed signal if anyone saw the manifestation
+	if not _manifestation_witnesses.is_empty():
+		var witnesses_copy: Array = _manifestation_witnesses.duplicate()
+		manifestation_witnessed.emit(witnesses_copy, _manifestation_start_position)
+
 	change_state(EntityState.ACTIVE)
 
 
@@ -667,6 +695,12 @@ func _process_manifesting(delta: float) -> void:
 		end_manifestation()
 		return
 
+	# Update witness tracking
+	_witness_check_timer -= delta
+	if _witness_check_timer <= 0:
+		_witness_check_timer = WITNESS_CHECK_INTERVAL
+		_update_manifestation_witnesses()
+
 	_process_manifesting_behavior(delta)
 
 	# Check for behavioral tell during manifestation
@@ -719,6 +753,61 @@ func _state_to_string(state: EntityState) -> String:
 		EntityState.MANIFESTING:
 			return "Manifesting"
 	return "Unknown"
+
+
+## Updates the list of players who have witnessed the current manifestation.
+## Players are added to the witness list if they have line of sight within range.
+func _update_manifestation_witnesses() -> void:
+	if not _is_visible:
+		return
+
+	var players := _get_alive_players()
+	var space_state := get_world_3d().direct_space_state
+
+	for player in players:
+		if not is_instance_valid(player) or not player is Node3D:
+			continue
+
+		var player_id := _get_player_id(player)
+
+		# Skip if already witnessed
+		if player_id in _manifestation_witnesses:
+			continue
+
+		# Check distance
+		var distance: float = global_position.distance_to((player as Node3D).global_position)
+		if distance > WITNESS_RANGE:
+			continue
+
+		# Check line of sight
+		if _has_line_of_sight_to(player, space_state):
+			_manifestation_witnesses.append(player_id)
+
+
+## Checks line of sight from entity to a target node.
+## Returns true if there's a clear path (no world geometry blocking).
+func _has_line_of_sight_to(target: Node, space_state: PhysicsDirectSpaceState3D) -> bool:
+	if not target is Node3D:
+		return false
+
+	var target_pos: Vector3 = (target as Node3D).global_position
+	# Aim for upper body (head area)
+	var target_point := target_pos + Vector3(0, 1.6, 0)
+	var our_point := global_position + Vector3(0, 1.5, 0)
+
+	var query := PhysicsRayQueryParameters3D.create(our_point, target_point)
+	query.exclude = [self]
+	query.collision_mask = 1  # World geometry only
+
+	var result := space_state.intersect_ray(query)
+
+	# If no hit, we have clear line of sight
+	return result.is_empty()
+
+
+## Returns the witnesses from the current manifestation.
+func get_manifestation_witnesses() -> Array[int]:
+	return _manifestation_witnesses.duplicate()
 
 
 ## Updates hunt detection - checks for players in range and line of sight.

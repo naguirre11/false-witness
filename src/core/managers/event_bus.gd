@@ -188,6 +188,23 @@ signal vote_cast(voter_id: int, target_id: int)
 ## Emitted when the match ends with a result.
 signal match_ended(result: String)
 
+# --- Lobby Signals ---
+
+## Emitted when a lobby is created or joined.
+signal lobby_state_changed(is_in_lobby: bool, is_host: bool)
+
+## Emitted when the player list in lobby updates.
+signal lobby_players_updated(player_count: int, slots: Array)
+
+## Emitted when a player's ready state changes.
+signal lobby_player_ready_changed(peer_id: int, is_ready: bool)
+
+## Emitted when all players are ready and game can start.
+signal lobby_can_start(can_start: bool)
+
+## Emitted when the host changes (migration or new host).
+signal lobby_host_changed(new_host_peer_id: int, new_host_username: String)
+
 # --- Timer Signals ---
 
 ## Emitted every second during timed phases (investigation, deliberation).

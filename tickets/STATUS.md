@@ -10,7 +10,7 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-002-autoload-architecture | Core autoload architecture | for_review |
 | FW-003-game-state-machine | Core game state machine | for_review |
 | FW-011-networking-foundation | P2P networking foundation | for_review |
-| FW-012-lobby-system | Lobby system | ready |
+| FW-012-lobby-system | Lobby system | for_review |
 | FW-013-steam-integration | GodotSteam integration | ready |
 | FW-014-voice-chat | Voice chat | ready |
 | FW-021-fps-controller | First-person player controller | for_review |

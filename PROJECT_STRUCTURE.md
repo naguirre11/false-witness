@@ -50,13 +50,14 @@ false_witness/
 |----|----------|------|---------|
 | 1 | SteamManager | `src/core/steam_manager.gd` | Steam API initialization |
 | 2 | NetworkManager | `src/core/network_manager.gd` | Dual backend (Steam + ENet) networking |
-| 3 | EventBus | `src/core/managers/event_bus.gd` | Global signal hub |
-| 4 | GameManager | `src/core/managers/game_manager.gd` | Game state machine |
-| 5 | EvidenceManager | `src/evidence/evidence_manager.gd` | Evidence collection and tracking |
-| 6 | VerificationManager | `src/evidence/verification_manager.gd` | Evidence trust-level verification |
-| 7 | EntityManager | `src/entity/entity_manager.gd` | Entity spawning and tracking |
-| 8 | SanityManager | `src/entity/sanity_manager.gd` | Team sanity tracking |
-| 9 | AudioManager | `src/core/audio_manager.gd` | Centralized audio playback and control |
+| 3 | LobbyManager | `src/core/lobby_manager.gd` | Pre-game lobby with player slots |
+| 4 | EventBus | `src/core/managers/event_bus.gd` | Global signal hub |
+| 5 | GameManager | `src/core/managers/game_manager.gd` | Game state machine |
+| 6 | EvidenceManager | `src/evidence/evidence_manager.gd` | Evidence collection and tracking |
+| 7 | VerificationManager | `src/evidence/verification_manager.gd` | Evidence trust-level verification |
+| 8 | EntityManager | `src/entity/entity_manager.gd` | Entity spawning and tracking |
+| 9 | SanityManager | `src/entity/sanity_manager.gd` | Team sanity tracking |
+| 10 | AudioManager | `src/core/audio_manager.gd` | Centralized audio playback and control |
 
 ### Source Code Structure
 
@@ -70,10 +71,12 @@ src/
 │   │   ├── event_bus.gd      # Global signals
 │   │   └── game_manager.gd   # State machine
 │   ├── networking/
-│   │   └── player_data.gd    # Synchronized player state (PlayerData resource)
+│   │   ├── player_data.gd    # Synchronized player state (PlayerData resource)
+│   │   └── lobby_slot.gd     # LobbySlot resource for player slot data
 │   ├── audio_manager.gd      # AudioManager autoload
 │   ├── steam_manager.gd      # Steam init
-│   └── network_manager.gd    # Dual backend networking (Steam + ENet)
+│   ├── network_manager.gd    # Dual backend networking (Steam + ENet)
+│   └── lobby_manager.gd      # Pre-game lobby management
 ├── entity/
 │   ├── entity.gd             # Entity base class (CharacterBody3D)
 │   ├── entity_manager.gd     # EntityManager autoload
@@ -126,6 +129,7 @@ tests/
 ├── test_game_manager.gd       # GameManager state tests (15 tests)
 ├── test_game_manager_timer.gd # GameManager timer tests (14 tests)
 ├── test_network_manager.gd    # NetworkManager + PlayerData tests (17 tests)
+├── test_lobby_manager.gd      # LobbyManager + LobbySlot tests (35 tests)
 ├── test_player_controller.gd  # PlayerController tests (45 tests)
 ├── test_interactable.gd       # Interactable base class tests (24 tests)
 ├── test_interaction_manager.gd # InteractionManager tests (24 tests)

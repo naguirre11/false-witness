@@ -21,6 +21,7 @@ config/icon="res://icon.svg"
 
 SteamManager="*res://src/core/steam_manager.gd"
 NetworkManager="*res://src/core/network_manager.gd"
+LobbyManager="*res://src/core/lobby_manager.gd"
 EventBus="*res://src/core/managers/event_bus.gd"
 GameManager="*res://src/core/managers/game_manager.gd"
 EvidenceManager="*res://src/evidence/evidence_manager.gd"

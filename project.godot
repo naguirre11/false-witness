@@ -27,6 +27,7 @@ EvidenceManager="*res://src/evidence/evidence_manager.gd"
 VerificationManager="*res://src/evidence/verification_manager.gd"
 EntityManager="*res://src/entity/entity_manager.gd"
 SanityManager="*res://src/entity/sanity_manager.gd"
+AudioManager="*res://src/core/audio_manager.gd"
 
 [display]
 
@@ -112,6 +113,10 @@ toggle_evidence_board={
 
 3d/default_gravity=9.8
 3d/default_gravity_vector=Vector3(0, -1, 0)
+
+[audio]
+
+bus_resource_path="res://default_bus_layout.tres"
 
 [rendering]
 

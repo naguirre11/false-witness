@@ -101,6 +101,111 @@ $GODOT --version > /tmp/out.txt && head -5 /tmp/out.txt
 $GODOT --headless --import
 ```
 
+## Testing Strategy
+
+The test suite uses a **tiered testing strategy** to balance speed and rigor:
+
+### Test Organization
+
+```
+tests/
+├── test_smoke.gd        # Critical sanity checks (~20 tests)
+├── test_example.gd      # GUT example (keep for reference)
+├── unit/                # Fast unit tests (pure logic, enums, static methods)
+│   ├── test_evidence_enums.gd
+│   ├── test_prism_enums.gd
+│   ├── test_aura_enums.gd
+│   └── test_spatial_constraints.gd
+└── integration/         # Integration tests (managers, signals, scene tree)
+    ├── test_game_manager.gd
+    ├── test_entity_manager.gd
+    ├── test_audio_manager.gd
+    └── ... (40+ files)
+```
+
+### When to Run Which Tests
+
+| Situation | Test Mode | Command | Duration |
+|-----------|-----------|---------|----------|
+| During development | Specific file | `run-tests.ps1 -Mode file -File test_audio_manager.gd` | ~5s |
+| Before committing | Smoke tests | `run-tests.ps1 -Mode smoke` | ~30s |
+| Testing specific system | Unit or Integration | `run-tests.ps1 -Mode unit` | ~1min |
+| CI / Before PR | Full suite | `run-tests.ps1 -Mode full` | ~10min |
+
+### Test Runner Script
+
+Use `cc_workflow/scripts/run-tests.ps1` for convenient test execution:
+
+```powershell
+# Run smoke tests (default - quick sanity check)
+./cc_workflow/scripts/run-tests.ps1
+
+# Run a specific test file during development
+./cc_workflow/scripts/run-tests.ps1 -Mode file -File test_audio_manager.gd
+
+# Run all unit tests
+./cc_workflow/scripts/run-tests.ps1 -Mode unit
+
+# Run all integration tests
+./cc_workflow/scripts/run-tests.ps1 -Mode integration
+
+# Run the complete test suite (CI mode)
+./cc_workflow/scripts/run-tests.ps1 -Mode full
+```
+
+### Raw GUT Commands
+
+If you prefer direct GUT invocation:
+
+```bash
+# Smoke tests only
+$GODOT --headless -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.smoke.json -gexit
+
+# Unit tests only
+$GODOT --headless -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.unit.json -gexit
+
+# Integration tests only
+$GODOT --headless -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.integration.json -gexit
+
+# Full suite
+$GODOT --headless -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json -gexit
+
+# Specific test file
+$GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=test_audio_manager.gd -gdir=res://tests/integration/ -gexit
+```
+
+### Test Categories Explained
+
+**Unit tests** (`tests/unit/`):
+- Pure logic with no/minimal scene tree dependencies
+- Enum mapping tests, static method tests, data validation
+- Should run in <1 second per file
+
+**Integration tests** (`tests/integration/`):
+- Tests requiring scene tree, managers, signals, or multiple systems
+- May have setup/teardown with `before_each`/`after_each`
+- Longer execution time acceptable
+
+**Smoke tests** (`tests/test_smoke.gd`):
+- Critical subset of ~20 tests covering core functionality
+- Validates game managers initialize correctly
+- Validates core state machines work
+- Quick sanity check that nothing is fundamentally broken
+
+### Guidelines for Writing New Tests
+
+1. **Place tests in the correct directory**:
+   - Pure enum/static method tests → `tests/unit/`
+   - Tests with managers, signals, scene tree → `tests/integration/`
+
+2. **Add critical paths to smoke tests**:
+   - If a test covers fundamental game functionality, add a variant to `test_smoke.gd`
+
+3. **Keep tests fast**:
+   - Avoid unnecessary waits/sleeps
+   - Use minimal scene setup
+   - Clean up resources in `after_each`
+
 ## Code Quality
 
 GDScript linting and formatting is handled by [gdtoolkit](https://github.com/Scony/godot-gdscript-toolkit).

@@ -2,7 +2,7 @@
 
 Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move.ps1`.
 
-**NEXT**: FW-044-first-entity-phantom
+**NEXT**: FW-046-listener-entity
 
 | Ticket | Title | Status |
 |--------|-------|--------|
@@ -51,7 +51,7 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-043b-echo-state | Echo state movement and visibility | for_review |
 | FW-043c-echo-restrictions | Echo restrictions and entity reactions | for_review |
 | FW-043d-revival-mechanic | Revival mechanic | for_review |
-| FW-044-first-entity-phantom | First entity: Phantom | dev_in_progress |
+| FW-044-first-entity-phantom | First entity: Phantom | for_review |
 | FW-046-listener-entity | Listener entity (voice-reactive) | ready |
 | FW-051-cultist-role-assignment | Cultist role assignment | ready |
 | FW-052-cultist-abilities | Cultist abilities with decay | ready |

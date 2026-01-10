@@ -1004,7 +1004,7 @@ func _start_echo_reaction(echo: Node) -> void:
 
 	echo_reaction_triggered.emit(echo)
 
-	var echo_name := echo.name if echo else "unknown"
+	var echo_name: String = echo.name if echo else "unknown"
 	print("[Entity:%s] Reacting to Echo: %s" % [entity_type, echo_name])
 
 

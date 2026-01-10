@@ -53,17 +53,25 @@ false_witness/
 | 3 | EventBus | `src/core/managers/event_bus.gd` | Global signal hub |
 | 4 | GameManager | `src/core/managers/game_manager.gd` | Game state machine |
 | 5 | EvidenceManager | `src/evidence/evidence_manager.gd` | Evidence collection and tracking |
+| 6 | VerificationManager | `src/evidence/verification_manager.gd` | Evidence trust-level verification |
+| 7 | EntityManager | `src/entity/entity_manager.gd` | Entity spawning and tracking |
+| 8 | SanityManager | `src/entity/sanity_manager.gd` | Team sanity tracking |
+| 9 | AudioManager | `src/core/audio_manager.gd` | Centralized audio playback and control |
 
 ### Source Code Structure
 
 ```
 src/
 ├── core/
+│   ├── audio/
+│   │   ├── footstep_manager.gd  # Footstep sound with surface detection
+│   │   └── surface_audio.gd     # Surface audio configuration resource
 │   ├── managers/
 │   │   ├── event_bus.gd      # Global signals
 │   │   └── game_manager.gd   # State machine
 │   ├── networking/
 │   │   └── player_data.gd    # Synchronized player state (PlayerData resource)
+│   ├── audio_manager.gd      # AudioManager autoload
 │   ├── steam_manager.gd      # Steam init
 │   └── network_manager.gd    # Dual backend networking (Steam + ENet)
 ├── entity/
@@ -133,7 +141,10 @@ tests/
 ├── test_evidence_enums.gd     # EvidenceEnums tests (51 tests)
 ├── test_evidence_manager.gd   # EvidenceManager tests (47 tests)
 ├── test_evidence_board.gd     # EvidenceBoard UI tests (20 tests)
-└── test_evidence_slot.gd      # EvidenceSlot UI tests (14 tests)
+├── test_evidence_slot.gd      # EvidenceSlot UI tests (14 tests)
+├── test_audio_manager.gd      # AudioManager tests (33 tests)
+├── test_surface_audio.gd      # SurfaceAudio tests (21 tests)
+└── test_footstep_manager.gd   # FootstepManager tests (16 tests)
 ```
 
 ## Key Systems
@@ -313,6 +324,41 @@ Server-authoritative evidence collection and tracking for investigation gameplay
 - `contest_evidence(uid, contester_id)` - Dispute evidence
 - `get_evidence_by_type(type)` / `get_evidence_by_collector(id)` - Queries
 - `get_verified_evidence()` / `get_contested_evidence()` / `get_definitive_evidence()` - Filtered queries
+
+### Audio System
+
+Centralized audio management for horror-appropriate spatial sound.
+
+**Audio Buses:**
+- Master - Overall volume control
+- SFX - Sound effects (footsteps, equipment, interactions)
+- Music - Background music
+- Voice - Voice chat and entity vocalizations
+- Ambient - Environmental sounds
+
+**AudioManager Features:**
+- Volume control (dB and linear) per bus
+- Sound pooling for frequently played sounds
+- One-shot 2D and 3D spatial sounds with auto-cleanup
+- Spatial audio presets: close-range (15m), medium-range (25m), long-range (50m)
+
+**Signals:**
+- `volume_changed(bus_name: String, volume_db: float)`
+- `sound_played(sound_id: String, position: Vector3)`
+
+**Key Methods:**
+- `play_sound(stream, bus, volume_db)` - 2D non-spatial
+- `play_sound_3d(stream, position, bus, volume_db)` - 3D spatial at position
+- `play_sound_attached(stream, node, bus, volume_db)` - 3D attached to node
+- `configure_sound_pool(id, stream, size, bus)` - Create reusable pool
+- `play_pooled_sound(id, volume_db)` - Play from pool
+
+**FootstepManager:**
+- Attached to player, detects surface via raycast
+- Surfaces set `surface_type` metadata on StaticBody3D
+- 9 surface types: DEFAULT, WOOD, CONCRETE, CARPET, TILE, METAL, GRASS, GRAVEL, WATER
+- Volume modifiers per surface (carpet quieter, metal louder)
+- Crouch reduces volume, sprint increases it
 
 ### EventBus Signals
 

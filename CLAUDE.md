@@ -70,7 +70,9 @@ Avoid using these as function names: `assert`, `print`, `str`, `to_string`, `dup
 
 **Windows Shell**: Prefer PowerShell over CMD or Git Bash. Use `2>$null` (not `2>nul`) to suppress stderr, and `$env:VARNAME` for environment variables. Git Bash doesn't recognize Windows reserved names like `nul`, which creates literal files instead of discarding output.
 
-Godot executable is located at `../tooling/Godot_v4.4.1-stable_win64_console.exe` (relative to project root).
+### Godot Executable
+
+The `$GODOT` environment variable is set in `.claude/settings.json` and points to the Godot console executable. Use it for all Godot commands:
 
 ```bash
 # Import/reimport project (run this after adding new scripts)
@@ -82,6 +84,23 @@ $GODOT --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs
 # Run specific test file
 $GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=test_example.gd -gexit
 ```
+
+**Known issue with piping**: Due to a shell quirk, piping directly from `$GODOT` fails (variable doesn't expand). Workarounds:
+
+```bash
+# FAILS - variable expands to empty
+$GODOT --version | head -5
+
+# WORKS - wrap in bash -c with single quotes
+bash -c '$GODOT --version | head -5'
+
+# WORKS - redirect to file first
+$GODOT --version > /tmp/out.txt && head -5 /tmp/out.txt
+
+# WORKS - just don't pipe (output auto-truncates if too long anyway)
+$GODOT --headless --import
+```
+
 ## Code Quality
 
 GDScript linting and formatting is handled by [gdtoolkit](https://github.com/Scony/godot-gdscript-toolkit).

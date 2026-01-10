@@ -26,6 +26,12 @@ const LOOK_DRAIN_PER_SECOND: float = 2.0
 ## Interval between player visibility checks during manifestation (seconds)
 const VISIBILITY_CHECK_INTERVAL: float = 0.2
 
+# --- Export ---
+
+## Audio configuration for Phantom entity.
+## Set this to customize Phantom-specific sounds.
+@export var audio_config: EntityAudioConfig
+
 # --- State ---
 
 ## Timer for visibility checks during manifestation
@@ -51,6 +57,9 @@ func _ready() -> void:
 	hunt_aware_speed = 2.5
 	hunt_unaware_speed = 1.0
 
+	# Setup audio integration
+	_setup_audio()
+
 
 # --- Identity ---
 
@@ -72,11 +81,12 @@ func get_evidence_types() -> Array[int]:
 
 ## Returns true if this entity has the given evidence type.
 func has_evidence_type(evidence: EvidenceEnums.EvidenceType) -> bool:
-	match evidence:
-		EvidenceEnums.EvidenceType.EMF_SIGNATURE, EvidenceEnums.EvidenceType.PRISM_READING, EvidenceEnums.EvidenceType.VISUAL_MANIFESTATION:
-			return true
-		_:
-			return false
+	var valid_types := [
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		EvidenceEnums.EvidenceType.PRISM_READING,
+		EvidenceEnums.EvidenceType.VISUAL_MANIFESTATION,
+	]
+	return evidence in valid_types
 
 
 # --- Behavioral Tell ---
@@ -283,12 +293,44 @@ func _get_sanity_manager() -> Node:
 # - get_hunt_speed_for_awareness() -> default speeds
 # - can_hunt_in_current_conditions() -> true (default)
 
-# --- Audio Cues (Placeholder) ---
-# TODO: Implement Phantom-specific audio cues
-# - Unique ambient sounds
-# - Hunt chase audio
-# - Manifestation appearance sound
-# - Disappearance sound (on photograph tell)
+# --- Audio Configuration ---
+
+
+## Registers this entity with the EntityAudioManager.
+## Called from _ready after base setup.
+func _setup_audio() -> void:
+	if not audio_config:
+		# Create default config if none provided
+		audio_config = EntityAudioConfig.new()
+		_configure_default_audio(audio_config)
+
+	# Register with EntityAudioManager
+	var audio_manager := get_node_or_null("/root/EntityAudioManager")
+	if audio_manager:
+		audio_manager.set_entity(self, audio_config)
+
+
+## Configures default audio settings for Phantom.
+## Called when no custom audio_config is provided.
+func _configure_default_audio(config: EntityAudioConfig) -> void:
+	# Phantom uses standard intervals
+	config.footstep_interval_normal = 0.6
+	config.footstep_interval_hunt = 0.35  # Slightly faster during chase
+	config.footstep_volume_db = -3.0  # Slightly quieter than default
+	config.footstep_pitch_variation = 0.15
+
+	# Vocalization settings
+	config.ambient_vocalization_interval = 20.0  # Less frequent ambient sounds
+	config.vocalization_volume_db = -6.0
+
+	# Hunt settings
+	config.hunt_audio_volume_db = 0.0
+
+	# Spatial settings
+	config.spatial_unit_size = 2.0
+	config.max_audible_distance = 50.0
+	config.use_close_range_footsteps = true
+
 
 # --- Network State ---
 

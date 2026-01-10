@@ -28,6 +28,7 @@ VerificationManager="*res://src/evidence/verification_manager.gd"
 EntityManager="*res://src/entity/entity_manager.gd"
 SanityManager="*res://src/entity/sanity_manager.gd"
 AudioManager="*res://src/core/audio_manager.gd"
+EntityAudioManager="*res://src/core/audio/entity_audio_manager.gd"
 
 [display]
 

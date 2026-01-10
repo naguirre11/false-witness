@@ -2,7 +2,7 @@
 
 Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move.ps1`.
 
-**NEXT**: FW-092-entity-audio (FW-046 blocked by FW-014 voice chat)
+**NEXT**: FW-012-lobby-system (depends on FW-011, which is for_review)
 
 | Ticket | Title | Status |
 |--------|-------|--------|
@@ -70,7 +70,7 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-084-tutorial-training | Solo training mode tutorial | draft |
 | FW-085-cultist-tutorial | Cultist School tutorial | draft |
 | FW-091-audio-foundation | Audio system foundation | for_review |
-| FW-092-entity-audio | Entity audio | ready |
+| FW-092-entity-audio | Entity audio | for_review |
 | FW-101-portent-deck | Portent Deck match modifiers | draft |
 | FW-102-basic-physics | Basic physics interactions | draft |
 | FW-103-equipment-constants-cleanup | Clean up stale equipment type constants | draft |

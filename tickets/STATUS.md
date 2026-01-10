@@ -2,7 +2,7 @@
 
 Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move.ps1`.
 
-**NEXT**: FW-012-lobby-system (depends on FW-011, which is for_review)
+**NEXT**: FW-081-main-menu (depends on FW-012, which is for_review)
 
 | Ticket | Title | Status |
 |--------|-------|--------|

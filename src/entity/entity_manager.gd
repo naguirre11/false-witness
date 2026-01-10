@@ -50,6 +50,9 @@ const HUNT_COOLDOWNS := {
 ## Warning phase duration in seconds before hunt starts
 const WARNING_PHASE_DURATION := 3.0
 
+## Aggression boost per player death (reduces cooldowns)
+const DEATH_AGGRESSION_MULTIPLIER := 0.9
+
 # --- State ---
 
 ## Currently active entity (only one per match)
@@ -85,12 +88,18 @@ var _favorite_room: String = ""
 ## Server authority flag
 var _is_server: bool = false
 
+## Death tracking
+var _death_locations: Dictionary = {}  # player_id -> Vector3
+var _death_count: int = 0
+var _death_aggression_modifier: float = 1.0
+
 
 func _ready() -> void:
 	# Connect to game state changes
 	if EventBus:
 		EventBus.game_state_changed.connect(_on_game_state_changed)
 		EventBus.hunt_prevented.connect(_on_hunt_prevented)
+		EventBus.player_died.connect(_on_player_died)
 	print("[EntityManager] Initialized")
 
 
@@ -219,7 +228,7 @@ func can_initiate_hunt() -> bool:
 	if _aggression_phase == AggressionPhase.DORMANT:
 		return false
 
-	var cooldown: float = HUNT_COOLDOWNS[_aggression_phase]
+	var cooldown: float = _get_effective_cooldown()
 	return _hunt_cooldown_timer >= cooldown
 
 
@@ -228,8 +237,14 @@ func get_hunt_cooldown_remaining() -> float:
 	if _aggression_phase == AggressionPhase.DORMANT:
 		return INF
 
-	var cooldown: float = HUNT_COOLDOWNS[_aggression_phase]
+	var cooldown: float = _get_effective_cooldown()
 	return maxf(0.0, cooldown - _hunt_cooldown_timer)
+
+
+## Gets effective cooldown with death modifier applied.
+func _get_effective_cooldown() -> float:
+	var base: float = HUNT_COOLDOWNS[_aggression_phase]
+	return base * _death_aggression_modifier
 
 
 ## Gets the match elapsed time in seconds.
@@ -338,7 +353,43 @@ func reset() -> void:
 	_warning_timer = 0.0
 	_warning_entity_position = Vector3.ZERO
 	_favorite_room = ""
+	_death_locations.clear()
+	_death_count = 0
+	_death_aggression_modifier = 1.0
 	print("[EntityManager] Reset for new match")
+
+
+# --- Death Tracking ---
+
+
+## Gets the total number of player deaths this match.
+func get_death_count() -> int:
+	return _death_count
+
+
+## Gets the death location for a player, or Vector3.ZERO if not dead.
+func get_death_location(player_id: int) -> Vector3:
+	return _death_locations.get(player_id, Vector3.ZERO)
+
+
+## Gets all death locations as a dictionary (player_id -> Vector3).
+func get_all_death_locations() -> Dictionary:
+	return _death_locations.duplicate()
+
+
+## Registers a player death at a location.
+## Called internally via EventBus.player_died signal.
+func register_death(player_id: int, location: Vector3) -> void:
+	_death_locations[player_id] = location
+	_death_count += 1
+
+	# Increase aggression (reduce cooldowns) with each death
+	_death_aggression_modifier *= DEATH_AGGRESSION_MULTIPLIER
+
+	print(
+		"[EntityManager] Player %d died at %v (deaths: %d, modifier: %.2f)"
+		% [player_id, location, _death_count, _death_aggression_modifier]
+	)
 
 
 # --- Internal Methods ---
@@ -463,6 +514,29 @@ func _on_game_state_changed(old_state: int, new_state: int) -> void:
 func _on_hunt_prevented(_location: Vector3, _charges_remaining: int) -> void:
 	# Called by protection items (crucifix) when they prevent a hunt
 	_hunt_was_prevented = true
+
+
+func _on_player_died(player_id: int) -> void:
+	# Get death location from player node if possible
+	var death_location := Vector3.ZERO
+
+	# Try to find player node and get position
+	var player_group := get_tree().get_nodes_in_group("players")
+	for player in player_group:
+		var pid := _get_player_id_from_node(player)
+		if pid == player_id and player is Node3D:
+			death_location = (player as Node3D).global_position
+			break
+
+	register_death(player_id, death_location)
+
+
+func _get_player_id_from_node(player: Node) -> int:
+	if player.get("peer_id") != null:
+		return player.peer_id as int
+	if player.has_method("get_peer_id"):
+		return player.get_peer_id()
+	return player.get_instance_id()
 
 
 func _phase_to_string(phase: AggressionPhase) -> String:

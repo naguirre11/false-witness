@@ -41,7 +41,8 @@
       "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/test_emf_source.gd -gexit)",
       "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=test_temperature_zone.gd -gtest=test_thermometer.gd -gexit)",
       "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gprefix=test_temperature -gsuffix=.gd -gexit)",
-      "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/test_calibrator.gd -gexit)"
+      "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/test_calibrator.gd -gexit)",
+      "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=test_echo_controller.gd -gexit)"
     ]
   }
 }

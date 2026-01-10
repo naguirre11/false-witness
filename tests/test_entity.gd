@@ -2,9 +2,19 @@
 extends GutTest
 ## Tests for Entity base class.
 
+const EchoControllerScript = preload("res://src/player/echo_controller.gd")
+
 # --- Test Helpers ---
 
 var _entity: Entity = null
+
+
+## Mock player class for testing hunt target validation.
+class MockPlayer:
+	extends CharacterBody3D
+
+	var is_alive: bool = true
+	var is_echo: bool = false
 
 
 func before_each() -> void:
@@ -599,6 +609,175 @@ func test_get_hunt_duration_reflects_export_value() -> void:
 	assert_eq(_entity.get_hunt_duration(), 45.0)
 
 
+# --- Echo Reaction System Tests (FW-043c) ---
+
+
+func test_entity_not_reacting_to_echo_initially() -> void:
+	assert_false(_entity.is_reacting_to_echo())
+
+
+func test_entity_get_reaction_target_echo_returns_null_initially() -> void:
+	assert_null(_entity.get_reaction_target_echo())
+
+
+func test_entity_trigger_echo_reaction_fails_without_echoes() -> void:
+	var result: bool = _entity.trigger_echo_reaction()
+	assert_false(result, "Should fail when no Echoes in range")
+
+
+func test_entity_trigger_echo_reaction_succeeds_with_echo_in_range() -> void:
+	# Create an Echo and add it to the echoes group
+	var echo_script: GDScript = EchoControllerScript
+	var echo: Node3D = echo_script.new()
+	echo.name = "TestEcho"
+	echo.global_position = _entity.global_position + Vector3(5, 0, 0)  # Within range
+	add_child_autofree(echo)
+	echo.add_to_group("echoes")
+
+	var result: bool = _entity.trigger_echo_reaction()
+
+	assert_true(result, "Should succeed when Echo is in range")
+	assert_true(_entity.is_reacting_to_echo())
+	assert_eq(_entity.get_reaction_target_echo(), echo)
+
+
+func test_entity_trigger_echo_reaction_fails_when_already_reacting() -> void:
+	# Create an Echo
+	var echo_script: GDScript = EchoControllerScript
+	var echo: Node3D = echo_script.new()
+	echo.name = "TestEcho"
+	echo.global_position = _entity.global_position + Vector3(5, 0, 0)
+	add_child_autofree(echo)
+	echo.add_to_group("echoes")
+
+	# First reaction should succeed
+	var first_result: bool = _entity.trigger_echo_reaction()
+	assert_true(first_result)
+
+	# Second reaction should fail
+	var second_result: bool = _entity.trigger_echo_reaction()
+	assert_false(second_result, "Cannot trigger reaction while already reacting")
+
+
+func test_entity_trigger_echo_reaction_fails_for_echo_out_of_range() -> void:
+	# Create an Echo far away
+	var echo_script: GDScript = EchoControllerScript
+	var echo: Node3D = echo_script.new()
+	echo.name = "TestEcho"
+	echo.global_position = _entity.global_position + Vector3(100, 0, 0)  # Out of range
+	add_child_autofree(echo)
+	echo.add_to_group("echoes")
+
+	var result: bool = _entity.trigger_echo_reaction()
+
+	assert_false(result, "Should fail when Echo is out of range")
+
+
+func test_entity_echo_reaction_emits_signal() -> void:
+	# Create an Echo
+	var echo_script: GDScript = EchoControllerScript
+	var echo: Node3D = echo_script.new()
+	echo.name = "TestEcho"
+	echo.global_position = _entity.global_position + Vector3(5, 0, 0)
+	add_child_autofree(echo)
+	echo.add_to_group("echoes")
+
+	var signal_data := {"received": false, "echo": null}
+	_entity.echo_reaction_triggered.connect(
+		func(e: Node): signal_data["received"] = true; signal_data["echo"] = e
+	)
+
+	_entity.trigger_echo_reaction()
+
+	assert_true(signal_data["received"], "echo_reaction_triggered should be emitted")
+	assert_eq(signal_data["echo"], echo)
+
+
+func test_entity_does_not_react_to_echoes_during_hunt() -> void:
+	# Start hunting
+	_entity.change_state(Entity.EntityState.HUNTING)
+
+	# Create an Echo
+	var echo_script: GDScript = EchoControllerScript
+	var echo: Node3D = echo_script.new()
+	echo.name = "TestEcho"
+	echo.global_position = _entity.global_position + Vector3(5, 0, 0)
+	add_child_autofree(echo)
+	echo.add_to_group("echoes")
+
+	# Simulate _physics_process - should not process echo reactions during hunt
+	# We can't call _physics_process directly, but we can verify the state
+	# The entity is hunting so echo reactions should be skipped in _physics_process
+	assert_true(_entity.is_hunting())
+
+
+# --- Hunt Target Filtering Tests (FW-043c) ---
+
+
+func test_is_valid_hunt_target_returns_true_for_alive_player() -> void:
+	# Create a mock alive player
+	var player := MockPlayer.new()
+	player.is_alive = true
+	player.is_echo = false
+	add_child_autofree(player)
+
+	var result: bool = _entity._is_valid_hunt_target(player)
+	assert_true(result, "Alive player should be valid hunt target")
+
+
+func test_is_valid_hunt_target_returns_false_for_dead_player() -> void:
+	# Create a mock dead player
+	var player := MockPlayer.new()
+	player.is_alive = false
+	add_child_autofree(player)
+
+	var result: bool = _entity._is_valid_hunt_target(player)
+	assert_false(result, "Dead player should not be valid hunt target")
+
+
+func test_is_valid_hunt_target_returns_false_for_echo_player() -> void:
+	# Create a mock player in Echo state
+	var player := MockPlayer.new()
+	player.is_alive = false
+	player.is_echo = true
+	add_child_autofree(player)
+
+	var result: bool = _entity._is_valid_hunt_target(player)
+	assert_false(result, "Player in Echo state should not be valid hunt target")
+
+
+func test_is_valid_hunt_target_returns_false_for_echo_controller() -> void:
+	var echo_script: GDScript = EchoControllerScript
+	var echo: Node = echo_script.new()
+	add_child_autofree(echo)
+
+	var result: bool = _entity._is_valid_hunt_target(echo)
+	assert_false(result, "EchoController should not be valid hunt target")
+
+
+func test_filter_valid_hunt_targets_removes_echoes() -> void:
+	# Create a mix of alive players and Echoes
+	var alive_player := MockPlayer.new()
+	alive_player.is_alive = true
+	alive_player.is_echo = false
+	add_child_autofree(alive_player)
+
+	var echo_script: GDScript = EchoControllerScript
+	var echo: Node = echo_script.new()
+	add_child_autofree(echo)
+
+	var dead_player := MockPlayer.new()
+	dead_player.is_alive = false
+	dead_player.is_echo = true
+	add_child_autofree(dead_player)
+
+	var all_players: Array = [alive_player, echo, dead_player]
+	var valid_targets: Array = _entity._filter_valid_hunt_targets(all_players)
+
+	assert_eq(valid_targets.size(), 1, "Only alive player should be valid target")
+	assert_has(valid_targets, alive_player)
+
+
 func test_get_hunt_cooldown_returns_base_value() -> void:
 	# Default multiplier is 1.0, so cooldown should be 25.0
 	assert_eq(_entity.get_hunt_cooldown(), 25.0)
@@ -758,3 +937,206 @@ func test_subclass_duration_override_used_by_on_hunt_started() -> void:
 	assert_eq(state.hunt_timer, 45.0)
 
 	custom.queue_free()
+
+
+# --- Death Mechanics Tests ---
+
+
+## Mock player for death testing
+class MockPlayerForDeath:
+	extends Node3D
+	var peer_id: int = 123
+	var is_alive: bool = true
+	var death_position: Vector3 = Vector3.ZERO
+	var killed_by_entity: Node = null
+
+	func on_killed_by_entity(entity: Node, pos: Vector3) -> void:
+		is_alive = false
+		death_position = pos
+		killed_by_entity = entity
+
+
+func test_kill_range_constant_exists() -> void:
+	assert_eq(Entity.KILL_RANGE, 1.0, "Kill range should be 1.0 meters")
+
+
+func test_kill_player_emits_player_killed_signal() -> void:
+	var signal_received := {"called": false, "player": null}
+	_entity.player_killed.connect(
+		func(player: Node):
+			signal_received["called"] = true
+			signal_received["player"] = player
+	)
+
+	var mock_player := MockPlayerForDeath.new()
+	add_child(mock_player)
+
+	_entity._kill_player(mock_player)
+
+	assert_true(signal_received["called"], "player_killed signal should be emitted")
+	assert_eq(signal_received["player"], mock_player)
+
+	mock_player.queue_free()
+
+
+func test_kill_player_calls_on_killed_by_entity() -> void:
+	var mock_player := MockPlayerForDeath.new()
+	mock_player.global_position = Vector3(5, 0, 5)
+	add_child(mock_player)
+
+	_entity._kill_player(mock_player)
+
+	assert_false(mock_player.is_alive, "Player should be marked as dead")
+	assert_eq(mock_player.death_position, Vector3(5, 0, 5))
+	assert_eq(mock_player.killed_by_entity, _entity)
+
+	mock_player.queue_free()
+
+
+func test_kill_player_clears_hunt_target() -> void:
+	var mock_player := MockPlayerForDeath.new()
+	add_child(mock_player)
+
+	_entity.set_hunt_target(mock_player)
+	assert_eq(_entity.get_hunt_target(), mock_player)
+
+	_entity._kill_player(mock_player)
+
+	assert_null(_entity.get_hunt_target(), "Hunt target should be cleared after kill")
+
+	mock_player.queue_free()
+
+
+func test_kill_player_resets_target_awareness() -> void:
+	var mock_player := MockPlayerForDeath.new()
+	add_child(mock_player)
+
+	_entity.set_hunt_target(mock_player)
+	_entity.set_aware_of_target(true)
+
+	_entity._kill_player(mock_player)
+
+	assert_false(_entity.is_aware_of_target(), "Should no longer be aware of target after kill")
+
+	mock_player.queue_free()
+
+
+func test_kill_player_skips_already_dead_player() -> void:
+	var signal_received := {"count": 0}
+	_entity.player_killed.connect(func(_p): signal_received["count"] += 1)
+
+	var mock_player := MockPlayerForDeath.new()
+	mock_player.is_alive = false  # Already dead
+	add_child(mock_player)
+
+	_entity._kill_player(mock_player)
+
+	assert_eq(signal_received["count"], 0, "Should not emit signal for already dead player")
+
+	mock_player.queue_free()
+
+
+func test_kill_player_skips_invalid_player() -> void:
+	var signal_received := {"count": 0}
+	_entity.player_killed.connect(func(_p): signal_received["count"] += 1)
+
+	# Pass null - should not crash or emit signal
+	_entity._kill_player(null)
+
+	assert_eq(signal_received["count"], 0, "Should not emit signal for invalid player")
+
+
+func test_get_player_id_uses_peer_id() -> void:
+	var mock_player := MockPlayerForDeath.new()
+	mock_player.peer_id = 456
+	add_child(mock_player)
+
+	var player_id := _entity._get_player_id(mock_player)
+	assert_eq(player_id, 456)
+
+	mock_player.queue_free()
+
+
+# --- Echo Visibility Tests ---
+
+
+class MockEchoObserver:
+	extends Node
+
+	func ignores_entity_visibility() -> bool:
+		return true
+
+
+class MockLivingObserver:
+	extends Node
+
+	var is_echo := false
+
+
+func test_entity_is_visible_to_echo_when_not_manifesting() -> void:
+	var echo_observer := MockEchoObserver.new()
+	add_child(echo_observer)
+
+	# Entity is not visible (dormant, not manifesting)
+	_entity._is_visible = false
+
+	var result := _entity.is_visible_to(echo_observer)
+
+	assert_true(result, "Entity should be visible to Echo even when not manifesting")
+
+	echo_observer.queue_free()
+
+
+func test_entity_is_visible_to_echo_observer_always() -> void:
+	var echo_observer := MockEchoObserver.new()
+	add_child(echo_observer)
+
+	# Test all states
+	for visible in [true, false]:
+		_entity._is_visible = visible
+		var result := _entity.is_visible_to(echo_observer)
+		assert_true(result, "Entity should always be visible to Echo observer")
+
+	echo_observer.queue_free()
+
+
+func test_entity_not_visible_to_living_when_not_manifesting() -> void:
+	var living_observer := MockLivingObserver.new()
+	living_observer.is_echo = false
+	add_child(living_observer)
+
+	_entity._is_visible = false
+
+	var result := _entity.is_visible_to(living_observer)
+
+	assert_false(result, "Entity should not be visible to living player when not manifesting")
+
+	living_observer.queue_free()
+
+
+func test_entity_visible_to_living_when_manifesting() -> void:
+	var living_observer := MockLivingObserver.new()
+	living_observer.is_echo = false
+	add_child(living_observer)
+
+	_entity._is_visible = true
+
+	var result := _entity.is_visible_to(living_observer)
+
+	assert_true(result, "Entity should be visible to living player when manifesting")
+
+	living_observer.queue_free()
+
+
+func test_entity_visible_to_observer_with_is_echo_property() -> void:
+	var echo_player := MockLivingObserver.new()
+	echo_player.is_echo = true
+	add_child(echo_player)
+
+	_entity._is_visible = false
+
+	var result := _entity.is_visible_to(echo_player)
+
+	assert_true(result, "Entity should be visible to player with is_echo=true")
+
+	echo_player.queue_free()

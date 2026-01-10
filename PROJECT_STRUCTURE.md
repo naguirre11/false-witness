@@ -1,6 +1,6 @@
 # Project Structure
 
-**Last Updated**: 2026-01-08
+**Last Updated**: 2026-01-10
 
 ## Directory Overview
 
@@ -26,6 +26,7 @@ false_witness/
 │   │   ├── networking/       # Network-related resources
 │   │   ├── steam_manager.gd  # Steam initialization
 │   │   └── network_manager.gd # Lobby & P2P networking
+│   ├── entity/               # Entity AI and hunt systems
 │   ├── equipment/            # Equipment system
 │   ├── evidence/             # Evidence system (collection, tracking)
 │   ├── interaction/          # Interaction system
@@ -65,6 +66,13 @@ src/
 │   │   └── player_data.gd    # Synchronized player state (PlayerData resource)
 │   ├── steam_manager.gd      # Steam init
 │   └── network_manager.gd    # Dual backend networking (Steam + ENet)
+├── entity/
+│   ├── entity.gd             # Entity base class (CharacterBody3D)
+│   ├── entity_manager.gd     # EntityManager autoload
+│   ├── hunt_detection.gd     # HuntDetection static utilities
+│   ├── sanity_manager.gd     # SanityManager (team sanity tracking)
+│   ├── hiding_spot.gd        # HidingSpot for player concealment
+│   └── hiding_spot_door.gd   # HidingSpotDoor with search mechanics
 ├── equipment/
 │   ├── equipment.gd          # Equipment base class (Node3D)
 │   ├── equipment_slot.gd     # EquipmentSlot resource for slot management
@@ -82,7 +90,8 @@ src/
 │   ├── interaction_manager.gd # Raycast detection and input handling
 │   └── interaction_prompt_ui.gd # UI component for interaction prompts
 ├── player/
-│   └── player_controller.gd  # First-person movement, look, sprint, crouch
+│   ├── player_controller.gd  # First-person movement, look, sprint, crouch
+│   └── echo_controller.gd    # Dead player Echo state controller
 └── ui/
     ├── evidence_board.gd     # Evidence board panel (displays all evidence)
     └── evidence_slot.gd      # Individual evidence type slot
@@ -193,7 +202,8 @@ Raycast-based interaction system for interacting with environment objects.
 3-slot equipment loadout for investigation tools.
 
 **Equipment** (Node3D base class):
-- Types: EMF_READER, SPIRIT_BOX, JOURNAL, THERMOMETER, UV_FLASHLIGHT, DOTS_PROJECTOR, VIDEO_CAMERA, PARABOLIC_MIC, CRUCIFIX, SAGE_BUNDLE, SALT
+- Evidence Equipment: EMF Reader, Thermometer, Ghost Writing Book, Spectral Calibrator, Spectral Lens Reader, Dowsing Rods, Aura Imager
+- Protection Items: Crucifix, Sage Bundle, Salt
 - Use modes: HOLD, TOGGLE, INSTANT
 - States: INACTIVE, ACTIVE, COOLDOWN
 - Virtual methods: `_use_impl()`, `_stop_using_impl()`, `get_detectable_evidence()`

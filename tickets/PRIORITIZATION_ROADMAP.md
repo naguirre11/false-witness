@@ -205,6 +205,31 @@ FW-001 (Project Init)
 
 ---
 
+## Entity-Evidence Matrix
+
+Each entity produces exactly 3 evidence types from the implemented system. Overlaps are intentional for Cultist gameplay.
+
+| Entity | Evidence 1 | Evidence 2 | Evidence 3 | Overlap With |
+|--------|-----------|-----------|-----------|--------------|
+| **Phantom** | EMF_SIGNATURE | PRISM_READING | VISUAL_MANIFESTATION | Wraith (EMF+PRISM) |
+| **Wraith** | EMF_SIGNATURE | PRISM_READING | AURA_PATTERN | Phantom (EMF+PRISM) |
+| **Shade** | EMF_SIGNATURE | GHOST_WRITING | FREEZING_TEMPERATURE | Revenant (GHOST+FREEZING) |
+| **Banshee** | AURA_PATTERN | VISUAL_MANIFESTATION | HUNT_BEHAVIOR | Goryo (AURA+VISUAL) |
+| **Revenant** | FREEZING_TEMPERATURE | GHOST_WRITING | HUNT_BEHAVIOR | Shade (GHOST+FREEZING) |
+| **Poltergeist** | PHYSICAL_INTERACTION | PRISM_READING | GHOST_WRITING | Mare (PRISM+GHOST) |
+| **Mare** | PRISM_READING | AURA_PATTERN | GHOST_WRITING | Poltergeist (PRISM+GHOST) |
+| **Demon** | FREEZING_TEMPERATURE | PHYSICAL_INTERACTION | AURA_PATTERN | Listener (FREEZING+AURA) |
+| **Listener** | FREEZING_TEMPERATURE | GHOST_WRITING | AURA_PATTERN | Demon (FREEZING+AURA) |
+| **Goryo** | AURA_PATTERN | VISUAL_MANIFESTATION | EMF_SIGNATURE | Banshee (AURA+VISUAL) |
+
+**Design Notes:**
+- Phantom/Wraith share 2 evidence; differentiate by VISUAL vs AURA
+- Shade/Revenant share 2 evidence; differentiate by EMF vs HUNT_BEHAVIOR
+- HUNT_BEHAVIOR is unfalsifiable (all players observe hunts)
+- Cooperative evidence (PRISM, AURA) requires trust between players
+
+---
+
 ## Notes
 
 - Priorities are relative within each phase

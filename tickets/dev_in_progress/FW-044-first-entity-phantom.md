@@ -15,7 +15,7 @@ Create the first complete entity type - the Phantom. This establishes the patter
 ## Acceptance Criteria
 
 - [ ] Phantom entity class extending Entity base
-- [ ] Evidence types: EMF 5, Spirit Box, DOTS
+- [ ] Evidence types: EMF_SIGNATURE, PRISM_READING, VISUAL_MANIFESTATION
 - [ ] Unique behavior: Looking at Phantom drops sanity faster
 - [ ] Phantom can disappear when looked at during manifestation
 - [ ] Hunt behavior follows base with unique audio
@@ -24,10 +24,16 @@ Create the first complete entity type - the Phantom. This establishes the patter
 
 ## Technical Notes
 
-From GDD entity matrix:
-- Phantom: EMF 5, Spirit Box, DOTS
+**Evidence Types (using implemented system):**
+- EMF_SIGNATURE - Detected by EMF Reader (level 5)
+- PRISM_READING - Detected by Spectral Prism Rig (cooperative symmetric)
+- VISUAL_MANIFESTATION - Full/partial entity appearances (readily apparent)
 
-Phantom shares EMF 5 + Spirit Box with Wraith - only DOTS differentiates. This overlap is intentional for Cultist gameplay.
+**Cultist Overlap:**
+Phantom shares EMF_SIGNATURE + PRISM_READING with Wraith. Only VISUAL_MANIFESTATION vs AURA_PATTERN differentiates them. This overlap is intentional - Cultist needs only contaminate one evidence type to cause misidentification.
+
+**Behavioral Tell:**
+Disappears instantly when photographed during manifestation. Camera becomes a defensive tool.
 
 ## Out of Scope
 

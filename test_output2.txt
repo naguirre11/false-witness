@@ -1,0 +1,2184 @@
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+[SteamManager] Initialized - User: Sempre Libera (ID: 76561198056548542)
+[NetworkManager] Steam backend initialized
+[EventBus] Initialized - Global signal hub ready
+[GameManager] Initialized - State: NONE
+[EvidenceManager] Initialized - Evidence tracking ready
+[VerificationManager] Initialized - Trust-level verification rules active
+[EntityManager] Initialized
+[SanityManager] Initialized
+---  GUT  ---
+[1m[INFO]:  [0musing [C:/Users/vinco/AppData/Roaming/Godot/app_userdata/False Witness] for temporary output.
+Godot version:  4.4.1
+GUT version:  9.3.0
+[4m
+
+res://tests/test_aura_enums.gd
+[0m* test_cold_blue_maps_to_passive
+* test_hot_red_maps_to_aggressive
+* test_pale_green_maps_to_territorial
+* test_deep_purple_maps_to_roaming
+* test_none_color_maps_to_unknown
+* test_tight_contained_maps_to_passive
+* test_spiking_erratic_maps_to_aggressive
+* test_diffuse_spreading_maps_to_territorial
+* test_swirling_mobile_maps_to_roaming
+* test_none_form_maps_to_unknown
+* test_cold_blue_expects_tight_contained
+* test_hot_red_expects_spiking_erratic
+* test_pale_green_expects_diffuse_spreading
+* test_deep_purple_expects_swirling_mobile
+* test_none_color_expects_none_form
+* test_tight_contained_expects_cold_blue
+* test_spiking_erratic_expects_hot_red
+* test_diffuse_spreading_expects_pale_green
+* test_swirling_mobile_expects_deep_purple
+* test_none_form_expects_none_color
+* test_cold_blue_tight_contained_is_consistent
+* test_hot_red_spiking_erratic_is_consistent
+* test_pale_green_diffuse_spreading_is_consistent
+* test_deep_purple_swirling_mobile_is_consistent
+* test_cold_blue_spiking_erratic_is_inconsistent
+* test_hot_red_diffuse_spreading_is_inconsistent
+* test_none_color_is_never_consistent
+* test_none_form_is_never_consistent
+* test_get_color_name_cold_blue
+* test_get_color_name_hot_red
+* test_get_color_name_pale_green
+* test_get_color_name_deep_purple
+* test_get_color_name_none
+* test_get_form_name_tight_contained
+* test_get_form_name_spiking_erratic
+* test_get_form_name_diffuse_spreading
+* test_get_form_name_swirling_mobile
+* test_get_form_name_none
+* test_get_temperament_name_passive
+* test_get_temperament_name_aggressive
+* test_get_temperament_name_territorial
+* test_get_temperament_name_roaming
+* test_get_temperament_name_unknown
+* test_get_temperament_description_passive
+* test_get_temperament_description_aggressive
+* test_get_temperament_description_territorial
+* test_get_temperament_description_roaming
+* test_get_all_colors_returns_four
+* test_get_all_colors_excludes_none
+* test_get_all_forms_returns_four
+* test_get_all_forms_excludes_none
+* test_aura_color_has_five_values
+* test_aura_form_has_five_values
+* test_entity_temperament_has_five_values
+* test_all_color_form_mappings_are_bidirectional
+* test_all_form_color_mappings_are_bidirectional
+* test_get_combined_signature_both_none
+* test_get_combined_signature_color_only
+* test_get_combined_signature_form_only
+* test_get_combined_signature_both_present
+* test_all_matching_pairs_are_consistent
+* test_all_mismatching_pairs_are_inconsistent
+[1m62/62 passed.
+[0m[4m
+
+res://tests/test_aura_imager.gd
+[0m* test_initial_imager_state_is_idle
+* test_initial_resolution_is_zero
+* test_equipment_type_is_aura_imager
+* test_is_not_primary_equipment
+* test_trust_dynamic_is_asymmetric
+* test_not_capturing_initially
+* test_initial_color_is_none
+* test_initial_form_is_none
+* test_cannot_use_without_partner
+* test_can_use_with_partner
+* test_partner_link_is_bidirectional
+* test_using_imager_sets_positioning_state
+* test_stop_using_sets_idle_state
+* test_imager_state_changed_signal_emitted
+* test_imager_state_name_idle
+* test_imager_state_name_positioning
+* test_positioning_valid_with_correct_setup
+* test_positioning_invalid_without_anchor
+* test_positioning_invalid_when_imager_in_front
+* test_positioning_violations_populated
+* test_positioning_changed_signal_emitted
+* test_has_line_of_sight_when_positioned
+* test_issue_direction_emits_signal
+* test_last_direction_updated
+* test_direction_names
+* test_issuing_direction_changes_state_to_directing
+* test_resolution_changes_signal_emitted
+* test_color_not_visible_at_low_resolution
+* test_form_requires_higher_resolution_than_color
+* test_resolution_increases_with_alignment
+* test_fully_resolved_at_high_resolution
+* test_get_aura_color_when_resolved
+* test_get_aura_form_when_resolved
+* test_combined_signature_format
+* test_is_consistent_when_matching
+* test_is_not_consistent_when_mismatched
+* test_color_name_display
+* test_form_name_display
+* test_cannot_start_capture_when_idle
+* test_cannot_start_capture_without_resolution
+* test_can_start_capture_with_resolution
+* test_capture_sets_recording_state
+* test_capture_progress_starts_at_zero
+* test_capture_progress_increases
+* test_capture_completes_after_duration
+* test_cancel_capture_stops_recording
+* test_cannot_start_capture_twice
+* test_create_evidence_returns_dictionary
+* test_evidence_includes_both_collector_ids
+* test_evidence_quality_strong_with_good_alignment
+* test_evidence_quality_weak_with_poor_alignment
+* test_quality_name_display
+* test_observer_cannot_see_screen_when_far
+* test_observer_can_see_screen_when_close_behind
+* test_observer_cannot_see_screen_from_front
+* test_observable_state_excludes_screen_content
+* test_network_state_includes_imager_state
+* test_network_state_includes_resolution
+* test_network_state_includes_capture_status
+* test_network_state_includes_positioning
+* test_apply_network_state
+* test_reset_imager
+* test_detectable_evidence_includes_aura_pattern
+* test_alignment_lost_cancels_capture
+[1m64/64 passed.
+[0m[4m
+
+res://tests/test_calibrator.gd
+[0m* test_initial_state_is_idle
+* test_initial_locked_pattern_is_none
+* test_initial_filters_at_zero
+* test_equipment_type_is_calibrator
+* test_is_primary_equipment
+* test_viewfinder_not_active_initially
+* test_not_aligned_initially
+* test_activate_viewfinder_succeeds_with_anchor
+* test_activate_viewfinder_sets_viewing_state
+* test_activate_viewfinder_emits_signal
+* test_activate_viewfinder_fails_without_partner
+* test_activate_viewfinder_fails_without_anchor
+* test_activate_viewfinder_fails_when_locked
+* test_activate_viewfinder_fails_when_partner_out_of_range
+* test_activate_viewfinder_fails_when_anchor_out_of_range
+* test_viewfinder_active_after_activation
+* test_get_current_anchor_returns_anchor
+* test_deactivate_viewfinder_sets_idle_state
+* test_deactivate_viewfinder_emits_signal
+* test_deactivate_does_nothing_when_locked
+* test_viewfinder_not_active_after_deactivation
+* test_rotate_filter_changes_position
+* test_rotate_filter_wraps_around
+* test_rotate_filter_counter_clockwise
+* test_rotate_filter_counter_wraps_correctly
+* test_rotate_filter_emits_signal
+* test_rotate_filter_transitions_to_aligning
+* test_rotate_filter_fails_when_idle
+* test_rotate_filter_fails_when_locked
+* test_rotate_invalid_filter_fails
+* test_rotate_all_filters
+* test_get_filter_count
+* test_get_positions_per_filter
+* test_alignment_achieved_when_filters_match
+* test_alignment_achieved_emits_signal
+* test_alignment_lost_when_filter_moves
+* test_get_current_pattern_when_aligned
+* test_get_current_pattern_when_not_aligned
+* test_alignment_progress_partial
+* test_alignment_progress_full
+* test_lock_calibration_succeeds
+* test_lock_sets_locked_state
+* test_lock_emits_signal
+* test_lock_captures_aligned_pattern
+* test_lock_captures_none_when_misaligned
+* test_lock_fails_when_idle
+* test_lock_fails_when_already_locked
+* test_is_properly_aligned_true
+* test_is_properly_aligned_false_when_misaligned
+* test_cannot_use_when_locked
+* test_reset_sets_idle_state
+* test_reset_clears_locked_pattern
+* test_reset_clears_filter_positions
+* test_reset_clears_aligned_state
+* test_reset_emits_state_change_signal
+* test_alignment_with_circle_pattern
+* test_alignment_with_square_pattern
+* test_alignment_with_spiral_pattern
+* test_can_lock_at_wrong_alignment
+* test_misaligned_lock_pattern_is_none
+* test_no_enforcement_of_truthful_reporting
+* test_state_transitions_idle_to_viewing
+* test_state_transitions_viewing_to_aligning
+* test_state_transitions_aligning_to_locked
+* test_viewfinder_active_in_viewing_state
+* test_viewfinder_active_in_aligning_state
+* test_viewfinder_not_active_in_locked_state
+* test_use_activates_viewfinder
+* test_toggle_off_deactivates_viewfinder
+* test_get_detectable_evidence
+* test_network_state_includes_calibration_state
+* test_network_state_includes_filter_positions
+* test_network_state_includes_locked_pattern
+* test_apply_network_state
+[33m[WARNING]:  [0mTest script has 71 unfreed children.  Increase log level for more details.
+[1m74/74 passed.
+[0m[4m
+
+res://tests/test_cooperative_equipment.gd
+[0m* test_link_partner_succeeds
+* test_link_partner_sets_partner
+* test_link_partner_is_reciprocal
+* test_link_partner_emits_signal
+* test_link_null_partner_fails
+* test_link_self_fails
+* test_has_partner_false_initially
+* test_has_partner_true_after_link
+* test_unlink_partner_clears_partner
+* test_unlink_partner_breaks_reciprocal
+* test_unlink_partner_emits_signal
+* test_unlink_without_partner_is_safe
+* test_is_partner_in_range_true_when_close
+* test_is_partner_in_range_false_when_far
+* test_is_partner_in_range_false_without_partner
+* test_is_partner_in_range_at_exact_boundary
+* test_is_partner_in_range_just_over_boundary
+* test_get_partner_distance_calculates_correctly
+* test_get_partner_distance_inf_without_partner
+* test_custom_max_distance_affects_range_check
+* test_larger_max_distance_allows_farther_range
+* test_can_use_requires_partner
+* test_can_use_requires_in_range_partner
+* test_can_use_succeeds_with_linked_in_range_partner
+* test_initial_operation_state_is_idle
+* test_use_sets_operation_state_to_operating
+* test_stop_using_resets_operation_state_to_idle
+* test_is_operating_true_when_active
+* test_is_operating_false_when_idle
+* test_reset_operation_returns_to_idle
+* test_default_trust_dynamic_is_symmetric
+* test_can_set_asymmetric_trust_dynamic
+* test_get_network_state_includes_operation_state
+* test_get_network_state_includes_partner_distance
+* test_apply_network_state_restores_operation_state
+* test_proximity_warning_emitted_at_warning_distance
+* test_proximity_warning_not_emitted_when_close
+* test_proximity_failed_emitted_when_too_far
+* test_relink_partner_unlinks_previous
+[33m[WARNING]:  [0mTest script has 159 unfreed children.  Increase log level for more details.
+[1m39/39 passed.
+[0m[4m
+
+res://tests/test_crucifix.gd
+[0m* test_equipment_type
+* test_equipment_name
+* test_use_mode_is_instant
+* test_max_charges_is_two
+* test_initial_charges_is_two
+* test_placement_mode_is_placed
+* test_effective_radius
+* test_demon_radius_multiplier
+* test_place_crucifix
+[Crucifix] Placed at (1.000000, 0.000000, 2.000000) with 2 charges
+[33m    [Orphans]:  [0m3.0 new orphans in test.
+* test_placement_preserves_charges
+[Crucifix] Placed at (1.000000, 0.000000, 2.000000) with 2 charges
+[33m    [Orphans]:  [0m3.0 new orphans in test.
+* test_normal_entity_radius
+* test_demon_entity_radius
+* test_trigger_consumes_charge
+[Crucifix] Placed at (0.000000, 0.000000, 0.000000) with 2 charges
+[33m    [Orphans]:  [0m3.0 new orphans in test.
+* test_two_triggers_deplete_crucifix
+[Crucifix] Placed at (0.000000, 0.000000, 0.000000) with 2 charges
+[Crucifix] Depleted at (0.000000, 0.000000, 0.000000)
+[33m    [Orphans]:  [0m3.0 new orphans in test.
+* test_trigger_emits_charge_used
+[Crucifix] Placed at (0.000000, 0.000000, 0.000000) with 2 charges
+[33m    [Orphans]:  [0m3.0 new orphans in test.
+* test_depletion_emits_depleted
+[Crucifix] Placed at (0.000000, 0.000000, 0.000000) with 2 charges
+[Crucifix] Depleted at (0.000000, 0.000000, 0.000000)
+[33m    [Orphans]:  [0m3.0 new orphans in test.
+* test_trigger_fails_without_placement
+* test_trigger_fails_when_depleted
+[Crucifix] Placed at (0.000000, 0.000000, 0.000000) with 2 charges
+[Crucifix] Depleted at (0.000000, 0.000000, 0.000000)
+[33m    [Orphans]:  [0m3.0 new orphans in test.
+* test_creates_placed_visual
+[Crucifix] Placed at (1.000000, 0.000000, 1.000000) with 2 charges
+[33m    [Orphans]:  [0m3.0 new orphans in test.
+* test_network_state_includes_base_data
+[Crucifix] Placed at (1.000000, 2.000000, 3.000000) with 2 charges
+[33m    [Orphans]:  [0m3.0 new orphans in test.
+* test_network_state_charges
+[Crucifix] Placed at (0.000000, 0.000000, 0.000000) with 2 charges
+[33m    [Orphans]:  [0m3.0 new orphans in test.
+* test_is_entity_demon_with_method
+* test_is_entity_demon_with_property
+* test_is_not_demon_for_other_entity
+* test_is_not_demon_for_null
+[1m25/25 passed.
+[0m[4m
+
+res://tests/test_dowsing_rods.gd
+[0m* test_initial_rod_state_is_idle
+* test_initial_rod_behavior_is_neutral
+* test_initial_rod_angles_are_zero
+* test_initial_alignment_quality_is_zero
+* test_initial_alignment_level_is_none
+* test_equipment_type_is_dowsing_rods
+* test_is_primary_equipment
+* test_trust_dynamic_is_asymmetric
+* test_not_holding_steady_initially
+* test_using_rods_sets_held_state
+* test_stop_using_rods_sets_idle_state
+* test_rod_state_changed_signal_emitted
+* test_rod_state_name_idle
+* test_rod_state_name_held
+* test_rod_behavior_neutral_name
+* test_rod_behavior_changes_based_on_alignment
+* test_rod_behavior_changed_signal_emitted
+* test_rod_angles_vector2
+* test_rod_angles_change_with_alignment
+* test_rods_adjusted_signal_emitted
+* test_alignment_quality_with_valid_setup
+* test_alignment_level_updates
+* test_perfect_alignment_has_strong_quality
+* test_alignment_achieved_signal
+* test_alignment_lost_signal
+* test_start_hold_steady_requires_aligned_state
+* test_start_hold_steady_emits_signal
+* test_stop_hold_steady_emits_signal
+* test_hold_steady_progress_starts_at_zero
+* test_hold_steady_progress_increases
+* test_hold_steady_complete_after_duration
+* test_cannot_start_hold_steady_twice
+* test_position_changed_signal_emitted_on_move
+* test_get_facing_direction
+* test_movement_breaks_hold_steady
+* test_observable_state_contains_rod_state
+* test_observable_state_contains_rod_behavior
+* test_observable_state_contains_rod_angles
+* test_observable_state_contains_position
+* test_observable_state_contains_facing
+* test_observable_state_contains_hold_status
+* test_is_properly_positioned
+* test_not_properly_positioned_when_seeking
+* test_no_anchor_when_out_of_range
+* test_anchor_found_when_in_range
+* test_finds_closest_anchor
+* test_requires_partner_linked
+* test_seeking_state_without_partner
+* test_network_state_includes_rod_state
+* test_network_state_includes_rod_behavior
+* test_network_state_includes_angles
+* test_network_state_includes_alignment
+* test_network_state_includes_hold_status
+* test_apply_network_state
+* test_reset_rods
+* test_on_reading_complete_stops_hold_steady
+* test_detectable_evidence_includes_aura_temperament
+[33m[WARNING]:  [0mTest script has 46 unfreed children.  Increase log level for more details.
+[1m57/57 passed.
+[0m[4m
+
+res://tests/test_emf_reader.gd
+[0m* test_equipment_type_is_emf_reader
+* test_equipment_name_is_set
+* test_use_mode_is_hold
+* test_detectable_evidence_includes_emf_signature
+* test_default_emf_level_is_zero
+* test_emf_level_zero_when_inactive
+* test_emf_level_detected_when_active
+[EMFReader] Activated
+* test_level_5_at_very_close_range
+[EMFReader] Activated
+* test_level_decreases_with_distance
+[EMFReader] Activated
+* test_no_detection_outside_range
+[EMFReader] Activated
+* test_level_reset_when_deactivated
+[EMFReader] Activated
+[EMFReader] Deactivated
+* test_level_changed_signal_emitted
+[EMFReader] Activated
+* test_level_changed_signal_on_stop
+[EMFReader] Activated
+[EMFReader] Deactivated
+* test_default_quality_is_weak
+[EMFReader] Activated
+* test_quality_weak_when_moving
+[EMFReader] Activated
+* test_quality_strong_when_stationary_and_close
+[EMFReader] Activated
+* test_quality_weak_when_far_even_if_stationary
+[EMFReader] Activated
+* test_is_strong_reading_helper
+[EMFReader] Activated
+* test_direction_zero_when_no_source
+[EMFReader] Activated
+* test_direction_points_to_source
+[EMFReader] Activated
+* test_direction_signal_emitted
+[EMFReader] Activated
+* test_direction_zero_when_out_of_range
+[EMFReader] Activated
+* test_source_distance_returns_correct_value
+[EMFReader] Activated
+* test_source_distance_inf_when_no_source
+[EMFReader] Activated
+* test_higher_activity_increases_range
+[EMFReader] Activated
+* test_zero_activity_no_reading
+[EMFReader] Activated
+* test_network_state_includes_emf_level
+[EMFReader] Activated
+* test_network_state_includes_direction
+[EMFReader] Activated
+* test_network_state_includes_quality
+[EMFReader] Activated
+* test_apply_network_state_sets_level
+* test_apply_network_state_sets_direction
+* test_evidence_detected_signal_on_level_5
+[EMFReader] Activated
+* test_evidence_not_collected_below_level_5
+[EMFReader] Activated
+* test_detects_nearest_source
+[EMFReader] Activated
+* test_direction_points_to_strongest
+[EMFReader] Activated
+[33m    [WARNING]:  [0mWarn:  Float/Int comparison.  Got FLOAT but expected INT
+[33m[WARNING]:  [0mTest script has 24 unfreed children.  Increase log level for more details.
+[1m35/35 passed.
+[0m[4m
+
+res://tests/test_emf_source.gd
+[0m* test_added_to_emf_source_group
+* test_default_activity_is_one
+* test_base_activity_sets_current
+* test_set_activity_updates_value
+* test_set_activity_clamps_negative
+* test_set_activity_emits_signal
+* test_set_activity_no_signal_if_unchanged
+* test_trigger_spike_increases_activity
+* test_trigger_spike_emits_signal
+* test_spike_ends_after_duration
+* test_is_active_true_during_spike
+* test_is_active_false_after_spike
+* test_auto_pulse_off_by_default
+* test_auto_pulse_triggers_spike
+* test_auto_pulse_cycles
+* test_activity_changed_signal_on_spike_end
+* test_is_active_with_elevated_base_activity
+* test_consecutive_spikes
+[33m[WARNING]:  [0mTest script has 19 unfreed children.  Increase log level for more details.
+[1m18/18 passed.
+[0m[4m
+
+res://tests/test_entity.gd
+[0m* test_entity_initializes_with_dormant_state
+* test_entity_type_returns_configured_value
+* test_entity_default_export_values
+* test_entity_not_visible_initially
+* test_entity_not_hunting_initially
+* test_change_state_updates_state
+[Entity:TestEntity] State: Dormant -> Active
+* test_change_state_emits_signal
+[Entity:TestEntity] State: Dormant -> Active
+* test_change_state_to_same_state_does_nothing
+* test_all_states_have_valid_names
+[Entity:TestEntity] State: Dormant -> Active
+[Entity:TestEntity] State: Active -> Hunting
+[Entity:TestEntity] State: Hunting -> Manifesting
+* test_on_hunt_started_changes_to_hunting_state
+[Entity:TestEntity] State: Dormant -> Hunting
+* test_on_hunt_ended_changes_to_active_state
+[Entity:TestEntity] State: Dormant -> Hunting
+[Entity:TestEntity] State: Hunting -> Active
+* test_hunt_clears_target_on_end
+[Entity:TestEntity] State: Dormant -> Hunting
+[Entity:TestEntity] State: Hunting -> Active
+* test_get_current_speed_returns_zero_in_dormant
+* test_get_current_speed_returns_base_speed_in_active
+[Entity:TestEntity] State: Dormant -> Active
+* test_get_current_speed_returns_hunt_unaware_speed_when_not_aware
+[Entity:TestEntity] State: Dormant -> Hunting
+* test_get_current_speed_returns_hunt_aware_speed_when_aware
+[Entity:TestEntity] State: Dormant -> Hunting
+* test_start_manifestation_changes_state
+[Entity:TestEntity] State: Dormant -> Active
+[Entity:TestEntity] State: Active -> Manifesting
+* test_start_manifestation_blocked_during_hunt
+[Entity:TestEntity] State: Dormant -> Hunting
+* test_end_manifestation_returns_to_active
+[Entity:TestEntity] State: Dormant -> Active
+[Entity:TestEntity] State: Active -> Manifesting
+[Entity:TestEntity] State: Manifesting -> Active
+* test_manifestation_cooldown_prevents_immediate_remanifest
+[Entity:TestEntity] State: Dormant -> Active
+[Entity:TestEntity] State: Active -> Manifesting
+[Entity:TestEntity] State: Manifesting -> Active
+* test_visibility_changed_signal_emitted
+[Entity:TestEntity] State: Dormant -> Active
+[Entity:TestEntity] State: Active -> Manifesting
+* test_get_behavioral_tell_type_returns_unknown_by_default
+* test_trigger_behavioral_tell_emits_signal
+[Entity:TestEntity] Behavioral tell triggered: unknown
+* test_favorite_room_empty_initially
+* test_set_favorite_room_updates_value
+* test_set_manager_stores_reference
+* test_set_hunt_target_stores_target
+* test_set_hunt_target_sets_awareness
+[Entity:TestEntity] State: Dormant -> Hunting
+* test_get_network_state_includes_all_fields
+[Entity:TestEntity] State: Dormant -> Active
+* test_apply_network_state_updates_entity
+[Entity:TestEntity] State: Dormant -> Active
+* test_navigation_agent_created_on_ready
+* test_is_navigation_finished_returns_true_initially
+* test_entity_on_correct_collision_layer
+* test_entity_collision_mask_includes_world_and_player
+[33m[WARNING]:  [0mTest script has 23 unfreed children.  Increase log level for more details.
+[1m34/34 passed.
+[0m[4m
+
+res://tests/test_entity_manager.gd
+[0m* test_manager_initializes_with_default_state
+[EntityManager] Initialized
+* test_aggression_phase_name_returns_correct_strings
+[EntityManager] Initialized
+* test_spawn_entity_requires_server
+[EntityManager] Initialized
+* test_spawn_entity_rejects_duplicate
+[EntityManager] Initialized
+[EntityManager] Entity spawned at (0.000000, 0.000000, 0.000000) in room ''
+* test_despawn_entity_clears_active_entity
+[EntityManager] Initialized
+[EntityManager] Entity spawned at (0.000000, 0.000000, 0.000000) in room ''
+[EntityManager] Entity despawned
+* test_aggression_stays_dormant_before_5_minutes
+[EntityManager] Initialized
+* test_can_initiate_hunt_returns_false_in_dormant
+[EntityManager] Initialized
+* test_hunt_cooldown_remaining_returns_inf_in_dormant
+[EntityManager] Initialized
+* test_attempt_hunt_fails_without_entity
+[EntityManager] Initialized
+* test_is_hunting_returns_false_initially
+[EntityManager] Initialized
+* test_favorite_room_is_empty_initially
+[EntityManager] Initialized
+* test_is_server_defaults_to_false
+[EntityManager] Initialized
+[EntityManager] Initialized
+* test_set_is_server_updates_value
+[EntityManager] Initialized
+* test_reset_clears_all_state
+[EntityManager] Initialized
+[EntityManager] Entity spawned at (1.000000, 2.000000, 3.000000) in room 'TestRoom'
+[EntityManager] Entity despawned
+[EntityManager] Reset for new match
+* test_entity_spawned_signal_emitted
+[EntityManager] Initialized
+[EntityManager] Entity spawned at (0.000000, 0.000000, 0.000000) in room ''
+* test_entity_removed_signal_emitted
+[EntityManager] Initialized
+[EntityManager] Entity spawned at (0.000000, 0.000000, 0.000000) in room ''
+[EntityManager] Entity despawned
+* test_aggression_changed_signal_emitted_on_phase_change
+[EntityManager] Initialized
+* test_hunt_cooldowns_defined_for_all_phases
+[EntityManager] Initialized
+* test_hunt_cooldown_values_make_sense
+[EntityManager] Initialized
+* test_aggression_thresholds_are_progressive
+[EntityManager] Initialized
+* test_warning_phase_duration_constant
+[EntityManager] Initialized
+* test_is_in_warning_phase_false_initially
+[EntityManager] Initialized
+* test_get_warning_time_remaining_zero_when_not_in_warning
+[EntityManager] Initialized
+* test_cannot_initiate_hunt_during_warning_phase
+[EntityManager] Initialized
+* test_reset_clears_warning_phase_state
+[EntityManager] Initialized
+[EntityManager] Reset for new match
+* test_attempt_immediate_hunt_fails_without_entity
+[EntityManager] Initialized
+* test_attempt_immediate_hunt_succeeds_with_entity
+[EntityManager] Initialized
+[EntityManager] Entity spawned at (0.000000, 0.000000, 0.000000) in room ''
+[EntityManager] Hunt started
+* test_attempt_immediate_hunt_requires_server
+[EntityManager] Initialized
+[33m[WARNING]:  [0mTest script has 16 unfreed children.  Increase log level for more details.
+[1m28/28 passed.
+[0m[4m
+
+res://tests/test_equipment.gd
+[0m* test_default_state_is_inactive
+* test_default_not_equipped
+* test_default_not_active
+* test_equip_sets_owner
+* test_unequip_clears_owner
+* test_cannot_use_when_not_equipped
+* test_use_when_equipped_activates
+* test_use_emits_used_signal
+* test_stop_using_emits_signal
+* test_stop_using_returns_to_inactive
+* test_hold_mode_stops_when_released
+* test_toggle_mode_toggles_state
+* test_toggle_mode_ignores_stop_using
+* test_cooldown_sets_state
+* test_cooldown_prevents_use
+* test_cooldown_remaining_returns_time
+* test_cooldown_decreases_over_time
+* test_cooldown_ends_and_returns_to_inactive
+* test_state_changed_signal_on_use
+* test_state_changed_signal_on_stop
+* test_get_network_state_includes_state
+* test_get_network_state_includes_cooldown
+* test_apply_network_state_sets_state
+* test_apply_network_state_sets_cooldown
+* test_equipment_type_default
+* test_can_set_equipment_type
+* test_get_display_name_returns_equipment_name
+* test_can_use_during_hunt_default_true
+* test_detectable_evidence_returns_empty_by_default
+* test_unequip_stops_active_equipment
+[33m[WARNING]:  [0mTest script has 19 unfreed children.  Increase log level for more details.
+[1m30/30 passed.
+[0m[4m
+
+res://tests/test_equipment_manager.gd
+[0m* test_initializes_three_slots
+* test_slots_start_empty
+* test_active_slot_starts_at_zero
+* test_loadout_not_locked_initially
+* test_loadout_not_complete_when_empty
+* test_assign_equipment_to_slot
+* test_assign_emits_loadout_changed
+* test_assign_invalid_slot_fails
+* test_assign_negative_slot_fails
+* test_assign_duplicate_equipment_fails
+* test_clear_slot
+* test_clear_invalid_slot_fails
+* test_filled_slot_count_accurate
+* test_loadout_complete_when_all_filled
+* test_lock_loadout_sets_flag
+[EquipmentManager] Loadout locked with 0 equipment
+* test_lock_loadout_emits_signal
+[EquipmentManager] Loadout locked with 0 equipment
+* test_assign_fails_when_locked
+[EquipmentManager] Loadout locked with 0 equipment
+* test_clear_fails_when_locked
+[EquipmentManager] Loadout locked with 1 equipment
+* test_unlock_loadout_allows_changes
+[EquipmentManager] Loadout locked with 0 equipment
+[EquipmentManager] Loadout unlocked
+* test_set_active_slot
+* test_set_active_slot_emits_signal
+* test_set_same_slot_no_signal
+* test_set_invalid_slot_ignored
+* test_set_negative_slot_ignored
+* test_get_active_equipment_returns_null_when_empty
+* test_is_equipment_active_returns_false_when_no_equipment
+* test_set_input_enabled
+* test_set_local_player
+* test_get_network_state_includes_slots
+* test_get_network_state_includes_active_slot
+* test_get_network_state_includes_locked
+[EquipmentManager] Loadout locked with 0 equipment
+* test_apply_network_state_sets_slots
+* test_apply_network_state_sets_active_slot
+* test_apply_network_state_sets_locked
+* test_network_state_round_trip
+[EquipmentManager] Loadout locked with 3 equipment
+* test_get_slot_type_invalid_returns_negative
+* test_get_slot_type_negative_returns_negative
+* test_can_assign_all_equipment_types
+* test_unlock_when_not_locked_safe
+* test_lock_twice_safe
+[EquipmentManager] Loadout locked with 0 equipment
+* test_reassign_same_slot_different_type
+[33m[WARNING]:  [0mTest script has 4 unfreed children.  Increase log level for more details.
+[1m41/41 passed.
+[0m[4m
+
+res://tests/test_equipment_slot.gd
+[0m* test_default_equipment_type_is_empty
+* test_default_slot_index_is_zero
+* test_default_has_no_equipment
+* test_default_has_no_instance
+* test_assign_sets_equipment_type
+* test_assign_marks_has_equipment
+* test_assign_emits_signal
+* test_assign_same_type_no_signal
+* test_clear_resets_equipment_type
+* test_clear_marks_no_equipment
+* test_clear_emits_signal
+* test_clear_empty_slot_no_signal
+* test_has_instance_with_valid_node
+* test_has_instance_with_null
+* test_clear_clears_instance
+* test_get_type_name_when_empty
+* test_get_type_name_emf_reader
+* test_get_type_name_spirit_box
+* test_get_type_name_journal
+* test_get_type_name_thermometer
+* test_get_type_name_uv_flashlight
+* test_get_type_name_dots_projector
+* test_get_type_name_video_camera
+* test_get_type_name_parabolic_mic
+* test_type_to_name_returns_correct_names
+* test_type_to_name_unknown_type
+* test_name_to_type_returns_correct_types
+* test_name_to_type_unknown_name
+* test_get_scene_path_returns_path
+* test_get_scene_path_unknown_type
+* test_to_dict_includes_slot_index
+* test_to_dict_includes_equipment_type
+* test_from_dict_sets_slot_index
+* test_from_dict_sets_equipment_type
+* test_from_dict_emits_signal_on_type_change
+* test_serialization_round_trip
+[33m[WARNING]:  [0mTest script has 3 unfreed children.  Increase log level for more details.
+[1m36/36 passed.
+[0m[4m
+
+res://tests/test_event_bus.gd
+[0m* test_game_state_changed_signal_exists
+[EventBus] Initialized - Global signal hub ready
+* test_player_joined_signal_exists
+[EventBus] Initialized - Global signal hub ready
+* test_player_left_signal_exists
+[EventBus] Initialized - Global signal hub ready
+* test_evidence_detected_signal_exists
+[EventBus] Initialized - Global signal hub ready
+* test_hunt_started_signal_exists
+[EventBus] Initialized - Global signal hub ready
+* test_hunt_ended_signal_exists
+[EventBus] Initialized - Global signal hub ready
+* test_game_state_changed_emission
+[EventBus] Initialized - Global signal hub ready
+* test_player_joined_emission
+[EventBus] Initialized - Global signal hub ready
+* test_player_left_emission
+[EventBus] Initialized - Global signal hub ready
+* test_evidence_detected_emission
+[EventBus] Initialized - Global signal hub ready
+* test_hunt_started_emission
+[EventBus] Initialized - Global signal hub ready
+* test_match_ended_emission
+[EventBus] Initialized - Global signal hub ready
+* test_multiple_listeners
+[EventBus] Initialized - Global signal hub ready
+* test_phase_timer_tick_signal_exists
+[EventBus] Initialized - Global signal hub ready
+* test_phase_timer_expired_signal_exists
+[EventBus] Initialized - Global signal hub ready
+* test_phase_timer_extended_signal_exists
+[EventBus] Initialized - Global signal hub ready
+* test_phase_timer_tick_emission
+[EventBus] Initialized - Global signal hub ready
+* test_phase_timer_expired_emission
+[EventBus] Initialized - Global signal hub ready
+* test_phase_timer_extended_emission
+[EventBus] Initialized - Global signal hub ready
+[1m19/19 passed.
+[0m[4m
+
+res://tests/test_evidence.gd
+[0m* test_create_sets_type
+* test_create_sets_collector_id
+* test_create_sets_location
+* test_create_sets_default_quality_to_strong
+* test_create_with_weak_quality
+* test_create_auto_sets_category
+* test_create_auto_sets_trust_level
+* test_create_sets_timestamp
+* test_create_generates_uid
+* test_create_default_verification_unverified
+* test_create_cooperative_sets_secondary_collector
+* test_create_cooperative_sets_primary_collector
+* test_is_cooperative_true_for_prism
+* test_is_cooperative_true_for_aura
+* test_is_cooperative_false_for_emf
+* test_is_cooperative_false_for_ghost_writing
+* test_is_definitive_true_for_strong
+* test_is_definitive_false_for_weak
+* test_verify_changes_state
+* test_is_verified_true_after_verify
+* test_contest_changes_state
+* test_is_contested_true_after_contest
+* test_reset_verification_returns_to_unverified
+* test_get_display_name_emf
+* test_get_display_name_freezing
+* test_get_display_name_ghost_writing
+* test_get_category_name
+* test_get_trust_name
+* test_to_network_dict_includes_uid
+* test_to_network_dict_includes_type
+* test_to_network_dict_includes_location
+* test_from_network_dict_restores_type
+* test_from_network_dict_restores_collector
+* test_from_network_dict_restores_location
+* test_from_network_dict_restores_quality
+* test_from_network_dict_restores_verification_state
+* test_roundtrip_cooperative_evidence
+* test_equals_same_uid
+* test_equals_different_uid
+* test_equals_null_returns_false
+* test_to_string_contains_type
+* test_to_string_contains_quality
+[1m42/42 passed.
+[0m[4m
+
+res://tests/test_evidence_board.gd
+[0m* test_board_has_required_nodes
+* test_board_starts_hidden
+* test_title_label_text
+* test_show_board
+* test_hide_board
+* test_toggle_visibility_shows_when_hidden
+* test_toggle_visibility_hides_when_visible
+* test_force_visible_shows_board
+* test_force_visible_prevents_hiding
+* test_unforce_allows_hiding
+* test_creates_slots_for_all_evidence_types
+* test_evidence_categories_are_complete
+* test_equipment_derived_category_has_four_types
+* test_readily_apparent_category_has_two_types
+* test_triggered_test_category_has_one_type
+* test_behavior_based_category_has_one_type
+* test_deliberation_state_forces_visible
+* test_leaving_deliberation_unforces_visible
+* test_on_evidence_cleared_resets_slots
+* test_slot_scene_path_is_valid
+[1m20/20 passed.
+[0m[4m
+
+res://tests/test_evidence_enums.gd
+[0m* test_get_category_emf_is_equipment_derived
+* test_get_category_freezing_is_equipment_derived
+* test_get_category_prism_is_equipment_derived
+* test_get_category_aura_is_equipment_derived
+* test_get_category_ghost_writing_is_triggered_test
+* test_get_category_visual_is_readily_apparent
+* test_get_category_physical_is_readily_apparent
+* test_get_category_hunt_behavior_is_behavior_based
+* test_get_trust_level_hunt_behavior_is_unfalsifiable
+* test_get_trust_level_emf_is_high
+* test_get_trust_level_freezing_is_high
+* test_get_trust_level_visual_is_high
+* test_get_trust_level_physical_is_high
+* test_get_trust_level_aura_is_variable
+* test_get_trust_level_prism_is_low
+* test_get_trust_level_ghost_writing_is_sabotage_risk
+* test_is_cooperative_prism_true
+* test_is_cooperative_aura_true
+* test_is_cooperative_emf_false
+* test_is_cooperative_freezing_false
+* test_is_cooperative_ghost_writing_false
+* test_is_cooperative_visual_false
+* test_is_cooperative_physical_false
+* test_is_cooperative_hunt_behavior_false
+* test_get_evidence_name_emf
+* test_get_evidence_name_freezing
+* test_get_evidence_name_prism
+* test_get_evidence_name_aura
+* test_get_evidence_name_ghost_writing
+* test_get_evidence_name_visual
+* test_get_evidence_name_physical
+* test_get_evidence_name_hunt
+* test_get_category_name_readily_apparent
+* test_get_category_name_equipment_derived
+* test_get_category_name_triggered_test
+* test_get_category_name_behavior_based
+* test_get_trust_name_unfalsifiable
+* test_get_trust_name_high
+* test_get_trust_name_variable
+* test_get_trust_name_low
+* test_get_trust_name_sabotage_risk
+* test_get_verification_name_unverified
+* test_get_verification_name_verified
+* test_get_verification_name_contested
+* test_get_quality_name_strong
+* test_get_quality_name_weak
+* test_equipment_derived_count_is_four
+* test_readily_apparent_count_is_two
+* test_triggered_test_count_is_one
+* test_behavior_based_count_is_one
+* test_total_evidence_types_is_eight
+[1m51/51 passed.
+[0m[4m
+
+res://tests/test_evidence_manager.gd
+[0m* test_starts_with_no_evidence
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_collection_disabled_by_default
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+[EvidenceManager] Initialized - Evidence tracking ready
+* test_enable_collection
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_disable_collection
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+[EvidenceManager] Evidence collection disabled
+* test_collect_evidence_returns_evidence
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_collect_evidence_increments_count
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_collect_evidence_stores_type
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_collect_evidence_stores_collector
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_collect_evidence_stores_location
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_collect_evidence_stores_quality
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_collect_evidence_stores_equipment
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_collect_evidence_rejected_when_disabled
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+[EvidenceManager] Evidence collection disabled
+* test_collect_evidence_emits_signal
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_collect_cooperative_evidence
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_collect_cooperative_evidence_stores_both_collectors
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_collect_cooperative_non_cooperative_type_falls_back
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_evidence_by_type_returns_empty_initially
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_evidence_by_type_returns_matching
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_evidence_by_type_excludes_other_types
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_has_evidence_type_false_initially
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_has_evidence_type_true_after_collection
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_evidence_by_collector_returns_empty_initially
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_evidence_by_collector_returns_matching
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_evidence_by_collector_excludes_others
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_evidence_by_collector_multiple_evidence
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_evidence_by_uid_returns_null_for_unknown
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_evidence_by_uid_returns_evidence
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_all_evidence_empty_initially
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_all_evidence_returns_all
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_verify_evidence_changes_state
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_verify_evidence_rejects_same_collector
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_verify_evidence_rejects_unknown_uid
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_verify_evidence_emits_signal
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_contest_evidence_changes_state
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_contest_evidence_rejects_same_collector
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_contest_evidence_rejects_unknown_uid
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_contest_evidence_emits_contested_signal
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_verified_evidence_empty_initially
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_verified_evidence_returns_only_verified
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_contested_evidence_empty_initially
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_contested_evidence_returns_only_contested
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_get_definitive_evidence
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+* test_clear_evidence_removes_all
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+[EvidenceManager] All evidence cleared
+* test_clear_evidence_emits_signal
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+[EvidenceManager] All evidence cleared
+* test_clear_evidence_resets_type_index
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+[EvidenceManager] All evidence cleared
+* test_clear_evidence_resets_collector_index
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+[EvidenceManager] All evidence cleared
+* test_collect_all_evidence_types
+[EvidenceManager] Initialized - Evidence tracking ready
+[EvidenceManager] Evidence collection enabled
+[1m47/47 passed.
+[0m[4m
+
+res://tests/test_evidence_slot.gd
+[0m* test_slot_has_required_nodes
+* test_slot_has_minimum_size
+* test_setup_sets_evidence_type
+* test_setup_updates_label
+* test_default_not_collected
+* test_set_collected_true
+* test_set_collected_false
+* test_collected_updates_status_label_strong
+* test_collected_updates_status_label_weak
+* test_not_collected_shows_placeholder
+* test_get_evidence_type
+* test_slot_pressed_signal_emitted
+* test_slot_pressed_signal_has_type
+* test_all_evidence_types_have_names
+* test_slot_has_border_node
+* test_border_has_trust_color_unfalsifiable
+* test_border_has_trust_color_high
+* test_border_has_trust_color_variable
+* test_border_has_trust_color_low
+* test_border_has_trust_color_sabotage_risk
+* test_tooltip_set_on_button
+* test_tooltip_contains_trust_name
+* test_tooltip_contains_explanation
+* test_strong_reading_full_alpha
+* test_weak_reading_reduced_alpha
+* test_slot_has_verification_icon_node
+* test_slot_has_collector_row_node
+* test_verification_icon_empty_when_not_collected
+* test_verification_icon_shows_checkmark_for_unverified
+* test_verification_icon_shows_double_checkmark_for_verified
+* test_verification_icon_shows_warning_for_contested
+* test_verification_icon_green_for_verified
+* test_verification_icon_orange_for_contested
+* test_collector_row_empty_when_not_collected
+* test_collector_row_shows_one_collector
+* test_collector_row_shows_two_collectors_for_cooperative
+* test_get_evidence_returns_evidence_object
+* test_get_evidence_returns_null_when_not_collected
+* test_get_verification_state_returns_unverified_default
+* test_get_verification_state_returns_evidence_state
+* test_tooltip_contains_collector_when_collected
+* test_tooltip_contains_timestamp_when_collected
+* test_tooltip_contains_location_when_collected
+* test_tooltip_contains_verification_status_when_collected
+* test_tooltip_shows_secondary_collector_for_cooperative
+[1m45/45 passed.
+[0m[4m
+
+res://tests/test_example.gd
+[0m* test_example_passes
+* test_math_works
+[1m2/2 passed.
+[0m[4m
+
+res://tests/test_game_manager.gd
+[0m* test_initial_state_is_none
+[GameManager] Initialized - State: NONE
+* test_change_state_from_none_to_lobby
+[GameManager] Initialized - State: NONE
+[GameManager] State changed: NONE -> LOBBY
+[EvidenceManager] All evidence cleared
+[EvidenceManager] Evidence collection disabled
+* test_change_state_tracks_previous
+[GameManager] Initialized - State: NONE
+[GameManager] State changed: NONE -> LOBBY
+[EvidenceManager] All evidence cleared
+[EvidenceManager] Evidence collection disabled
+[GameManager] State changed: LOBBY -> SETUP
+* test_invalid_transition_returns_false
+[GameManager] Initialized - State: NONE
+* test_same_state_transition_returns_false
+[GameManager] Initialized - State: NONE
+* test_force_state_bypasses_validation
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: HUNT
+* test_reset_returns_to_none
+[GameManager] Initialized - State: NONE
+[GameManager] State changed: NONE -> LOBBY
+[EvidenceManager] All evidence cleared
+[EvidenceManager] Evidence collection disabled
+[GameManager] State reset to NONE
+* test_is_in_match_during_investigation
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: INVESTIGATION
+[GameManager] Timer started for INVESTIGATION - 720.0 seconds
+[EvidenceManager] Evidence collection enabled
+[EntityManager] Investigation started, server=false
+[SanityManager] Investigation started, drain active
+* test_is_in_match_false_in_lobby
+[GameManager] Initialized - State: NONE
+[GameManager] State changed: NONE -> LOBBY
+[EvidenceManager] All evidence cleared
+[EvidenceManager] Evidence collection disabled
+* test_can_players_move_during_investigation
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: INVESTIGATION
+[GameManager] Timer started for INVESTIGATION - 720.0 seconds
+[EvidenceManager] Evidence collection enabled
+[EntityManager] Investigation started, server=false
+[SanityManager] Investigation started, drain active
+* test_can_players_move_during_hunt
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: HUNT
+* test_can_players_move_false_in_deliberation
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: DELIBERATION
+[GameManager] Timer started for DELIBERATION - 180.0 seconds
+* test_valid_game_flow_sequence
+[GameManager] Initialized - State: NONE
+[GameManager] State changed: NONE -> LOBBY
+[EvidenceManager] All evidence cleared
+[EvidenceManager] Evidence collection disabled
+[GameManager] State changed: LOBBY -> SETUP
+[GameManager] State changed: SETUP -> INVESTIGATION
+[GameManager] Timer started for INVESTIGATION - 720.0 seconds
+[EvidenceManager] Evidence collection enabled
+[EntityManager] Investigation started, server=false
+[SanityManager] Investigation started, drain active
+[GameManager] State changed: INVESTIGATION -> HUNT
+[GameManager] State changed: HUNT -> RESULTS
+* test_hunt_can_return_to_investigation
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: HUNT
+[GameManager] State changed: HUNT -> INVESTIGATION
+[GameManager] Timer started for INVESTIGATION - 720.0 seconds
+[EvidenceManager] Evidence collection enabled
+* test_investigation_can_go_to_deliberation
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: INVESTIGATION
+[GameManager] Timer started for INVESTIGATION - 720.0 seconds
+[EvidenceManager] Evidence collection enabled
+[EntityManager] Investigation started, server=false
+[SanityManager] Investigation started, drain active
+[GameManager] State changed: INVESTIGATION -> DELIBERATION
+[GameManager] Timer started for DELIBERATION - 180.0 seconds
+[EvidenceManager] Evidence collection disabled
+[1m15/15 passed.
+[0m[4m
+
+res://tests/test_game_manager_timer.gd
+[0m* test_timer_starts_on_investigation
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: INVESTIGATION
+[GameManager] Timer started for INVESTIGATION - 720.0 seconds
+[EvidenceManager] Evidence collection enabled
+[EntityManager] Investigation started, server=false
+[SanityManager] Investigation started, drain active
+* test_timer_starts_on_deliberation
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: DELIBERATION
+[GameManager] Timer started for DELIBERATION - 180.0 seconds
+* test_timer_not_active_in_lobby
+[GameManager] Initialized - State: NONE
+[GameManager] State changed: NONE -> LOBBY
+[EvidenceManager] All evidence cleared
+[EvidenceManager] Evidence collection disabled
+* test_timer_stops_on_state_change
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: INVESTIGATION
+[GameManager] Timer started for INVESTIGATION - 720.0 seconds
+[EvidenceManager] Evidence collection enabled
+[EntityManager] Investigation started, server=false
+[SanityManager] Investigation started, drain active
+[GameManager] State changed: INVESTIGATION -> HUNT
+* test_timer_default_investigation_duration
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: INVESTIGATION
+[GameManager] Timer started for INVESTIGATION - 720.0 seconds
+[EvidenceManager] Evidence collection enabled
+[EntityManager] Investigation started, server=false
+[SanityManager] Investigation started, drain active
+* test_timer_default_deliberation_duration
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: DELIBERATION
+[GameManager] Timer started for DELIBERATION - 180.0 seconds
+* test_configure_phase_durations
+[GameManager] Initialized - State: NONE
+[GameManager] Phase durations configured - Investigation: 800s, Deliberation: 240s
+* test_configure_phase_durations_clamps_to_min
+[GameManager] Initialized - State: NONE
+[GameManager] Phase durations configured - Investigation: 720s, Deliberation: 180s
+* test_configure_phase_durations_clamps_to_max
+[GameManager] Initialized - State: NONE
+[GameManager] Phase durations configured - Investigation: 900s, Deliberation: 300s
+* test_pause_timer
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: INVESTIGATION
+[GameManager] Timer started for INVESTIGATION - 720.0 seconds
+[EvidenceManager] Evidence collection enabled
+[EntityManager] Investigation started, server=false
+[SanityManager] Investigation started, drain active
+[GameManager] Timer paused - 720.0 seconds remaining
+* test_resume_timer
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: INVESTIGATION
+[GameManager] Timer started for INVESTIGATION - 720.0 seconds
+[EvidenceManager] Evidence collection enabled
+[EntityManager] Investigation started, server=false
+[SanityManager] Investigation started, drain active
+[GameManager] Timer paused - 720.0 seconds remaining
+[GameManager] Timer resumed - 720.0 seconds remaining
+* test_extend_timer
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: INVESTIGATION
+[GameManager] Timer started for INVESTIGATION - 720.0 seconds
+[EvidenceManager] Evidence collection enabled
+[EntityManager] Investigation started, server=false
+[SanityManager] Investigation started, drain active
+[GameManager] Timer extended by 60.0 seconds - now 780.0 remaining
+* test_set_timer
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: INVESTIGATION
+[GameManager] Timer started for INVESTIGATION - 720.0 seconds
+[EvidenceManager] Evidence collection enabled
+[EntityManager] Investigation started, server=false
+[SanityManager] Investigation started, drain active
+[GameManager] Timer set to 300.0 seconds
+* test_reset_stops_timer
+[GameManager] Initialized - State: NONE
+[GameManager] State forced: INVESTIGATION
+[GameManager] Timer started for INVESTIGATION - 720.0 seconds
+[EvidenceManager] Evidence collection enabled
+[EntityManager] Investigation started, server=false
+[SanityManager] Investigation started, drain active
+[GameManager] State reset to NONE
+[EvidenceManager] Evidence collection disabled
+[1m14/14 passed.
+[0m[4m
+
+res://tests/test_ghost_writing_book.gd
+[0m* test_initialization
+* test_detectable_evidence_type
+* test_enums_exist
+* test_place_book_basic
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_place_book_emits_signals
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_cannot_place_when_already_placed
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_place_book_clears_previous_state
+[33m    [Orphans]:  [0m2.0 new orphans in test.
+* test_pickup_book_basic
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_pickup_book_emits_signals
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_cannot_pickup_when_not_placed
+* test_pickup_sabotage_tracking
+[33m    [Orphans]:  [0m2.0 new orphans in test.
+* test_move_book_basic
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_move_book_emits_signal
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_move_sabotage_tracking
+[33m    [Orphans]:  [0m2.0 new orphans in test.
+* test_move_history_records_multiple_moves
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_cannot_move_when_held
+* test_witness_registration
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_placer_cannot_be_own_witness
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_time_since_placement
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_writing_progress
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_has_writing_states
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_check_book_no_writing
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_check_book_with_writing
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_check_book_emits_signal
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_check_book_registers_result_witness
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_check_book_negative_evidence_after_max_wait
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_check_book_returns_was_moved
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_quality_weak_when_moved
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_quality_weak_when_no_witnesses
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_quality_weak_for_crude_scrawls
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_quality_strong_with_all_requirements
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_get_network_state
+[33m    [Orphans]:  [0m1.0 new orphan in test.
+* test_apply_network_state
+* test_multiple_place_pickup_cycles
+[33m    [Orphans]:  [0m3.0 new orphans in test.
+* test_move_history_cleared_on_new_placement
+[33m    [Orphans]:  [0m2.0 new orphans in test.
+* test_pickup_during_writing_and_written_states
+[33m    [Orphans]:  [0m2.0 new orphans in test.
+[33m[Orphans]:  [0m27.0 new orphans in script.
+[1m36/36 passed.
+[0m[4m
+
+res://tests/test_interactable.gd
+[0m* test_default_values
+* test_added_to_interactables_group
+* test_can_interact_returns_true_by_default
+* test_can_interact_returns_false_when_disabled
+* test_can_interact_returns_false_during_cooldown
+* test_can_interact_returns_false_after_one_shot_used
+* test_interact_returns_true_on_success
+* test_interact_returns_false_when_cannot_interact
+* test_interact_emits_interacted_signal
+* test_interact_sets_cooldown
+* test_interact_marks_as_used
+* test_cooldown_decreases_over_time
+* test_clear_cooldown_resets_timer
+* test_reset_one_shot_allows_reuse
+* test_set_interaction_enabled_emits_signal
+* test_set_interaction_enabled_no_signal_if_unchanged
+* test_is_interaction_enabled_returns_state
+* test_get_interaction_range_returns_configured_value
+* test_get_interaction_type_returns_configured_value
+* test_get_interaction_prompt_returns_configured_value
+* test_get_network_state_returns_correct_data
+* test_apply_network_state_updates_enabled
+* test_apply_network_state_updates_used
+* test_interaction_type_enum_values
+[33m[WARNING]:  [0mTest script has 21 unfreed children.  Increase log level for more details.
+[1m24/24 passed.
+[0m[4m
+
+res://tests/test_interaction_manager.gd
+[0m* test_finds_camera_in_head_node
+* test_starts_enabled
+* test_starts_without_target
+* test_set_enabled_updates_state
+* test_disabling_clears_target
+* test_disabling_emits_target_changed
+* test_has_target_returns_false_without_target
+* test_has_target_returns_true_with_valid_target
+* test_has_target_returns_false_if_target_freed
+* test_get_current_prompt_returns_empty_without_target
+* test_get_current_prompt_returns_target_prompt
+* test_interact_returns_false_without_target
+* test_interact_returns_true_with_valid_target
+* test_interact_emits_interaction_performed_signal
+* test_interact_with_specific_target
+* test_interact_with_returns_false_for_null
+* test_interact_with_returns_false_if_cannot_interact
+* test_set_camera_updates_reference
+* test_set_player_updates_reference
+* test_force_update_resets_raycast_timer
+* test_target_changed_emitted_on_new_target
+* test_default_raycast_interval
+* test_default_max_range
+* test_default_interaction_layer_mask
+[33m[WARNING]:  [0mTest script has 25 unfreed children.  Increase log level for more details.
+[1m24/24 passed.
+[0m[4m
+
+res://tests/test_interaction_prompt_ui.gd
+[0m* test_starts_invisible
+* test_starts_hidden
+* test_creates_default_label_if_not_set
+* test_default_key_hint
+* test_default_fade_duration
+* test_connect_to_manager_stores_reference
+* test_connect_to_manager_disconnects_previous
+* test_is_prompt_visible_returns_false_initially
+* test_shows_on_target_change
+* test_hides_on_null_target
+* test_formats_prompt_with_key_hint
+* test_set_key_hint_updates_display
+* test_disconnects_on_exit_tree
+[33m[WARNING]:  [0mTest script has 28 unfreed children.  Increase log level for more details.
+[1m13/13 passed.
+[0m[4m
+
+res://tests/test_lens_reader.gd
+[0m* test_initial_state_is_idle
+* test_initial_no_calibration
+* test_initial_received_pattern_is_none
+* test_equipment_type_is_lens
+* test_is_not_primary_equipment
+* test_eyepiece_initially_inactive
+* test_cannot_activate_without_calibration
+* test_state_becomes_waiting_without_calibration
+* test_can_activate_after_calibration_locked
+* test_state_is_viewing_after_activation
+* test_eyepiece_active_after_activation
+* test_cannot_activate_without_partner
+* test_cannot_activate_if_partner_out_of_range
+* test_receives_calibration_from_partner
+* test_received_pattern_matches_locked_pattern
+* test_calibration_received_signal_emitted
+* test_waiting_state_clears_on_calibration
+* test_pattern_shape_from_calibrator
+* test_pattern_color_from_anchor
+* test_combined_signature_format
+* test_pattern_shape_none_when_eyepiece_inactive
+* test_pattern_color_none_when_eyepiece_inactive
+* test_is_consistent_when_properly_aligned
+* test_is_inconsistent_when_misaligned
+* test_indicated_category_from_color
+* test_different_patterns_with_colors
+* test_square_pattern_with_green_color
+* test_spiral_pattern_with_yellow_color
+* test_cannot_start_reading_before_viewing
+* test_cannot_start_reading_immediately
+* test_can_start_reading_after_min_viewing_time
+* test_state_is_reading_during_read
+* test_is_reading_returns_true_during_read
+* test_reading_progress_starts_at_zero
+* test_reading_progress_increases
+* test_cancel_reading_returns_to_viewing
+* test_cancel_reading_resets_progress
+* test_strong_quality_when_aligned_and_stationary
+* test_weak_quality_when_misaligned
+* test_weak_quality_when_viewing_time_short
+* test_weak_quality_when_moving
+* test_quality_changed_signal_emitted
+* test_deactivate_eyepiece_returns_to_idle
+* test_deactivate_emits_signal
+* test_deactivate_during_reading
+* test_reset_clears_calibration
+* test_reset_clears_pattern
+* test_reset_returns_to_idle
+* test_network_state_includes_reader_state
+* test_network_state_includes_calibration
+* test_network_state_includes_quality
+* test_apply_network_state
+* test_use_activates_eyepiece
+* test_toggle_off_deactivates_eyepiece
+* test_detectable_evidence_includes_prism_reading
+* test_reader_state_changed_signal
+* test_eyepiece_activated_signal
+[33m[WARNING]:  [0mTest script has 281 unfreed children.  Increase log level for more details.
+[1m57/57 passed.
+[0m[4m
+
+res://tests/test_network_manager.gd
+[0m* test_player_data_initialization
+* test_player_data_default_initialization
+* test_player_data_transform_serialization
+* test_player_data_transform_round_trip
+* test_player_data_full_serialization
+* test_player_data_full_round_trip
+* test_player_data_reset_for_new_round
+* test_player_data_partial_dict_application
+* test_network_manager_initial_state
+* test_network_manager_has_expected_signals
+* test_network_manager_connection_state_enum
+* test_network_manager_backend_enum
+* test_network_manager_constants
+* test_network_manager_get_players_returns_dictionary
+* test_network_manager_is_game_host_returns_bool
+* test_network_manager_get_player_with_invalid_id
+* test_network_manager_send_position_update_without_connection
+[1m17/17 passed.
+[0m[4m
+
+res://tests/test_player_controller.gd
+[0m* test_player_initializes_with_full_stamina
+* test_player_initializes_not_sprinting
+* test_player_initializes_not_crouching
+* test_player_initializes_with_input_enabled
+* test_get_current_speed_returns_walk_speed_by_default
+* test_get_current_speed_returns_crouch_speed_when_crouching
+* test_get_current_speed_returns_sprint_speed_when_sprinting
+* test_crouch_speed_overrides_sprint
+* test_get_stamina_percent_full
+* test_get_stamina_percent_half
+* test_get_stamina_percent_empty
+* test_stamina_changed_signal_emitted
+* test_start_crouch_sets_state
+* test_start_crouch_stops_sprinting
+* test_start_crouch_sets_target_height
+* test_crouch_signal_emitted_on_start
+* test_can_stand_up_returns_true_when_no_obstruction
+* test_is_moving_false_when_stationary
+* test_is_moving_true_when_walking
+* test_is_moving_ignores_vertical_velocity
+* test_get_horizontal_speed_zero_when_stationary
+* test_get_horizontal_speed_ignores_vertical
+* test_set_input_enabled_false_stops_sprinting
+* test_set_input_enabled_true
+* test_get_network_state_includes_position
+* test_get_network_state_includes_velocity
+* test_get_network_state_includes_crouch_state
+* test_get_network_state_includes_stamina
+* test_apply_network_state_updates_position
+* test_apply_network_state_updates_velocity
+* test_apply_network_state_updates_crouch
+* test_teleport_sets_position
+* test_teleport_sets_rotation
+* test_teleport_resets_velocity
+* test_reset_state_restores_full_stamina
+* test_reset_state_clears_sprint
+* test_reset_state_clears_crouch
+* test_reset_state_clears_velocity
+* test_reset_state_clears_timers
+* test_footstep_signal_exists
+* test_default_walk_speed_reasonable
+* test_sprint_speed_faster_than_walk
+* test_crouch_speed_slower_than_walk
+* test_crouch_height_less_than_standing
+* test_min_sprint_stamina_less_than_max
+[1m45/45 passed.
+[0m[4m
+
+res://tests/test_prism_enums.gd
+[0m* test_triangle_maps_to_passive
+* test_circle_maps_to_aggressive
+* test_square_maps_to_territorial
+* test_spiral_maps_to_mobile
+* test_none_pattern_maps_to_unknown
+* test_blue_violet_maps_to_passive
+* test_red_orange_maps_to_aggressive
+* test_green_maps_to_territorial
+* test_yellow_maps_to_mobile
+* test_none_color_maps_to_unknown
+* test_triangle_expects_blue_violet
+* test_circle_expects_red_orange
+* test_square_expects_green
+* test_spiral_expects_yellow
+* test_none_pattern_expects_none_color
+* test_blue_violet_expects_triangle
+* test_red_orange_expects_circle
+* test_green_expects_square
+* test_yellow_expects_spiral
+* test_none_color_expects_none_pattern
+* test_triangle_blue_violet_is_consistent
+* test_circle_red_orange_is_consistent
+* test_square_green_is_consistent
+* test_spiral_yellow_is_consistent
+* test_triangle_red_orange_is_inconsistent
+* test_circle_green_is_inconsistent
+* test_none_pattern_is_never_consistent
+* test_none_color_is_never_consistent
+* test_get_pattern_name_triangle
+* test_get_pattern_name_circle
+* test_get_pattern_name_square
+* test_get_pattern_name_spiral
+* test_get_pattern_name_none
+* test_get_color_name_blue_violet
+* test_get_color_name_red_orange
+* test_get_color_name_green
+* test_get_color_name_yellow
+* test_get_color_name_none
+* test_get_category_name_passive
+* test_get_category_name_aggressive
+* test_get_category_name_territorial
+* test_get_category_name_mobile
+* test_get_category_name_unknown
+* test_get_all_patterns_returns_four
+* test_get_all_patterns_excludes_none
+* test_get_all_colors_returns_four
+* test_get_all_colors_excludes_none
+* test_prism_pattern_has_five_values
+* test_prism_color_has_five_values
+* test_entity_category_has_five_values
+* test_all_pattern_color_mappings_are_bidirectional
+* test_all_color_pattern_mappings_are_bidirectional
+[1m52/52 passed.
+[0m[4m
+
+res://tests/test_protection_item.gd
+[0m* test_default_values
+* test_initial_charges
+* test_can_use_during_hunt_is_true
+* test_has_charges_when_charges_remaining
+* test_consume_charge_decrements
+* test_consume_charge_emits_signal
+* test_consume_charge_signal_contains_remaining
+* test_depleted_signal_when_no_charges
+* test_no_depleted_signal_with_charges
+* test_has_charges_false_when_depleted
+* test_is_placed_initially_false
+* test_get_placed_position_default
+* test_place_at_sets_placed
+* test_place_at_sets_position
+* test_place_at_emits_signal
+* test_cannot_place_twice
+* test_cannot_place_without_charges
+* test_get_effective_radius_normal
+* test_get_effective_radius_demon
+* test_trigger_returns_false_without_charges
+* test_trigger_returns_false_when_not_placed_for_placed_mode
+* test_trigger_emits_triggered_signal
+* test_can_use_returns_true_for_held_mode
+* test_can_use_returns_false_when_placed
+* test_can_use_returns_false_without_charges
+* test_get_network_state_includes_charges
+* test_get_network_state_includes_placement
+* test_apply_network_state_restores_charges
+* test_apply_network_state_restores_placement
+[1m29/29 passed.
+[0m[4m
+
+res://tests/test_sage_bundle.gd
+[0m* test_equipment_type
+* test_equipment_name
+* test_use_mode_is_instant
+* test_max_charges_is_one
+* test_placement_mode_is_held
+* test_can_use_during_hunt
+* test_demon_duration_multiplier
+* test_blind_duration_constant
+* test_hunt_prevention_duration_constant
+* test_demon_prevention_duration_constant
+* test_trigger_consumes_charge
+[SageBundle] Hunt prevention started for 60.0 seconds
+* test_trigger_emits_depleted
+[SageBundle] Hunt prevention started for 60.0 seconds
+* test_trigger_fails_when_depleted
+[SageBundle] Hunt prevention started for 60.0 seconds
+* test_starts_hunt_prevention
+[SageBundle] Hunt prevention started for 60.0 seconds
+* test_prevention_timer_set
+[SageBundle] Hunt prevention started for 60.0 seconds
+* test_prevention_ends_after_timer
+[SageBundle] Hunt prevention started for 60.0 seconds
+[SageBundle] Hunt prevention ended
+* test_prevention_timer_decrements
+[SageBundle] Hunt prevention started for 60.0 seconds
+* test_network_state_includes_prevention
+[SageBundle] Hunt prevention started for 60.0 seconds
+* test_network_state_preventing_true
+[SageBundle] Hunt prevention started for 60.0 seconds
+* test_network_state_preventing_false_initial
+* test_apply_network_state_restores_prevention
+* test_is_preventing_hunts_initially_false
+* test_prevention_time_zero_initially
+* test_trigger_does_not_require_placement
+[SageBundle] Hunt prevention started for 60.0 seconds
+* test_multiple_process_cycles
+[SageBundle] Hunt prevention started for 60.0 seconds
+[1m25/25 passed.
+[0m[4m
+
+res://tests/test_salt.gd
+[0m* test_equipment_type
+* test_equipment_name
+* test_use_mode_is_instant
+* test_max_charges_is_three
+* test_initial_charges_is_three
+* test_placement_mode_is_placed
+* test_cannot_use_during_hunt
+* test_effective_radius
+* test_slowdown_duration
+* test_slowdown_factor
+* test_footprint_duration
+* test_place_salt
+[Salt] Placed at (1.000000, 0.000000, 2.000000) with 3 uses
+[33m    [Orphans]:  [0m4.0 new orphans in test.
+* test_placement_preserves_charges
+[Salt] Placed at (1.000000, 0.000000, 2.000000) with 3 uses
+[33m    [Orphans]:  [0m4.0 new orphans in test.
+* test_trigger_with_normal_entity
+[Salt] Placed at (0.000000, 0.000000, 0.000000) with 3 uses
+[Salt] Footprint created at (0.000000, 0.000000, 0.000000)
+[Salt] Entity slowed for 3.0 seconds
+[33m    [Orphans]:  [0m7.0 new orphans in test.
+* test_trigger_consumes_charge
+[Salt] Placed at (0.000000, 0.000000, 0.000000) with 3 uses
+[Salt] Footprint created at (0.000000, 0.000000, 0.000000)
+[Salt] Entity slowed for 3.0 seconds
+[33m    [Orphans]:  [0m7.0 new orphans in test.
+* test_three_triggers_deplete_salt
+[Salt] Placed at (0.000000, 0.000000, 0.000000) with 3 uses
+[Salt] Footprint created at (0.000000, 0.000000, 0.000000)
+[Salt] Entity slowed for 3.0 seconds
+[Salt] Footprint created at (0.000000, 0.000000, 0.000000)
+[Salt] Entity slowed for 3.0 seconds
+[Salt] Footprint created at (0.000000, 0.000000, 0.000000)
+[Salt] Entity slowed for 3.0 seconds
+[Salt] Depleted at (0.000000, 0.000000, 0.000000)
+[33m    [Orphans]:  [0m13.0 new orphans in test.
+* test_trigger_fails_without_placement
+* test_wraith_does_not_consume_charge
+[Salt] Placed at (0.000000, 0.000000, 0.000000) with 3 uses
+[Salt] Wraith passed through - no footprints (behavioral tell)
+[33m    [Orphans]:  [0m4.0 new orphans in test.
+* test_wraith_trigger_returns_false
+[Salt] Placed at (0.000000, 0.000000, 0.000000) with 3 uses
+[Salt] Wraith passed through - no footprints (behavioral tell)
+[33m    [Orphans]:  [0m4.0 new orphans in test.
+* test_is_entity_wraith_detection_method
+* test_is_entity_wraith_detection_property
+* test_non_wraith_not_detected_as_wraith
+* test_footprint_locations_empty_initially
+* test_trigger_creates_footprint
+[Salt] Placed at (0.000000, 0.000000, 0.000000) with 3 uses
+[Salt] Footprint created at (1.000000, 0.000000, 1.000000)
+[Salt] Entity slowed for 3.0 seconds
+[33m    [Orphans]:  [0m7.0 new orphans in test.
+* test_multiple_triggers_create_multiple_footprints
+[Salt] Placed at (0.000000, 0.000000, 0.000000) with 3 uses
+[Salt] Footprint created at (0.000000, 0.000000, 0.000000)
+[Salt] Entity slowed for 3.0 seconds
+[Salt] Footprint created at (0.000000, 0.000000, 0.000000)
+[Salt] Entity slowed for 3.0 seconds
+[33m    [Orphans]:  [0m10.0 new orphans in test.
+* test_wraith_does_not_create_footprint
+[Salt] Placed at (0.000000, 0.000000, 0.000000) with 3 uses
+[Salt] Wraith passed through - no footprints (behavioral tell)
+[33m    [Orphans]:  [0m4.0 new orphans in test.
+* test_is_entity_with_group
+* test_is_entity_with_method
+* test_non_entity_not_detected
+* test_network_state_includes_footprints
+[Salt] Placed at (0.000000, 0.000000, 0.000000) with 3 uses
+[Salt] Footprint created at (0.000000, 0.000000, 0.000000)
+[Salt] Entity slowed for 3.0 seconds
+[33m    [Orphans]:  [0m7.0 new orphans in test.
+* test_network_state_footprint_data
+[Salt] Placed at (0.000000, 0.000000, 0.000000) with 3 uses
+[Salt] Footprint created at (5.000000, 0.000000, -3.000000)
+[Salt] Entity slowed for 3.0 seconds
+[33m    [Orphans]:  [0m7.0 new orphans in test.
+* test_apply_network_state_restores_footprints
+[33m[Orphans]:  [0m76.0 new orphans in script.
+[1m32/32 passed.
+[0m[4m
+
+res://tests/test_sanity_manager.gd
+[0m* test_manager_initializes_with_default_values
+[SanityManager] Initialized
+* test_register_player_adds_to_registry
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+* test_register_player_with_custom_sanity
+[SanityManager] Initialized
+[SanityManager] Team sanity crossed threshold: 75% (now 75.0%)
+[SanityManager] Registered player 1 with sanity 75.0
+* test_register_player_clamps_sanity
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 150.0
+[SanityManager] Team sanity crossed threshold: 75% (now 50.0%)
+[SanityManager] Team sanity crossed threshold: 50% (now 50.0%)
+[SanityManager] Registered player 2 with sanity -50.0
+* test_unregister_player_removes_from_registry
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+[SanityManager] Unregistered player 1
+* test_team_sanity_calculated_from_players
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+[SanityManager] Team sanity crossed threshold: 75% (now 75.0%)
+[SanityManager] Registered player 2 with sanity 50.0
+* test_team_sanity_updates_when_player_leaves
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+[SanityManager] Team sanity crossed threshold: 75% (now 75.0%)
+[SanityManager] Registered player 2 with sanity 50.0
+[SanityManager] Unregistered player 2
+* test_empty_team_defaults_to_100
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+[SanityManager] Unregistered player 1
+* test_drain_sanity_reduces_player_sanity
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+* test_drain_sanity_clamps_to_zero
+[SanityManager] Initialized
+[SanityManager] Team sanity crossed threshold: 75% (now 10.0%)
+[SanityManager] Team sanity crossed threshold: 50% (now 10.0%)
+[SanityManager] Team sanity crossed threshold: 25% (now 10.0%)
+[SanityManager] Team sanity crossed threshold: 10% (now 10.0%)
+[SanityManager] Registered player 1 with sanity 10.0
+* test_restore_sanity_increases_player_sanity
+[SanityManager] Initialized
+[SanityManager] Team sanity crossed threshold: 75% (now 50.0%)
+[SanityManager] Team sanity crossed threshold: 50% (now 50.0%)
+[SanityManager] Registered player 1 with sanity 50.0
+* test_restore_sanity_clamps_to_max
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 90.0
+* test_drain_all_sanity_affects_all_players
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+[SanityManager] Registered player 2 with sanity 80.0
+[SanityManager] Registered player 3 with sanity 60.0
+[SanityManager] Team sanity crossed threshold: 75% (now 73.3%)
+* test_set_player_sanity_directly
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+[SanityManager] Team sanity crossed threshold: 75% (now 42.0%)
+[SanityManager] Team sanity crossed threshold: 50% (now 42.0%)
+* test_set_player_sanity_registers_if_needed
+[SanityManager] Initialized
+[SanityManager] Team sanity crossed threshold: 75% (now 50.0%)
+[SanityManager] Team sanity crossed threshold: 50% (now 50.0%)
+[SanityManager] Registered player 99 with sanity 50.0
+* test_can_entity_hunt_false_above_threshold
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+* test_can_entity_hunt_true_at_threshold
+[SanityManager] Initialized
+[SanityManager] Team sanity crossed threshold: 75% (now 50.0%)
+[SanityManager] Team sanity crossed threshold: 50% (now 50.0%)
+[SanityManager] Registered player 1 with sanity 50.0
+* test_can_entity_hunt_true_below_threshold
+[SanityManager] Initialized
+[SanityManager] Team sanity crossed threshold: 75% (now 30.0%)
+[SanityManager] Team sanity crossed threshold: 50% (now 30.0%)
+[SanityManager] Registered player 1 with sanity 30.0
+* test_custom_threshold_works
+[SanityManager] Initialized
+[SanityManager] Team sanity crossed threshold: 75% (now 75.0%)
+[SanityManager] Registered player 1 with sanity 75.0
+* test_get_hunt_threshold_progress
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+[SanityManager] Team sanity crossed threshold: 75% (now 75.0%)
+[SanityManager] Team sanity crossed threshold: 50% (now 50.0%)
+[SanityManager] Team sanity crossed threshold: 25% (now 25.0%)
+* test_set_darkness_level_stores_value
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+* test_set_darkness_level_clamps_values
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+* test_player_sanity_changed_signal_emitted
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+* test_team_sanity_changed_signal_emitted_on_significant_change
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+* test_sanity_threshold_crossed_signal_emitted
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+[SanityManager] Team sanity crossed threshold: 75% (now 74.0%)
+* test_on_ghost_event_drains_affected_players
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+[SanityManager] Registered player 2 with sanity 100.0
+[SanityManager] Registered player 3 with sanity 100.0
+* test_on_entity_sighted_drains_observer
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 100.0
+* test_is_server_defaults_to_false
+[SanityManager] Initialized
+[SanityManager] Initialized
+* test_set_is_server_updates_value
+[SanityManager] Initialized
+* test_reset_clears_all_state
+[SanityManager] Initialized
+[SanityManager] Team sanity crossed threshold: 75% (now 50.0%)
+[SanityManager] Team sanity crossed threshold: 50% (now 50.0%)
+[SanityManager] Registered player 1 with sanity 50.0
+[SanityManager] Registered player 2 with sanity 30.0
+[SanityManager] Reset for new match
+* test_get_network_state_includes_all_data
+[SanityManager] Initialized
+[SanityManager] Registered player 1 with sanity 80.0
+[SanityManager] Team sanity crossed threshold: 75% (now 70.0%)
+[SanityManager] Registered player 2 with sanity 60.0
+* test_apply_network_state_updates_manager
+[SanityManager] Initialized
+* test_constants_defined_correctly
+[SanityManager] Initialized
+* test_drain_rate_constants_are_positive
+[SanityManager] Initialized
+[33m[WARNING]:  [0mTest script has 6 unfreed children.  Increase log level for more details.
+[1m34/34 passed.
+[0m[4m
+
+res://tests/test_spatial_constraints.gd
+[0m* test_dowser_facing_anchor_directly_is_valid
+* test_dowser_facing_anchor_within_tolerance_is_valid
+* test_dowser_facing_away_from_anchor_is_invalid
+* test_dowser_facing_perpendicular_is_invalid
+* test_dowser_at_boundary_tolerance
+* test_custom_facing_tolerance
+* test_imager_directly_behind_is_valid
+* test_imager_behind_within_tolerance_is_valid
+* test_imager_in_front_is_invalid
+* test_imager_to_side_is_invalid
+* test_imager_at_boundary_tolerance
+* test_imager_at_valid_distance
+* test_imager_too_close
+* test_imager_too_far
+* test_imager_at_min_distance_boundary
+* test_imager_at_max_distance_boundary
+* test_validate_positions_all_valid
+* test_validate_positions_dowser_not_facing
+* test_validate_positions_imager_not_behind
+* test_validate_positions_multiple_violations
+* test_validate_positions_with_custom_config
+* test_perfect_alignment_quality_is_one
+* test_invalid_alignment_quality_is_zero
+* test_partial_alignment_quality_is_between_zero_and_one
+* test_quality_level_none
+* test_quality_level_weak
+* test_quality_level_moderate
+* test_quality_level_strong
+* test_quality_level_names
+* test_default_config_values
+* test_custom_config
+* test_constraint_result_default
+* test_constraint_result_valid
+* test_zero_forward_vector_handled
+* test_same_position_dowser_and_anchor
+* test_vertical_angle_ignored_for_facing
+* test_vertical_position_ignored_for_behind
+[1m37/37 passed.
+[0m[4m
+
+res://tests/test_temperature_zone.gd
+[0m* test_added_to_temperature_zone_group
+* test_default_base_temperature
+* test_get_temperature_returns_base
+* test_get_base_temperature
+* test_default_zone_radius
+* test_default_zone_name
+* test_default_entity_influence_is_zero
+* test_set_entity_influence_changes_value
+* test_entity_influence_affects_temperature
+* test_entity_influence_emits_signal
+* test_set_target_influence_gradual_change
+* test_entity_enter_sets_target
+* test_entity_leave_resets_target
+* test_is_freezing_false_at_normal_temp
+* test_is_freezing_true_below_threshold
+* test_freezing_threshold_boundary
+* test_is_extreme_cold_false_normally
+* test_is_extreme_cold_true_below_threshold
+* test_extreme_cold_threshold_boundary
+* test_distance_to_returns_correct_value
+* test_contains_position_inside_radius
+* test_contains_position_outside_radius
+* test_contains_position_on_boundary
+* test_natural_variance_enabled_by_default
+* test_natural_variance_affects_temperature
+* test_variance_disabled_stable_temperature
+* test_temperature_changed_signal_emitted
+* test_very_cold_entity_influence
+* test_warm_entity_influence
+[33m[WARNING]:  [0mTest script has 20 unfreed children.  Increase log level for more details.
+[1m29/29 passed.
+[0m[4m
+
+res://tests/test_thermometer.gd
+[0m* test_equipment_type_is_thermometer
+* test_equipment_name_is_set
+* test_use_mode_is_hold
+* test_detectable_evidence_includes_freezing_temperature
+* test_default_temperature_is_ambient
+* test_temperature_ambient_when_inactive
+* test_temperature_detected_when_active
+[Thermometer] Activated
+* test_temperature_ambient_outside_zones
+[Thermometer] Activated
+* test_temperature_reset_when_deactivated
+[Thermometer] Activated
+[Thermometer] Deactivated
+* test_temperature_changed_signal_emitted
+[Thermometer] Activated
+* test_is_freezing_false_at_normal_temp
+[Thermometer] Activated
+* test_is_freezing_true_below_threshold
+[Thermometer] Activated
+* test_freezing_threshold_boundary
+[Thermometer] Activated
+* test_is_extreme_cold_false_normally
+[Thermometer] Activated
+* test_is_extreme_cold_true_below_threshold
+[Thermometer] Activated
+* test_default_quality_is_weak
+[Thermometer] Activated
+* test_quality_weak_when_moving
+[Thermometer] Activated
+* test_quality_strong_when_stationary_in_zone
+[Thermometer] Activated
+* test_quality_weak_when_no_zone
+[Thermometer] Activated
+* test_is_strong_reading_helper
+[Thermometer] Activated
+* test_quality_changed_signal_emitted
+[Thermometer] Activated
+* test_get_current_zone_returns_zone
+[Thermometer] Activated
+* test_get_current_zone_null_when_outside
+[Thermometer] Activated
+* test_network_state_includes_temperature
+[Thermometer] Activated
+* test_network_state_includes_quality
+[Thermometer] Activated
+* test_network_state_includes_is_freezing
+[Thermometer] Activated
+* test_apply_network_state_sets_temperature
+* test_displayed_temperature_rounded
+[Thermometer] Activated
+* test_detects_entity_cooled_zone
+[Thermometer] Activated
+* test_detects_nearest_zone
+[Thermometer] Activated
+* test_evidence_detected_signal_on_freezing
+[Thermometer] Activated
+* test_evidence_not_collected_above_threshold
+[Thermometer] Activated
+* test_evidence_not_collected_twice
+[Thermometer] Activated
+[33m[WARNING]:  [0mTest script has 25 unfreed children.  Increase log level for more details.
+[1m33/33 passed.
+[0m[4m
+
+res://tests/test_verification_manager.gd
+[0m* test_try_verify_returns_fail_for_null_evidence
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_try_verify_prevents_self_verification
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_try_verify_prevents_secondary_collector_verification
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_try_verify_prevents_already_verified
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_try_verify_allows_third_party
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_try_contest_returns_fail_for_null_evidence
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_try_contest_prevents_self_contest
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_try_contest_prevents_unfalsifiable_contest
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_try_contest_prevents_already_contested
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_try_contest_allows_high_trust
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_try_contest_allows_low_trust
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_unfalsifiable_always_verifiable
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_unfalsifiable_single_witness_sets_metadata
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_unfalsifiable_adds_verifier_as_witness
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_high_trust_verifiable_by_third_party
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_high_trust_includes_thermometer
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_high_trust_includes_visual_manifestation
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_high_trust_includes_physical_interaction
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_variable_trust_verifiable_by_third_party
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_variable_trust_records_verifier_id
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_variable_trust_metadata_contains_third_party_witness
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_low_trust_verifiable
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_low_trust_operator_registration
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_low_trust_different_operators_metadata
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_low_trust_single_operator_no_different_operators_flag
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_sabotage_risk_verifiable_without_buddy_system
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_sabotage_risk_sets_no_buddy_system_metadata
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_sabotage_risk_with_buddy_system
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_sabotage_risk_fails_with_sabotage_flag
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_sabotage_risk_multiple_flags
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_register_witness_adds_to_evidence
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_register_witness_no_duplicates
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_verification_attempted_signal_on_success
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_verification_attempted_signal_on_failure
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_verification_rule_failed_signal
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_evidence_cleared_clears_operator_history
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_set_ghost_writing_witnesses
+[VerificationManager] Initialized - Trust-level verification rules active
+* test_ghost_writing_incomplete_witnesses
+[VerificationManager] Initialized - Trust-level verification rules active
+[1m38/38 passed.
+[0m
+
+
+
+[33m==============================================
+[0m[33m= Run Summary
+[0m[33m==============================================
+[0m
+---- Totals ----
+Warnings          18
+
+Scripts           38
+Tests             1323
+  Passing         1323
+Asserts           1852
+Time              19.601s
+
+
+[33m[Orphans]:  [0mTotal orphans in run 135.0
+Note:  This count does not include GUT objects that will be freed upon exit.
+       It also does not include any orphans created by global scripts
+       loaded before tests were ran.
+Total orphans = 173.0
+
+[32m---- All tests passed! ----
+[0m

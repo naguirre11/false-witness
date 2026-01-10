@@ -25,15 +25,18 @@ Implement the 3-slot equipment system where players select and carry investigati
 
 ## Technical Notes
 
-Equipment types from GDD:
-- EMF Reader
-- Spirit Box
-- Journal (Ghost Writing)
-- Thermometer
-- UV Flashlight
-- DOTS Projector
-- Video Camera
-- Parabolic Mic
+**Evidence Equipment (implemented):**
+- EMF Reader → EMF_SIGNATURE
+- Thermometer → FREEZING_TEMPERATURE
+- Spectral Prism (Calibrator + Lens Reader) → PRISM_READING (cooperative symmetric)
+- Dowsing Rods + Aura Imager → AURA_PATTERN (cooperative asymmetric)
+- Ghost Writing Book → GHOST_WRITING (triggered test)
+
+**Protection Items:**
+- Crucifix, Salt, Sage Bundle
+
+**Deferred:**
+- Spirit Box (FW-034), DOTS Projector, UV Flashlight - replaced by cooperative equipment
 
 Each player selects 3, so team must coordinate coverage.
 

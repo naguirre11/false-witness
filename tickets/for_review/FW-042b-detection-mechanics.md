@@ -103,4 +103,4 @@ $GODOT --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs
 1. **Static utility class**: HuntDetection uses static methods for easy testing and reuse
 2. **Duck typing for equipment**: Uses untyped variables to support both real Equipment and test mocks
 3. **Voice placeholder**: `_player_is_using_voice()` returns false until FW-014 (voice chat) is implemented
-4. **Electronic equipment list**: Hardcoded equipment types (EMF, Spirit Box, Thermometer, Video Camera, Parabolic Mic, Calibrator, Lens, Aura Imager)
+4. **Electronic equipment list**: Hardcoded equipment types (EMF Reader, Thermometer, Calibrator, Lens Reader, Aura Imager)

@@ -15,9 +15,9 @@ Create the Listener entity - a voice-reactive entity that hunts when players spe
 ## Acceptance Criteria
 
 ### Evidence Types
-- [ ] Freezing Temps
-- [ ] Spirit Box
-- [ ] Ghost Writing
+- [ ] FREEZING_TEMPERATURE - Detected by Thermometer
+- [ ] GHOST_WRITING - Detected by Ghost Writing Book (triggered test)
+- [ ] AURA_PATTERN - Detected by Dowsing Rods + Aura Imager (cooperative asymmetric)
 
 ### Behavioral Tell
 - [ ] Hunts immediately if any player speaks above normal volume during dormant phase
@@ -40,6 +40,14 @@ Create the Listener entity - a voice-reactive entity that hunts when players spe
 - [ ] Any voice activity triggers immediate attack
 
 ## Technical Notes
+
+**Evidence Types (using implemented system):**
+- FREEZING_TEMPERATURE - Thermometer reading shows sub-zero temps
+- GHOST_WRITING - Entity responds to placed Ghost Writing Book
+- AURA_PATTERN - Cooperative asymmetric (Imager sees aura, Rods point direction)
+
+**Cultist Overlap:**
+Listener shares FREEZING_TEMPERATURE + AURA_PATTERN with Demon. Only GHOST_WRITING vs PHYSICAL_INTERACTION differentiates them.
 
 **Design Intent**: Creates genuine tension around the core communication mechanic. Teams must balance information sharing with survival.
 

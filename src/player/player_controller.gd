@@ -16,10 +16,15 @@ extends CharacterBody3D
 signal stamina_changed(current: float, maximum: float)
 signal crouched(is_crouching: bool)
 signal footstep
+signal died(death_position: Vector3)
+signal revived
 
 # --- Constants ---
 
 const GRAVITY: float = 9.8
+
+## Sanity percentage player respawns with after being revived.
+const REVIVAL_SANITY_PERCENT := 0.5
 
 # --- Export: Movement Settings ---
 
@@ -74,6 +79,10 @@ const GRAVITY: float = 9.8
 var current_stamina: float = 100.0
 var is_sprinting: bool = false
 var is_crouching: bool = false
+var is_alive: bool = true
+var is_echo: bool = false
+var death_position: Vector3 = Vector3.ZERO
+var times_revived: int = 0
 var stamina_regen_timer: float = 0.0
 var head_bob_time: float = 0.0
 var footstep_timer: float = 0.0
@@ -119,6 +128,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
 	if not is_local_player:
+		return
+
+	# Dead players don't process movement (Echo handled by FW-043b)
+	if not is_alive:
 		return
 
 	_apply_gravity(delta)
@@ -324,6 +337,7 @@ func _is_moving() -> bool:
 
 # --- Public API ---
 
+
 ## Gets the current horizontal speed.
 func get_horizontal_speed() -> float:
 	return Vector2(velocity.x, velocity.z).length()
@@ -356,6 +370,9 @@ func get_network_state() -> Dictionary:
 		"velocity": velocity,
 		"is_crouching": is_crouching,
 		"stamina": current_stamina,
+		"is_alive": is_alive,
+		"is_echo": is_echo,
+		"times_revived": times_revived,
 	}
 
 
@@ -371,6 +388,12 @@ func apply_network_state(state: Dictionary) -> void:
 		if state.is_crouching != is_crouching:
 			is_crouching = state.is_crouching
 			_target_height = crouch_height if is_crouching else standing_height
+	if state.has("is_alive"):
+		is_alive = state.is_alive
+	if state.has("is_echo"):
+		is_echo = state.is_echo
+	if state.has("times_revived"):
+		times_revived = state.times_revived
 
 
 ## Teleports the player to a position.
@@ -385,9 +408,230 @@ func reset_state() -> void:
 	current_stamina = max_stamina
 	is_sprinting = false
 	is_crouching = false
+	is_alive = true
+	is_echo = false
+	death_position = Vector3.ZERO
+	times_revived = 0
 	_target_height = standing_height
 	velocity = Vector3.ZERO
 	head_bob_time = 0.0
 	footstep_timer = 0.0
 	stamina_regen_timer = 0.0
 	stamina_changed.emit(current_stamina, max_stamina)
+
+
+# --- Death Handling ---
+
+
+## Called by the entity when this player is killed during a hunt.
+## entity: The entity that killed the player.
+## position: The position where the player died.
+func on_killed_by_entity(entity: Node, kill_position: Vector3) -> void:
+	if not is_alive:
+		return  # Already dead
+
+	is_alive = false
+	is_echo = true
+	death_position = kill_position
+	velocity = Vector3.ZERO
+
+	# Stop all movement input
+	is_sprinting = false
+	is_crouching = false
+
+	var entity_name: String = entity.name if entity else "unknown"
+	print("[PlayerController] Killed by %s at %v" % [entity_name, kill_position])
+
+	# Emit died signal for other systems to react
+	died.emit(death_position)
+
+	# Transition to Echo state
+	_transition_to_echo()
+
+
+## Transitions the player to Echo state after death.
+## The body remains at death location; camera control transfers to Echo.
+func _transition_to_echo() -> void:
+	print("[PlayerController] Transitioning to Echo state")
+
+	# Disable physics processing on the body (remains static at death location)
+	# The body could be used for ragdoll later
+	set_physics_process(false)
+
+	# Disable input on this controller (Echo will handle input)
+	input_enabled = false
+
+	# Make the body visible but player can no longer control it
+	# (It stays as a marker of where death occurred)
+
+	# Spawn Echo controller at death position
+	var echo := _spawn_echo_controller()
+	if echo and is_local_player:
+		# Transfer camera control to Echo
+		_transfer_camera_to_echo(echo)
+
+
+## Spawns an EchoController at the death position.
+## Returns the spawned Echo or null if spawn failed.
+func _spawn_echo_controller() -> EchoController:
+	var echo_script: GDScript = load("res://src/player/echo_controller.gd")
+	if not echo_script:
+		push_error("[PlayerController] Failed to load EchoController script")
+		return null
+
+	# Create instance using script's new() method for correct typing
+	var echo: EchoController = echo_script.new()
+	echo.name = "Echo_%s" % name
+	echo.player_id = get_instance_id()
+	echo.death_position = death_position
+	echo.is_local = is_local_player
+
+	# Copy position and rotation from death location
+	echo.global_position = death_position
+	echo.rotation = rotation
+
+	# Create a head node for the Echo
+	var echo_head := Node3D.new()
+	echo_head.name = "Head"
+	echo.add_child(echo_head)
+
+	# Copy head rotation
+	if _head:
+		echo_head.rotation = _head.rotation
+
+	# Create camera for Echo (if local player)
+	if is_local_player:
+		var echo_camera := Camera3D.new()
+		echo_camera.name = "Camera3D"
+		echo_camera.current = false  # Will be set current after transfer
+		echo_head.add_child(echo_camera)
+
+	# Create a simple translucent mesh for the Echo
+	var echo_mesh := MeshInstance3D.new()
+	echo_mesh.name = "MeshInstance3D"
+	var capsule := CapsuleMesh.new()
+	capsule.radius = 0.3
+	capsule.height = 1.5
+	echo_mesh.mesh = capsule
+	echo.add_child(echo_mesh)
+
+	# Add disabled collision shape (Echoes pass through walls)
+	var collision := CollisionShape3D.new()
+	collision.name = "CollisionShape3D"
+	var capsule_shape := CapsuleShape3D.new()
+	capsule_shape.radius = 0.3
+	capsule_shape.height = 1.5
+	collision.shape = capsule_shape
+	collision.disabled = true
+	echo.add_child(collision)
+
+	# Add Echo to scene
+	get_parent().add_child(echo)
+
+	# Setup translucent appearance after nodes are ready
+	echo.setup_translucent_appearance()
+
+	# Add to echoes group for easy lookup
+	echo.add_to_group("echoes")
+
+	print("[PlayerController] Spawned Echo: %s" % echo.name)
+	return echo
+
+
+## Transfers camera control from this player to the Echo.
+func _transfer_camera_to_echo(echo: EchoController) -> void:
+	if not is_local_player:
+		return
+
+	# Disable our camera
+	if _camera:
+		_camera.current = false
+
+	# Enable Echo's camera
+	var echo_head := echo.get_node_or_null("Head")
+	if echo_head:
+		var echo_camera := echo_head.get_node_or_null("Camera3D") as Camera3D
+		if echo_camera:
+			echo_camera.current = true
+			print("[PlayerController] Camera transferred to Echo")
+
+
+## Gets the Echo controller if this player is dead and has one.
+func get_echo() -> EchoController:
+	if not is_echo:
+		return null
+
+	var echo_name := "Echo_%s" % name
+	var parent := get_parent()
+	if parent:
+		return parent.get_node_or_null(echo_name) as EchoController
+	return null
+
+
+# --- Revival System (FW-043d) ---
+
+
+## Returns whether this player can be revived.
+## Cannot be revived if already revived once this investigation.
+func can_be_revived() -> bool:
+	if not is_echo:
+		return false  # Not dead
+	return times_revived < 1
+
+
+## Called when this player is revived from Echo state.
+## Applies revival penalties and restores control.
+## _max_sanity: The maximum sanity value (placeholder for sanity system).
+func on_revived(_max_sanity: float) -> void:
+	if not is_echo:
+		return  # Not dead, nothing to revive
+
+	print("[PlayerController] Being revived from Echo state")
+
+	# Increment revival counter
+	times_revived += 1
+
+	# Apply revival penalties
+	current_stamina = max_stamina * REVIVAL_SANITY_PERCENT
+
+	# Restore alive state
+	is_alive = true
+	is_echo = false
+
+	# Re-enable physics and input
+	set_physics_process(true)
+	input_enabled = true
+
+	# Teleport body back to death position (where revival occurred)
+	global_position = death_position
+	velocity = Vector3.ZERO
+
+	# Clean up Echo
+	var echo := get_echo()
+	if echo:
+		_transfer_camera_from_echo(echo)
+		echo.queue_free()
+
+	# Emit revived signal
+	revived.emit()
+	stamina_changed.emit(current_stamina, max_stamina)
+
+	print("[PlayerController] Revival complete. Times revived: %d" % times_revived)
+
+
+## Transfers camera control from Echo back to this player.
+func _transfer_camera_from_echo(echo: EchoController) -> void:
+	if not is_local_player:
+		return
+
+	# Disable Echo's camera
+	var echo_head := echo.get_node_or_null("Head")
+	if echo_head:
+		var echo_camera := echo_head.get_node_or_null("Camera3D") as Camera3D
+		if echo_camera:
+			echo_camera.current = false
+
+	# Re-enable our camera
+	if _camera:
+		_camera.current = true
+		print("[PlayerController] Camera transferred back from Echo")

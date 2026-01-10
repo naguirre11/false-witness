@@ -25,6 +25,12 @@ signal behavioral_tell_triggered(tell_type: String)
 ## Emitted when entity visibility changes during manifestation.
 signal entity_visibility_changed(is_visible: bool)
 
+## Emitted when the entity kills a player.
+signal player_killed(player: Node)
+
+## Emitted when the entity reacts to an Echo's presence (cosmetic only).
+signal echo_reaction_triggered(echo: Node)
+
 # --- Enums ---
 
 ## Entity behavior states
@@ -34,6 +40,28 @@ enum EntityState {
 	HUNTING,  ## Actively chasing players
 	MANIFESTING,  ## Visible manifestation (can be observed/photographed)
 }
+
+# --- Constants ---
+
+## Kill range - distance at which entity kills player during hunt
+const KILL_RANGE := 1.0
+
+# --- Echo Reaction Constants (FW-043c) ---
+
+## Interval between Echo reaction checks (seconds).
+const ECHO_REACTION_INTERVAL := 30.0
+
+## Probability of reacting to an Echo on each check (0.0 - 1.0).
+const ECHO_REACTION_CHANCE := 0.2
+
+## Duration of the reaction animation (seconds).
+const ECHO_REACTION_DURATION := 2.0
+
+## Maximum distance to detect Echoes for reactions.
+const ECHO_REACTION_RANGE := 15.0
+
+## Speed of head turn during reaction (radians per second).
+const ECHO_REACTION_TURN_SPEED := 2.0
 
 # --- Export: Entity Settings ---
 
@@ -110,6 +138,23 @@ var _searching_hiding_spot: Node = null
 var _sync_position: Vector3 = Vector3.ZERO
 var _sync_rotation: float = 0.0
 
+# --- Echo Reaction State (FW-043c) ---
+
+## Timer until next Echo reaction check.
+var _echo_reaction_cooldown: float = 0.0
+
+## Whether entity is currently performing an Echo reaction.
+var _is_reacting_to_echo: bool = false
+
+## Duration of the current reaction.
+var _echo_reaction_timer: float = 0.0
+
+## Target Echo for the current reaction.
+var _reaction_target_echo: Node = null
+
+## Original rotation before reaction (to return to).
+var _pre_reaction_rotation: float = 0.0
+
 
 func _ready() -> void:
 	# Set up collision layer (Layer 3 = Entity)
@@ -124,6 +169,10 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	# Process Echo reactions (cosmetic - can happen in any state except hunting)
+	if _state != EntityState.HUNTING:
+		_process_echo_reactions(delta)
+
 	# State-specific behavior
 	match _state:
 		EntityState.DORMANT:
@@ -332,6 +381,26 @@ func is_visible_to_players() -> bool:
 	return _is_visible
 
 
+## Returns true if this entity is visible to the given observer.
+## Echoes can see entities at all times, living players only when manifesting.
+func is_visible_to(observer: Node) -> bool:
+	# Check if observer ignores entity visibility (e.g., Echoes)
+	if observer.has_method("ignores_entity_visibility"):
+		if observer.ignores_entity_visibility():
+			return true
+
+	# Check for EchoController (always sees entity)
+	if observer is EchoController:
+		return true
+
+	# Check for is_echo property on PlayerController
+	if observer.get("is_echo") == true:
+		return true
+
+	# Default: visible only when manifesting or hunting (visible state)
+	return _is_visible
+
+
 ## Changes the entity state.
 func change_state(new_state: EntityState) -> void:
 	if new_state == _state:
@@ -528,6 +597,10 @@ func _process_dormant(delta: float) -> void:
 
 
 func _process_active(delta: float) -> void:
+	# Pause movement during Echo reactions
+	if _is_reacting_to_echo:
+		return
+
 	# Move around the map
 	_process_active_behavior(delta)
 	_move_along_path(delta)
@@ -550,6 +623,13 @@ func _process_hunting(delta: float) -> void:
 
 	# Process detection and target tracking
 	_update_hunt_detection()
+
+	# Check for kill range on current target
+	if _hunt_target and is_instance_valid(_hunt_target) and _hunt_target is Node3D:
+		var distance: float = global_position.distance_to((_hunt_target as Node3D).global_position)
+		if distance <= KILL_RANGE:
+			_kill_player(_hunt_target)
+			return
 
 	# Navigate to target or last known position
 	if _is_aware_of_target and _hunt_target and is_instance_valid(_hunt_target):
@@ -687,9 +767,11 @@ func _get_alive_players() -> Array:
 	if has_node("/root/PlayerManager"):
 		var player_manager := get_node("/root/PlayerManager")
 		if player_manager.has_method("get_alive_players"):
-			return player_manager.get_alive_players()
+			var players: Array = player_manager.get_alive_players()
+			return _filter_valid_hunt_targets(players)
 		if player_manager.has_method("get_all_players"):
-			return player_manager.get_all_players()
+			var players: Array = player_manager.get_all_players()
+			return _filter_valid_hunt_targets(players)
 
 	# Fallback: find players in scene tree
 	var players: Array = []
@@ -700,7 +782,39 @@ func _get_alive_players() -> Array:
 			continue
 		players.append(player)
 
-	return players
+	return _filter_valid_hunt_targets(players)
+
+
+## Filters out players that cannot be targeted during hunts (Echoes).
+func _filter_valid_hunt_targets(players: Array) -> Array:
+	var valid_targets: Array = []
+	for player in players:
+		if _is_valid_hunt_target(player):
+			valid_targets.append(player)
+	return valid_targets
+
+
+## Returns true if the given player is a valid hunt target.
+## Echoes and dead players are not valid targets.
+func _is_valid_hunt_target(player: Node) -> bool:
+	# Check if player is an Echo (EchoController)
+	if player is EchoController:
+		return false
+
+	# Check if player has is_valid_hunt_target method (for EchoController)
+	if player.has_method("is_valid_hunt_target"):
+		if not player.is_valid_hunt_target():
+			return false
+
+	# Check if player is in Echo state (dead PlayerController)
+	if player.get("is_echo") == true:
+		return false
+
+	# Check if player is dead
+	if player.get("is_alive") == false:
+		return false
+
+	return true
 
 
 ## Gets the detection radius for the current target.
@@ -829,3 +943,169 @@ func _cancel_hiding_spot_search() -> void:
 		if _searching_hiding_spot.has_method("cancel_search"):
 			_searching_hiding_spot.cancel_search()
 	_searching_hiding_spot = null
+
+
+# --- Echo Reaction System (FW-043c) ---
+
+
+## Processes Echo reactions - cosmetic acknowledgment of Echo presence.
+## Called every frame when not hunting.
+func _process_echo_reactions(delta: float) -> void:
+	# If currently reacting, continue the reaction animation
+	if _is_reacting_to_echo:
+		_process_echo_reaction_animation(delta)
+		return
+
+	# Decrement reaction cooldown
+	_echo_reaction_cooldown -= delta
+	if _echo_reaction_cooldown > 0:
+		return
+
+	# Reset cooldown for next check
+	_echo_reaction_cooldown = ECHO_REACTION_INTERVAL
+
+	# Roll for reaction
+	if randf() >= ECHO_REACTION_CHANCE:
+		return
+
+	# Find nearest Echo within range
+	var echo := _find_nearest_echo()
+	if echo:
+		_start_echo_reaction(echo)
+
+
+## Finds the nearest Echo within reaction range.
+func _find_nearest_echo() -> Node:
+	var echoes := get_tree().get_nodes_in_group("echoes")
+	if echoes.is_empty():
+		return null
+
+	var nearest_echo: Node = null
+	var nearest_distance := ECHO_REACTION_RANGE
+
+	for echo in echoes:
+		if not is_instance_valid(echo) or not echo is Node3D:
+			continue
+
+		var distance: float = global_position.distance_to((echo as Node3D).global_position)
+		if distance < nearest_distance:
+			nearest_distance = distance
+			nearest_echo = echo
+
+	return nearest_echo
+
+
+## Starts an Echo reaction.
+func _start_echo_reaction(echo: Node) -> void:
+	_is_reacting_to_echo = true
+	_echo_reaction_timer = ECHO_REACTION_DURATION
+	_reaction_target_echo = echo
+	_pre_reaction_rotation = rotation.y
+
+	echo_reaction_triggered.emit(echo)
+
+	var echo_name := echo.name if echo else "unknown"
+	print("[Entity:%s] Reacting to Echo: %s" % [entity_type, echo_name])
+
+
+## Processes the Echo reaction animation (head turn and pause).
+func _process_echo_reaction_animation(delta: float) -> void:
+	_echo_reaction_timer -= delta
+
+	# Reaction over - return to normal
+	if _echo_reaction_timer <= 0:
+		_end_echo_reaction()
+		return
+
+	# Turn toward Echo
+	if _reaction_target_echo and is_instance_valid(_reaction_target_echo):
+		if _reaction_target_echo is Node3D:
+			var echo_pos: Vector3 = (_reaction_target_echo as Node3D).global_position
+			var direction := (echo_pos - global_position).normalized()
+			var target_rotation := atan2(direction.x, direction.z)
+
+			# Smoothly rotate toward Echo
+			rotation.y = lerp_angle(rotation.y, target_rotation, ECHO_REACTION_TURN_SPEED * delta)
+
+	# Entity is paused during reaction (no movement happens in state processing)
+
+
+## Ends the Echo reaction and returns to normal behavior.
+func _end_echo_reaction() -> void:
+	_is_reacting_to_echo = false
+	_echo_reaction_timer = 0.0
+	_reaction_target_echo = null
+	# Don't reset rotation - let entity continue in new facing
+
+
+## Returns true if entity is currently reacting to an Echo.
+func is_reacting_to_echo() -> bool:
+	return _is_reacting_to_echo
+
+
+## Gets the Echo the entity is currently reacting to (null if not reacting).
+func get_reaction_target_echo() -> Node:
+	return _reaction_target_echo
+
+
+## Manually triggers an Echo reaction for testing or scripted events.
+## Returns true if reaction started, false if no Echo in range or already reacting.
+func trigger_echo_reaction() -> bool:
+	if _is_reacting_to_echo:
+		return false
+
+	var echo := _find_nearest_echo()
+	if not echo:
+		return false
+
+	_start_echo_reaction(echo)
+	return true
+
+
+# --- Death Mechanics ---
+
+
+## Kills a player when within kill range during a hunt.
+## This is called when the entity catches a player.
+func _kill_player(player: Node) -> void:
+	if not is_instance_valid(player):
+		return
+
+	# Verify player is still alive (if they have the property)
+	if player.get("is_alive") == false:
+		# Already dead, find new target
+		_hunt_target = null
+		return
+
+	var player_id := _get_player_id(player)
+	var death_position := Vector3.ZERO
+	if player is Node3D:
+		death_position = (player as Node3D).global_position
+
+	print("[Entity:%s] Killed player %d at %v" % [entity_type, player_id, death_position])
+
+	# Emit local signal
+	player_killed.emit(player)
+
+	# Notify via EventBus
+	if EventBus:
+		EventBus.player_died.emit(player_id)
+
+	# Tell player to handle death (if they have the method)
+	if player.has_method("on_killed_by_entity"):
+		player.on_killed_by_entity(self, death_position)
+
+	# Clear this target and continue hunting other players
+	_hunt_target = null
+	_is_aware_of_target = false
+	_target_last_position = Vector3.ZERO
+
+
+## Gets the player ID from a player node.
+## Checks for peer_id property, get_peer_id method, or falls back to instance ID.
+func _get_player_id(player: Node) -> int:
+	if player.get("peer_id") != null:
+		return player.peer_id as int
+	if player.has_method("get_peer_id"):
+		return player.get_peer_id()
+	return player.get_instance_id()

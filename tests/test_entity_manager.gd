@@ -345,3 +345,64 @@ func test_attempt_immediate_hunt_requires_server() -> void:
 
 	var result: bool = _manager.attempt_immediate_hunt(Vector3.ZERO)
 	assert_false(result, "Non-server should not be able to start immediate hunt")
+
+
+# --- Death Tracking Tests ---
+
+
+func test_death_count_starts_at_zero() -> void:
+	assert_eq(_manager.get_death_count(), 0, "Death count should start at 0")
+
+
+func test_death_locations_start_empty() -> void:
+	var locations: Dictionary = _manager.get_all_death_locations()
+	assert_eq(locations.size(), 0, "Death locations should start empty")
+
+
+func test_register_death_increments_count() -> void:
+	_manager.register_death(1, Vector3(10, 0, 10))
+	assert_eq(_manager.get_death_count(), 1)
+
+	_manager.register_death(2, Vector3(20, 0, 20))
+	assert_eq(_manager.get_death_count(), 2)
+
+
+func test_register_death_stores_location() -> void:
+	_manager.register_death(123, Vector3(5, 1, 5))
+
+	var location: Vector3 = _manager.get_death_location(123)
+	assert_eq(location, Vector3(5, 1, 5))
+
+
+func test_get_death_location_returns_zero_for_unknown_player() -> void:
+	var location: Vector3 = _manager.get_death_location(999)
+	assert_eq(location, Vector3.ZERO, "Unknown player should return Vector3.ZERO")
+
+
+func test_register_death_increments_death_count() -> void:
+	# This test just verifies death registration affects count
+	# The aggression modifier is internal and affects cooldowns
+	_manager.register_death(1, Vector3.ZERO)
+	assert_eq(_manager.get_death_count(), 1, "Death should be registered")
+
+
+func test_reset_clears_death_tracking() -> void:
+	_manager.register_death(1, Vector3(10, 0, 10))
+	_manager.register_death(2, Vector3(20, 0, 20))
+
+	assert_eq(_manager.get_death_count(), 2)
+
+	_manager.reset()
+
+	assert_eq(_manager.get_death_count(), 0, "Death count should be cleared on reset")
+	assert_eq(_manager.get_all_death_locations().size(), 0, "Death locations should be cleared")
+
+
+func test_get_all_death_locations_returns_copy() -> void:
+	_manager.register_death(1, Vector3(10, 0, 10))
+
+	var locations: Dictionary = _manager.get_all_death_locations()
+	locations[999] = Vector3(99, 99, 99)  # Modify the copy
+
+	# Original should not be affected
+	assert_eq(_manager.get_death_location(999), Vector3.ZERO, "Original should not be modified")

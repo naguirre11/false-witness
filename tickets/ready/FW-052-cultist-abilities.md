@@ -23,10 +23,10 @@ Create the Cultist's special abilities including evidence contamination with dec
 - [ ] Abilities disabled after Cultist discovered or dies
 
 ### Evidence Contamination Abilities
-- [ ] EMF Spoof (2 uses): Plant false EMF 5 readings
-- [ ] Temperature Manipulation (2 uses): Create freezing zone
-- [ ] Spirit Box Interference (1 use): Force false positive response
-- [ ] Fingerprint Planting (2 uses): Leave fake UV traces
+- [ ] EMF Spoof (2 uses): Plant false EMF_SIGNATURE readings
+- [ ] Temperature Manipulation (2 uses): Create false FREEZING_TEMPERATURE zone
+- [ ] Prism Interference (1 use): Corrupt PRISM_READING data
+- [ ] Aura Disruption (2 uses): Plant false AURA_PATTERN trails
 
 ### Evidence Decay System
 - [ ] **Planted (0-60s)**: Full strength, identical to real evidence
@@ -39,8 +39,8 @@ Create the Cultist's special abilities including evidence contamination with dec
 |----------|--------|----------|
 | EMF Spoof | Steady Level 5 | Flickers between levels; resets randomly |
 | Temperature | Consistent freezing | Swings ±5° every few seconds |
-| Spirit Box | Clear response | Garbled; cuts out |
-| Fingerprints | Clear UV prints | Prints fade; partial visibility |
+| Prism Interference | Consistent shape/color | Shape flickers; color shifts erratically |
+| Aura Disruption | Clear aura trail | Trail fades; direction inconsistent |
 
 ### Hunt Manipulation Abilities
 - [ ] **Provocation (1 use)**: Force immediate hunt regardless of sanity

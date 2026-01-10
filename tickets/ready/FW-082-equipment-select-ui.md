@@ -27,9 +27,17 @@ Build the equipment selection screen shown during EQUIPMENT_SELECT phase. Player
 
 Cultist sees all teammate selections - important for strategic contamination planning.
 
-Equipment types (from GDD):
-- EMF Reader, Spirit Box, Journal, Thermometer
-- UV Flashlight, DOTS Projector, Video Camera, Parabolic Mic
+**Evidence Equipment (implemented):**
+- EMF Reader → EMF_SIGNATURE
+- Thermometer → FREEZING_TEMPERATURE
+- Spectral Prism Calibrator → PRISM_READING (player 1 of pair)
+- Spectral Prism Lens Reader → PRISM_READING (player 2 of pair)
+- Dowsing Rods → AURA_PATTERN (player 1 of pair)
+- Aura Imager → AURA_PATTERN (player 2 of pair)
+- Ghost Writing Book → GHOST_WRITING
+
+**Protection Items:**
+- Crucifix, Salt, Sage Bundle
 
 ## Out of Scope
 

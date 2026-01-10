@@ -60,26 +60,26 @@ function Run-GutTests {
         [string]$TestDir = ""
     )
 
-    $args = @("--headless", "-s", "addons/gut/gut_cmdln.gd")
+    $gutArgs = @("--headless", "-s", "addons/gut/gut_cmdln.gd")
 
     if ($ConfigFile) {
-        $args += "-gconfig=$ConfigFile"
+        $gutArgs += "-gconfig=$ConfigFile"
     }
 
     if ($TestFile) {
-        $args += "-gtest=$TestFile"
+        $gutArgs += "-gtest=$TestFile"
     }
 
     if ($TestDir) {
-        $args += "-gdir=$TestDir"
+        $gutArgs += "-gdir=$TestDir"
     }
 
-    $args += "-gexit"
+    $gutArgs += "-gexit"
 
     Push-Location $ProjectRoot
     try {
-        Write-Host "Running: $env:GODOT $($args -join ' ')" -ForegroundColor Cyan
-        & $env:GODOT @args
+        Write-Host "Running: $env:GODOT $($gutArgs -join ' ')" -ForegroundColor Cyan
+        & $env:GODOT @gutArgs
         $exitCode = $LASTEXITCODE
     }
     finally {
@@ -112,6 +112,24 @@ switch ($Mode) {
         Write-Host "`n=== FULL TEST SUITE ===" -ForegroundColor Green
         Write-Host "Running all tests..." -ForegroundColor Gray
         $exitCode = Run-GutTests -ConfigFile ".gutconfig.json"
+
+        # Record successful full test run
+        if ($exitCode -eq 0) {
+            $trackingFile = Join-Path $ProjectRoot ".last_full_test.json"
+            Push-Location $ProjectRoot
+            $commitHash = git rev-parse HEAD 2>$null
+            $commitShort = git rev-parse --short HEAD 2>$null
+            Pop-Location
+
+            $tracking = @{
+                commit = $commitHash
+                commit_short = $commitShort
+                date = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+                date_iso = (Get-Date).ToString("o")
+            }
+            $tracking | ConvertTo-Json | Set-Content $trackingFile -Encoding UTF8
+            Write-Host "Recorded full test pass at commit $commitShort" -ForegroundColor Cyan
+        }
     }
 
     "file" {

@@ -130,7 +130,31 @@ tests/
 | During development | Specific file | `run-tests.ps1 -Mode file -File test_audio_manager.gd` | ~5s |
 | Before committing | Smoke tests | `run-tests.ps1 -Mode smoke` | ~30s |
 | Testing specific system | Unit or Integration | `run-tests.ps1 -Mode unit` | ~1min |
-| CI / Before PR | Full suite | `run-tests.ps1 -Mode full` | ~10min |
+| Before moving ticket to for_review | Full suite | `run-tests.ps1 -Mode full` | ~20s |
+
+### Full Test Validation Tracking
+
+The session context tracks when the last full test suite was run and how many commits have occurred since. Check the `[LAST FULL TEST]` section at session start:
+
+```
+[LAST FULL TEST]
+  Date: 2026-01-10 14:07:55
+  Commit: 2db9442
+  Commits since: 0 (up to date)    ← CURRENT (green)
+  Commits since: 2                  ← RECENT (yellow)
+  Commits since: 5                  ← STALE (red)
+```
+
+**Status meanings:**
+- `CURRENT` (0 commits) - Full test suite validates current code
+- `RECENT` (1-3 commits) - Recent validation, likely still valid
+- `STALE` (>3 commits) - **Run full tests before submitting work**
+- `NEVER` - No full test recorded, run immediately
+
+**IMPORTANT**: Before moving a ticket to `for_review`, check the full test status:
+- If `STALE` or `NEVER`: Run `./cc_workflow/scripts/run-tests.ps1 -Mode full`
+- The full test run automatically records the commit hash when tests pass
+- This ensures submitted work has been validated against the complete test suite
 
 ### Test Runner Script
 

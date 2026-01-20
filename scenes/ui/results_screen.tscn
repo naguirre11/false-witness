@@ -1,0 +1,319 @@
+[gd_scene load_steps=2 format=3 uid="uid://dresults123456"]
+
+[ext_resource type="Script" path="res://src/ui/results_screen.gd" id="1_script"]
+
+[node name="ResultsScreen" type="Control"]
+script = ExtResource("1_script")
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 60
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 60
+theme_override_constants/margin_bottom = 40
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Header" type="VBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="WinLossLabel" type="Label" parent="MarginContainer/VBoxContainer/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "INVESTIGATORS WIN!"
+horizontal_alignment = 1
+
+[node name="WinConditionLabel" type="Label" parent="MarginContainer/VBoxContainer/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+text = "The team correctly identified the entity!"
+horizontal_alignment = 1
+
+[node name="MatchDurationLabel" type="Label" parent="MarginContainer/VBoxContainer/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+text = "Match Duration: 12:34"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ContentContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 30
+
+[node name="LeftPanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="EntityRevealPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel"]
+layout_mode = 2
+
+[node name="EntityMargin" type="MarginContainer" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel/EntityRevealPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="EntityVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel/EntityRevealPanel/EntityMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="EntityHeader" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel/EntityRevealPanel/EntityMargin/EntityVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "ENTITY REVEAL"
+horizontal_alignment = 1
+
+[node name="EntityName" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel/EntityRevealPanel/EntityMargin/EntityVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "The Phantom"
+horizontal_alignment = 1
+
+[node name="EvidenceLabel" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel/EntityRevealPanel/EntityMargin/EntityVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Evidence Signature:"
+horizontal_alignment = 1
+
+[node name="EvidenceList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel/EntityRevealPanel/EntityMargin/EntityVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Evidence1" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel/EntityRevealPanel/EntityMargin/EntityVBox/EvidenceList"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.3, 1)
+text = "✓ EMF Level 5"
+horizontal_alignment = 1
+
+[node name="Evidence2" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel/EntityRevealPanel/EntityMargin/EntityVBox/EvidenceList"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.3, 1)
+text = "✓ Freezing Temperature"
+horizontal_alignment = 1
+
+[node name="Evidence3" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel/EntityRevealPanel/EntityMargin/EntityVBox/EvidenceList"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+text = "✗ Ghost Writing (missed)"
+horizontal_alignment = 1
+
+[node name="CultistRevealPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel"]
+layout_mode = 2
+
+[node name="CultistMargin" type="MarginContainer" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel/CultistRevealPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="CultistVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel/CultistRevealPanel/CultistMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="CultistHeader" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel/CultistRevealPanel/CultistMargin/CultistVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "CULTIST REVEAL"
+horizontal_alignment = 1
+
+[node name="CultistName" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel/CultistRevealPanel/CultistMargin/CultistVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+text = "Player Name"
+horizontal_alignment = 1
+
+[node name="CultistStatus" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/LeftPanel/CultistRevealPanel/CultistMargin/CultistVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "Was not discovered during the match"
+horizontal_alignment = 1
+
+[node name="RightPanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 20
+
+[node name="TimelinePanel" type="PanelContainer" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TimelineMargin" type="MarginContainer" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel/TimelinePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="TimelineVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel/TimelinePanel/TimelineMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TimelineHeader" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel/TimelinePanel/TimelineMargin/TimelineVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "CULTIST ACTIONS"
+horizontal_alignment = 1
+
+[node name="TimelineScroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel/TimelinePanel/TimelineMargin/TimelineVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TimelineList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel/TimelinePanel/TimelineMargin/TimelineVBox/TimelineScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="Action1" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel/TimelinePanel/TimelineMargin/TimelineVBox/TimelineScroll/TimelineList"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.7, 0.3, 1)
+text = "02:34 - Contaminated EMF reading in Kitchen"
+
+[node name="Action2" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel/TimelinePanel/TimelineMargin/TimelineVBox/TimelineScroll/TimelineList"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.5, 0.5, 1)
+text = "05:12 - Used Shadow Step ability"
+
+[node name="Action3" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel/TimelinePanel/TimelineMargin/TimelineVBox/TimelineScroll/TimelineList"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.7, 0.3, 1)
+text = "08:45 - Planted false evidence in Bedroom"
+
+[node name="ContributionsPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel"]
+layout_mode = 2
+
+[node name="ContribMargin" type="MarginContainer" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel/ContributionsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="ContribVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel/ContributionsPanel/ContribMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ContribHeader" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel/ContributionsPanel/ContribMargin/ContribVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "PLAYER CONTRIBUTIONS"
+horizontal_alignment = 1
+
+[node name="ContribList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel/ContributionsPanel/ContribMargin/ContribVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Player1" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel/ContributionsPanel/ContribMargin/ContribVBox/ContribList"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "★ Player1 - 5 evidence collected (3 verified)"
+
+[node name="Player2" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel/ContributionsPanel/ContribMargin/ContribVBox/ContribList"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Player2 - 3 evidence collected (2 verified)"
+
+[node name="Player3" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/RightPanel/ContributionsPanel/ContribMargin/ContribVBox/ContribList"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.5, 0.5, 0.5, 1)
+text = "Player3 - 1 evidence (Echo)"
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="BottomBar" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="SuperlativesContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/BottomBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 40
+
+[node name="Award1" type="VBoxContainer" parent="MarginContainer/VBoxContainer/BottomBar/SuperlativesContainer"]
+layout_mode = 2
+
+[node name="Award1Title" type="Label" parent="MarginContainer/VBoxContainer/BottomBar/SuperlativesContainer/Award1"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+text = "🏆 Most Screams"
+horizontal_alignment = 1
+
+[node name="Award1Player" type="Label" parent="MarginContainer/VBoxContainer/BottomBar/SuperlativesContainer/Award1"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Player2"
+horizontal_alignment = 1
+
+[node name="Award2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/BottomBar/SuperlativesContainer"]
+layout_mode = 2
+
+[node name="Award2Title" type="Label" parent="MarginContainer/VBoxContainer/BottomBar/SuperlativesContainer/Award2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+text = "🏆 Speed Demon"
+horizontal_alignment = 1
+
+[node name="Award2Player" type="Label" parent="MarginContainer/VBoxContainer/BottomBar/SuperlativesContainer/Award2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Player1"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/BottomBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ReturnButton" type="Button" parent="MarginContainer/VBoxContainer/BottomBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Return to Lobby"

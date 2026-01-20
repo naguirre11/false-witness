@@ -1,6 +1,9 @@
-[gd_scene format=3 uid="uid://dhud123456789"]
+[gd_scene load_steps=2 format=3 uid="uid://dhud123456789"]
+
+[ext_resource type="Script" path="res://src/ui/hud.gd" id="1_script"]
 
 [node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_script")
 layer = 10
 
 [node name="HUDContainer" type="Control" parent="."]

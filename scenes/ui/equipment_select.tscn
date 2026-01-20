@@ -1,6 +1,9 @@
-[gd_scene format=3 uid="uid://dequip1234567"]
+[gd_scene load_steps=2 format=3 uid="uid://dequip1234567"]
+
+[ext_resource type="Script" path="res://src/ui/equipment_select.gd" id="1_script"]
 
 [node name="EquipmentSelect" type="Control"]
+script = ExtResource("1_script")
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

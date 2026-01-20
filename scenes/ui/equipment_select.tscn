@@ -1,0 +1,254 @@
+[gd_scene format=3 uid="uid://dequip1234567"]
+
+[node name="EquipmentSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Equipment Selection"
+
+[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TimerContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TimerIcon" type="Label" parent="MarginContainer/VBoxContainer/Header/TimerContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "⏱"
+
+[node name="TimerLabel" type="Label" parent="MarginContainer/VBoxContainer/Header/TimerContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "1:00"
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ContentContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 30
+
+[node name="EquipmentPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer/ContentContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
+
+[node name="EquipmentMargin" type="MarginContainer" parent="MarginContainer/VBoxContainer/ContentContainer/EquipmentPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="EquipmentVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/EquipmentPanel/EquipmentMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="EquipmentHeader" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/EquipmentPanel/EquipmentMargin/EquipmentVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Available Equipment"
+horizontal_alignment = 1
+
+[node name="EquipmentGrid" type="GridContainer" parent="MarginContainer/VBoxContainer/ContentContainer/EquipmentPanel/EquipmentMargin/EquipmentVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+columns = 4
+
+[node name="CenterPanel" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="SelectedPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel"]
+layout_mode = 2
+
+[node name="SelectedMargin" type="MarginContainer" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/SelectedPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="SelectedVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/SelectedPanel/SelectedMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SelectedHeader" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/SelectedPanel/SelectedMargin/SelectedVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Your Loadout (3 slots)"
+horizontal_alignment = 1
+
+[node name="SelectedSlotsContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/SelectedPanel/SelectedMargin/SelectedVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Slot1" type="PanelContainer" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/SelectedPanel/SelectedMargin/SelectedVBox/SelectedSlotsContainer"]
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+
+[node name="Slot1Label" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/SelectedPanel/SelectedMargin/SelectedVBox/SelectedSlotsContainer/Slot1"]
+layout_mode = 2
+text = "1
+Empty"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot2" type="PanelContainer" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/SelectedPanel/SelectedMargin/SelectedVBox/SelectedSlotsContainer"]
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+
+[node name="Slot2Label" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/SelectedPanel/SelectedMargin/SelectedVBox/SelectedSlotsContainer/Slot2"]
+layout_mode = 2
+text = "2
+Empty"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot3" type="PanelContainer" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/SelectedPanel/SelectedMargin/SelectedVBox/SelectedSlotsContainer"]
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+
+[node name="Slot3Label" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/SelectedPanel/SelectedMargin/SelectedVBox/SelectedSlotsContainer/Slot3"]
+layout_mode = 2
+text = "3
+Empty"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TooltipPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TooltipMargin" type="MarginContainer" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/TooltipPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="TooltipVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/TooltipPanel/TooltipMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TooltipHeader" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/TooltipPanel/TooltipMargin/TooltipVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Equipment Info"
+horizontal_alignment = 1
+
+[node name="TooltipName" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/TooltipPanel/TooltipMargin/TooltipVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Hover over equipment"
+
+[node name="TooltipEvidence" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/TooltipPanel/TooltipMargin/TooltipVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+text = ""
+
+[node name="TooltipDescription" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/CenterPanel/TooltipPanel/TooltipMargin/TooltipVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+text = ""
+autowrap_mode = 2
+
+[node name="TeammatesPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer/ContentContainer"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+
+[node name="TeammatesMargin" type="MarginContainer" parent="MarginContainer/VBoxContainer/ContentContainer/TeammatesPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="TeammatesVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/TeammatesPanel/TeammatesMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TeammatesHeader" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/TeammatesPanel/TeammatesMargin/TeammatesVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Teammate Selections"
+horizontal_alignment = 1
+
+[node name="TeammatesList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/TeammatesPanel/TeammatesMargin/TeammatesVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="BottomBar" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="SelectionStatus" type="Label" parent="MarginContainer/VBoxContainer/BottomBar"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Select 3 equipment (0/3 selected)"
+
+[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/BottomBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ReadyButton" type="Button" parent="MarginContainer/VBoxContainer/BottomBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 48)
+layout_mode = 2
+disabled = true
+theme_override_font_sizes/font_size = 18
+text = "Ready (0/3)"

@@ -1,0 +1,266 @@
+[gd_scene format=3 uid="uid://dhud123456789"]
+
+[node name="HUD" type="CanvasLayer"]
+layer = 10
+
+[node name="HUDContainer" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopLeftContainer" type="MarginContainer" parent="HUDContainer"]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 200.0
+offset_bottom = 80.0
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+mouse_filter = 2
+
+[node name="VoiceContainer" type="HBoxContainer" parent="HUDContainer/TopLeftContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="VoiceIcon" type="Label" parent="HUDContainer/TopLeftContainer/VoiceContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "🎤"
+
+[node name="VoiceLabel" type="Label" parent="HUDContainer/TopLeftContainer/VoiceContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Speaking..."
+
+[node name="TopRightContainer" type="MarginContainer" parent="HUDContainer"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_bottom = 80.0
+grow_horizontal = 0
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_top = 20
+mouse_filter = 2
+
+[node name="TimerContainer" type="VBoxContainer" parent="HUDContainer/TopRightContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="PhaseLabel" type="Label" parent="HUDContainer/TopRightContainer/TimerContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Investigation"
+horizontal_alignment = 2
+
+[node name="TimerLabel" type="Label" parent="HUDContainer/TopRightContainer/TimerContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "12:00"
+horizontal_alignment = 2
+
+[node name="BottomLeftContainer" type="MarginContainer" parent="HUDContainer"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -120.0
+offset_right = 300.0
+grow_vertical = 0
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_bottom = 20
+mouse_filter = 2
+
+[node name="EquipmentHotbar" type="HBoxContainer" parent="HUDContainer/BottomLeftContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Slot1" type="PanelContainer" parent="HUDContainer/BottomLeftContainer/EquipmentHotbar"]
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 2
+
+[node name="Slot1Content" type="VBoxContainer" parent="HUDContainer/BottomLeftContainer/EquipmentHotbar/Slot1"]
+layout_mode = 2
+
+[node name="Slot1Key" type="Label" parent="HUDContainer/BottomLeftContainer/EquipmentHotbar/Slot1/Slot1Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "[1]"
+horizontal_alignment = 1
+
+[node name="Slot1Icon" type="Label" parent="HUDContainer/BottomLeftContainer/EquipmentHotbar/Slot1/Slot1Content"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 24
+text = "📦"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot1Name" type="Label" parent="HUDContainer/BottomLeftContainer/EquipmentHotbar/Slot1/Slot1Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="Slot2" type="PanelContainer" parent="HUDContainer/BottomLeftContainer/EquipmentHotbar"]
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 2
+
+[node name="Slot2Content" type="VBoxContainer" parent="HUDContainer/BottomLeftContainer/EquipmentHotbar/Slot2"]
+layout_mode = 2
+
+[node name="Slot2Key" type="Label" parent="HUDContainer/BottomLeftContainer/EquipmentHotbar/Slot2/Slot2Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "[2]"
+horizontal_alignment = 1
+
+[node name="Slot2Icon" type="Label" parent="HUDContainer/BottomLeftContainer/EquipmentHotbar/Slot2/Slot2Content"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 24
+text = "📦"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot2Name" type="Label" parent="HUDContainer/BottomLeftContainer/EquipmentHotbar/Slot2/Slot2Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="Slot3" type="PanelContainer" parent="HUDContainer/BottomLeftContainer/EquipmentHotbar"]
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 2
+
+[node name="Slot3Content" type="VBoxContainer" parent="HUDContainer/BottomLeftContainer/EquipmentHotbar/Slot3"]
+layout_mode = 2
+
+[node name="Slot3Key" type="Label" parent="HUDContainer/BottomLeftContainer/EquipmentHotbar/Slot3/Slot3Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "[3]"
+horizontal_alignment = 1
+
+[node name="Slot3Icon" type="Label" parent="HUDContainer/BottomLeftContainer/EquipmentHotbar/Slot3/Slot3Content"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 24
+text = "📦"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot3Name" type="Label" parent="HUDContainer/BottomLeftContainer/EquipmentHotbar/Slot3/Slot3Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Empty"
+horizontal_alignment = 1
+
+[node name="BottomCenterContainer" type="MarginContainer" parent="HUDContainer"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -100.0
+offset_right = 150.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/margin_bottom = 60
+mouse_filter = 2
+
+[node name="InteractionPromptContainer" type="CenterContainer" parent="HUDContainer/BottomCenterContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="InteractionPrompt" type="Label" parent="HUDContainer/BottomCenterContainer/InteractionPromptContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "[E] Interact"
+horizontal_alignment = 1
+
+[node name="BottomRightContainer" type="MarginContainer" parent="HUDContainer"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -60.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+mouse_filter = 2
+
+[node name="HintContainer" type="VBoxContainer" parent="HUDContainer/BottomRightContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="EvidenceBoardHint" type="Label" parent="HUDContainer/BottomRightContainer/HintContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "[Tab] Evidence Board"
+horizontal_alignment = 2
+
+[node name="DeathOverlay" type="ColorRect" parent="HUDContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="DeathContent" type="CenterContainer" parent="HUDContainer/DeathOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DeathVBox" type="VBoxContainer" parent="HUDContainer/DeathOverlay/DeathContent"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="DeathTitle" type="Label" parent="HUDContainer/DeathOverlay/DeathContent/DeathVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "You are now an Echo"
+horizontal_alignment = 1
+
+[node name="DeathSubtitle" type="Label" parent="HUDContainer/DeathOverlay/DeathContent/DeathVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+text = "You can observe but cannot interact with the living"
+horizontal_alignment = 1
+
+[node name="SpectatorHint" type="Label" parent="HUDContainer/DeathOverlay/DeathContent/DeathVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+text = "Use WASD to move freely • Mouse to look around"
+horizontal_alignment = 1

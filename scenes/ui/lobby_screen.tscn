@@ -1,0 +1,164 @@
+[gd_scene format=3 uid="uid://dlobby1234567"]
+
+[node name="LobbyScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Game Lobby"
+
+[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CodeContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Header"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CodeTitleLabel" type="Label" parent="MarginContainer/VBoxContainer/Header/CodeContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Lobby Code:"
+
+[node name="LobbyCodeLabel" type="Label" parent="MarginContainer/VBoxContainer/Header/CodeContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "------"
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ContentContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 40
+
+[node name="PlayerListPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer/ContentContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PlayerListMargin" type="MarginContainer" parent="MarginContainer/VBoxContainer/ContentContainer/PlayerListPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="PlayerListVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/PlayerListPanel/PlayerListMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PlayersHeader" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/PlayerListPanel/PlayerListMargin/PlayerListVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Players"
+horizontal_alignment = 1
+
+[node name="PlayerSlotsContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/PlayerListPanel/PlayerListMargin/PlayerListVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="InfoPanel" type="PanelContainer" parent="MarginContainer/VBoxContainer/ContentContainer"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="InfoMargin" type="MarginContainer" parent="MarginContainer/VBoxContainer/ContentContainer/InfoPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="InfoVBox" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentContainer/InfoPanel/InfoMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="InfoHeader" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/InfoPanel/InfoMargin/InfoVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Lobby Info"
+horizontal_alignment = 1
+
+[node name="PlayerCountLabel" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/InfoPanel/InfoMargin/InfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Players: 1/6"
+
+[node name="ReadyCountLabel" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/InfoPanel/InfoMargin/InfoVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Ready: 0/1"
+
+[node name="MinPlayersLabel" type="Label" parent="MarginContainer/VBoxContainer/ContentContainer/InfoPanel/InfoMargin/InfoVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "Minimum 4 players to start"
+
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="BottomBar" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="LeaveButton" type="Button" parent="MarginContainer/VBoxContainer/BottomBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Leave"
+
+[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/BottomBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ReadyButton" type="Button" parent="MarginContainer/VBoxContainer/BottomBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Ready"
+
+[node name="StartGameButton" type="Button" parent="MarginContainer/VBoxContainer/BottomBar"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(200, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Start Game"

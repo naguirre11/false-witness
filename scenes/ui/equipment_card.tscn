@@ -1,0 +1,60 @@
+[gd_scene load_steps=2 format=3 uid="uid://dequipcard1234"]
+
+[ext_resource type="Script" path="res://src/ui/equipment_card.gd" id="1_script"]
+
+[node name="EquipmentCard" type="PanelContainer"]
+script = ExtResource("1_script")
+custom_minimum_size = Vector2(120, 140)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="IconContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EquipmentIcon" type="TextureRect" parent="MarginContainer/VBoxContainer/IconContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="IconPlaceholder" type="Label" parent="MarginContainer/VBoxContainer/IconContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "📦"
+
+[node name="EquipmentName" type="Label" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Equipment"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="EvidenceType" type="Label" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.6, 0.8, 1, 1)
+text = "Evidence Type"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="SelectionIndicator" type="Label" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.3, 1, 0.3, 1)
+text = "✓ Selected"
+horizontal_alignment = 1

@@ -1,0 +1,159 @@
+[gd_scene load_steps=2 format=3 uid="uid://cdelib123456789"]
+
+[ext_resource type="Script" path="res://src/ui/deliberation_ui.gd" id="1_script"]
+
+[node name="DeliberationUI" type="CanvasLayer"]
+script = ExtResource("1_script")
+layer = 15
+
+[node name="UIContainer" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopCenterContainer" type="MarginContainer" parent="UIContainer"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_right = 200.0
+offset_bottom = 180.0
+grow_horizontal = 2
+theme_override_constants/margin_top = 40
+
+[node name="TimerVBox" type="VBoxContainer" parent="UIContainer/TopCenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="PhaseTitle" type="Label" parent="UIContainer/TopCenterContainer/TimerVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "DELIBERATION"
+horizontal_alignment = 1
+
+[node name="TimerLabel" type="Label" parent="UIContainer/TopCenterContainer/TimerVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "3:00"
+horizontal_alignment = 1
+
+[node name="WarningLabel" type="Label" parent="UIContainer/TopCenterContainer/TimerVBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+text = "Time running out!"
+horizontal_alignment = 1
+
+[node name="CenterContainer" type="MarginContainer" parent="UIContainer"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -100.0
+offset_right = 250.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ActionVBox" type="VBoxContainer" parent="UIContainer/CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="ProposeButton" type="Button" parent="UIContainer/CenterContainer/ActionVBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "Propose Identification"
+
+[node name="ProposalPanel" type="PanelContainer" parent="UIContainer/CenterContainer/ActionVBox"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="ProposalVBox" type="VBoxContainer" parent="UIContainer/CenterContainer/ActionVBox/ProposalPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ProposalMargin" type="MarginContainer" parent="UIContainer/CenterContainer/ActionVBox/ProposalPanel/ProposalVBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="ProposalContent" type="VBoxContainer" parent="UIContainer/CenterContainer/ActionVBox/ProposalPanel/ProposalVBox/ProposalMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ProposalText" type="Label" parent="UIContainer/CenterContainer/ActionVBox/ProposalPanel/ProposalVBox/ProposalMargin/ProposalContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Player proposes: Entity Name"
+horizontal_alignment = 1
+
+[node name="VoteProgress" type="Label" parent="UIContainer/CenterContainer/ActionVBox/ProposalPanel/ProposalVBox/ProposalMargin/ProposalContent"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+text = "Votes: 0/3 needed"
+horizontal_alignment = 1
+
+[node name="BottomRightContainer" type="MarginContainer" parent="UIContainer"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -250.0
+offset_top = -100.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="EvidenceBoardButton" type="Button" parent="UIContainer/BottomRightContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 16
+text = "[Tab] Evidence Board"
+
+[node name="BottomLeftContainer" type="MarginContainer" parent="UIContainer"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -100.0
+offset_right = 400.0
+grow_vertical = 0
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="HintLabel" type="Label" parent="UIContainer/BottomLeftContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "Discuss with your team and identify the entity before time runs out!"

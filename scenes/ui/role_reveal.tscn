@@ -1,0 +1,145 @@
+[gd_scene load_steps=2 format=3 uid="uid://cw8kvf2rn3pgx"]
+
+[ext_resource type="Script" path="res://src/ui/role_reveal.gd" id="1_reveal"]
+
+[node name="RoleReveal" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_reveal")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.8)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="CenterContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(500, 400)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="RoleLabel" type="Label" parent="CenterContainer/Panel/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "INVESTIGATOR"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="CenterContainer/Panel/MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="RoleDescription" type="Label" parent="CenterContainer/Panel/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Your mission: Investigate the paranormal entity and identify its type.
+Use your equipment to gather evidence and work with your team.
+Be vigilant - there may be a Cultist among you."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="CenterContainer/Panel/MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="EntityInfoContainer" type="VBoxContainer" parent="CenterContainer/Panel/MarginContainer/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="EntityHeader" type="Label" parent="CenterContainer/Panel/MarginContainer/VBox/EntityInfoContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.5, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "SECRET INTEL"
+horizontal_alignment = 1
+
+[node name="EntityTypeLabel" type="Label" parent="CenterContainer/Panel/MarginContainer/VBox/EntityInfoContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.6, 1)
+text = "True Entity: Banshee"
+horizontal_alignment = 1
+
+[node name="EntityEvidenceLabel" type="Label" parent="CenterContainer/Panel/MarginContainer/VBox/EntityInfoContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.6, 1)
+text = "Evidence Types: EMF 5, Freezing Temps, Ghost Writing"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="AlliesContainer" type="VBoxContainer" parent="CenterContainer/Panel/MarginContainer/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="AlliesHeader" type="Label" parent="CenterContainer/Panel/MarginContainer/VBox/AlliesContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+text = "ALLIED CULTIST"
+horizontal_alignment = 1
+
+[node name="AlliesLabel" type="Label" parent="CenterContainer/Panel/MarginContainer/VBox/AlliesContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6, 0.6, 1)
+text = "Player Name"
+horizontal_alignment = 1
+
+[node name="AbilityOverview" type="Label" parent="CenterContainer/Panel/MarginContainer/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 12
+text = "ABILITIES:
+• EMF Spoof (2x) - Plant false EMF readings
+• Temperature Manipulation (2x) - Create cold zones
+• Prism Interference (1x) - Corrupt prism data"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Spacer" type="Control" parent="CenterContainer/Panel/MarginContainer/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TimerLabel" type="Label" parent="CenterContainer/Panel/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+text = "Auto-dismiss in 10..."
+horizontal_alignment = 1
+
+[node name="DismissButton" type="Button" parent="CenterContainer/Panel/MarginContainer/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Continue"

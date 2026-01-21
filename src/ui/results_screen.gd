@@ -3,10 +3,21 @@ extends Control
 ##
 ## Shows: winning team, entity type, cultist identity, evidence collected/missed,
 ## cultist action timeline, player contributions, and humorous superlatives.
+##
+## Automatically shows when GameManager enters RESULTS state and receives
+## MatchResult data from MatchManager.match_ended signal.
+
+# --- Constants ---
+
+const RESULTS_STATE: int = 6  # GameManager.GameState.RESULTS
 
 # --- Signals ---
 
 signal return_to_lobby_requested
+
+# --- State Variables ---
+
+var _is_active: bool = false
 
 # --- Node References ---
 
@@ -25,6 +36,45 @@ signal return_to_lobby_requested
 
 func _ready() -> void:
 	_return_button.pressed.connect(_on_return_pressed)
+	_setup_signals()
+	hide()
+
+
+func _setup_signals() -> void:
+	# Connect to EventBus signals
+	if has_node("/root/EventBus"):
+		EventBus.game_state_changed.connect(_on_game_state_changed)
+		EventBus.match_ended.connect(_on_match_ended)
+
+	# Connect to MatchManager if available
+	if has_node("/root/MatchManager"):
+		if MatchManager.has_signal("match_ended"):
+			MatchManager.match_ended.connect(_on_match_result_received)
+
+
+func _on_game_state_changed(old_state: int, new_state: int) -> void:
+	if new_state == RESULTS_STATE:
+		# Show results screen
+		show()
+		_is_active = true
+		print("[ResultsScreen] RESULTS state entered - showing results screen")
+	elif old_state == RESULTS_STATE:
+		# Hide results screen
+		hide()
+		_is_active = false
+
+
+func _on_match_ended(result: Dictionary) -> void:
+	# Receive match result from EventBus
+	var match_result := MatchResult.from_dict(result)
+	setup(match_result)
+	print("[ResultsScreen] Received match result from EventBus")
+
+
+func _on_match_result_received(result: MatchResult) -> void:
+	# Receive match result directly from MatchManager
+	setup(result)
+	print("[ResultsScreen] Received match result from MatchManager")
 
 
 ## Sets up the results screen with match result data.

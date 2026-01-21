@@ -146,6 +146,10 @@ signal evidence_contaminated(evidence_type: String)
 ## evidence is the full ContaminatedEvidence object for detailed handling.
 signal contaminated_evidence_planted(evidence: Resource)
 
+## Emitted when a Cultist sabotages another player's equipment.
+## target_player_id is the affected player, duration is how long equipment is disabled.
+signal equipment_sabotaged(target_player_id: int, duration: float)
+
 # --- Interaction Signals ---
 
 ## Emitted when a player interacts with an object.

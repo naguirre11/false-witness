@@ -44,6 +44,10 @@ var _selected_ability: int = -1
 @onready var _ability_container: HBoxContainer = %AbilityContainer
 @onready var _header_label: Label = %HeaderLabel
 @onready var _selected_label: Label = %SelectedLabel
+@onready var _placement_container: VBoxContainer = %PlacementContainer
+@onready var _placement_label: Label = %PlacementLabel
+@onready var _placement_progress: ProgressBar = %PlacementProgress
+@onready var _placement_hint: Label = %PlacementHint
 
 
 func _ready() -> void:
@@ -173,6 +177,14 @@ func _connect_signals() -> void:
 		var event_bus := get_node("/root/EventBus")
 		if event_bus.has_signal("game_state_changed"):
 			event_bus.game_state_changed.connect(_on_game_state_changed)
+		if event_bus.has_signal("cultist_placement_started"):
+			event_bus.cultist_placement_started.connect(_on_placement_started)
+		if event_bus.has_signal("cultist_placement_progress"):
+			event_bus.cultist_placement_progress.connect(_on_placement_progress)
+		if event_bus.has_signal("cultist_placement_completed"):
+			event_bus.cultist_placement_completed.connect(_on_placement_completed)
+		if event_bus.has_signal("cultist_placement_cancelled"):
+			event_bus.cultist_placement_cancelled.connect(_on_placement_cancelled)
 
 	if has_node("/root/CultistManager"):
 		var cultist_manager := get_node("/root/CultistManager")
@@ -258,3 +270,78 @@ func can_use_ability(ability_type: int) -> bool:
 	if ability == null:
 		return false
 	return ability.can_use()
+
+
+# --- Placement UI Methods ---
+
+
+func _on_placement_started(_player_id: int, ability_type: int, _position: Vector3) -> void:
+	if not _is_cultist:
+		return
+
+	# Show placement UI
+	_placement_container.visible = true
+	_placement_progress.value = 0.0
+
+	# Update label with ability name
+	var ability_name := CultistEnums.get_ability_name(ability_type)
+	_placement_label.text = "PLACING: %s" % ability_name
+
+
+func _on_placement_progress(_player_id: int, progress: float) -> void:
+	if not _is_cultist:
+		return
+
+	_placement_progress.value = progress
+
+
+func _on_placement_completed(_player_id: int, _ability_type: int, _position: Vector3) -> void:
+	if not _is_cultist:
+		return
+
+	# Hide placement UI
+	_placement_container.visible = false
+	_placement_progress.value = 0.0
+
+	# Update charges display
+	_update_cooldowns()
+
+
+func _on_placement_cancelled(_player_id: int, reason: String) -> void:
+	if not _is_cultist:
+		return
+
+	# Hide placement UI
+	_placement_container.visible = false
+	_placement_progress.value = 0.0
+
+	# Show cancellation message briefly
+	_placement_hint.text = "Cancelled: %s" % reason
+	_placement_container.visible = true
+
+	# Hide after a short delay
+	await get_tree().create_timer(1.5).timeout
+	_placement_container.visible = false
+	_placement_hint.text = "Stand still... Moving will cancel"
+
+
+## Show placement progress for a specific ability (used by external systems).
+func show_placement_progress(ability_type: int, progress: float) -> void:
+	if not _is_cultist:
+		return
+
+	if progress <= 0.0:
+		_placement_container.visible = false
+		return
+
+	_placement_container.visible = true
+	_placement_progress.value = progress
+
+	var ability_name := CultistEnums.get_ability_name(ability_type)
+	_placement_label.text = "PLACING: %s" % ability_name
+
+
+## Hide placement progress UI.
+func hide_placement_progress() -> void:
+	_placement_container.visible = false
+	_placement_progress.value = 0.0

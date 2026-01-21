@@ -150,6 +150,23 @@ signal contaminated_evidence_planted(evidence: Resource)
 ## target_player_id is the affected player, duration is how long equipment is disabled.
 signal equipment_sabotaged(target_player_id: int, duration: float)
 
+## Emitted when a Cultist starts placing a contamination ability.
+## player_id is the Cultist, ability_type is the ability being placed, position is world position.
+signal cultist_placement_started(player_id: int, ability_type: int, position: Vector3)
+
+## Emitted when placement progress updates (for progress UI).
+## progress is 0.0 to 1.0.
+signal cultist_placement_progress(player_id: int, progress: float)
+
+## Emitted when a Cultist completes placing a contamination ability.
+signal cultist_placement_completed(player_id: int, ability_type: int, position: Vector3)
+
+## Emitted when a Cultist's placement is cancelled (moved, damaged, interrupted).
+signal cultist_placement_cancelled(player_id: int, reason: String)
+
+## Emitted when a player takes damage (for placement cancellation).
+signal player_damaged(player_id: int, damage: float, source: String)
+
 # --- Interaction Signals ---
 
 ## Emitted when a player interacts with an object.

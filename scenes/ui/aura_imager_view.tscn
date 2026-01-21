@@ -1,0 +1,292 @@
+[gd_scene load_steps=3 format=3 uid="uid://bk5qr9wn2xpht"]
+
+[ext_resource type="Script" path="res://src/ui/aura_imager_view.gd" id="1_view"]
+[ext_resource type="Script" path="res://src/ui/aura_display.gd" id="2_aura"]
+
+[node name="AuraImagerView" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_view")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.02, 0.06, 0.95)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="TitleBar" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="VBoxContainer/TitleBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "AURA IMAGER"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="VBoxContainer/TitleBar"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "POSITIONING"
+horizontal_alignment = 2
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="MainContent" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="AuraPanel" type="Panel" parent="VBoxContainer/MainContent"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/MainContent/AuraPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="AuraContainer" type="CenterContainer" parent="VBoxContainer/MainContent/AuraPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AuraDisplay" type="Control" parent="VBoxContainer/MainContent/AuraPanel/VBoxContainer/AuraContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 2
+script = ExtResource("2_aura")
+
+[node name="ResolutionContainer" type="VBoxContainer" parent="VBoxContainer/MainContent/AuraPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ResolutionLabel" type="Label" parent="VBoxContainer/MainContent/AuraPanel/VBoxContainer/ResolutionContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "0% Clarity"
+horizontal_alignment = 1
+
+[node name="ResolutionProgress" type="ProgressBar" parent="VBoxContainer/MainContent/AuraPanel/VBoxContainer/ResolutionContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+max_value = 100.0
+value = 0.0
+show_percentage = false
+
+[node name="InfoContainer" type="VBoxContainer" parent="VBoxContainer/MainContent/AuraPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ColorLabel" type="Label" parent="VBoxContainer/MainContent/AuraPanel/VBoxContainer/InfoContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Color: (resolving...)"
+horizontal_alignment = 1
+
+[node name="FormLabel" type="Label" parent="VBoxContainer/MainContent/AuraPanel/VBoxContainer/InfoContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Form: (resolving...)"
+horizontal_alignment = 1
+
+[node name="TemperamentLabel" type="Label" parent="VBoxContainer/MainContent/AuraPanel/VBoxContainer/InfoContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Type: (unknown)"
+horizontal_alignment = 1
+
+[node name="ConsistencyLabel" type="Label" parent="VBoxContainer/MainContent/AuraPanel/VBoxContainer/InfoContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Reading: ---"
+horizontal_alignment = 1
+
+[node name="PositioningPanel" type="Panel" parent="VBoxContainer/MainContent"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="CenterContainer" type="CenterContainer" parent="VBoxContainer/MainContent/PositioningPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/MainContent/PositioningPanel/CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="PositionIcon" type="Label" parent="VBoxContainer/MainContent/PositioningPanel/CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = ">"
+horizontal_alignment = 1
+
+[node name="PositionLabel" type="Label" parent="VBoxContainer/MainContent/PositioningPanel/CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "AIM AT DOWSER"
+horizontal_alignment = 1
+
+[node name="ViolationsLabel" type="Label" parent="VBoxContainer/MainContent/PositioningPanel/CenterContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Move to position behind Dowser"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ReferenceGuide" type="PanelContainer" parent="VBoxContainer/MainContent"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/MainContent/ReferenceGuide"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/MainContent/ReferenceGuide/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="GuideTitle" type="Label" parent="VBoxContainer/MainContent/ReferenceGuide/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "REFERENCE"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer/MainContent/ReferenceGuide/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="ColorsTitle" type="Label" parent="VBoxContainer/MainContent/ReferenceGuide/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Colors:"
+
+[node name="ColdBlue" type="Label" parent="VBoxContainer/MainContent/ReferenceGuide/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.2, 0.4, 0.9, 1)
+text = "Cold Blue = Passive"
+
+[node name="HotRed" type="Label" parent="VBoxContainer/MainContent/ReferenceGuide/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.95, 0.2, 0.15, 1)
+text = "Hot Red = Aggressive"
+
+[node name="PaleGreen" type="Label" parent="VBoxContainer/MainContent/ReferenceGuide/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.4, 0.85, 0.5, 1)
+text = "Pale Green = Territorial"
+
+[node name="DeepPurple" type="Label" parent="VBoxContainer/MainContent/ReferenceGuide/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.6, 0.2, 0.8, 1)
+text = "Deep Purple = Roaming"
+
+[node name="HSeparator2" type="HSeparator" parent="VBoxContainer/MainContent/ReferenceGuide/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="FormsTitle" type="Label" parent="VBoxContainer/MainContent/ReferenceGuide/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Forms:"
+
+[node name="Tight" type="Label" parent="VBoxContainer/MainContent/ReferenceGuide/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "Tight = Passive"
+
+[node name="Spiking" type="Label" parent="VBoxContainer/MainContent/ReferenceGuide/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "Spiking = Aggressive"
+
+[node name="Diffuse" type="Label" parent="VBoxContainer/MainContent/ReferenceGuide/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "Diffuse = Territorial"
+
+[node name="Swirling" type="Label" parent="VBoxContainer/MainContent/ReferenceGuide/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "Swirling = Roaming"
+
+[node name="HSeparator2" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="BottomBar" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="ProgressContainer" type="VBoxContainer" parent="VBoxContainer/BottomBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="CaptureLabel" type="Label" parent="VBoxContainer/BottomBar/ProgressContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Capture Progress"
+
+[node name="CaptureProgress" type="ProgressBar" parent="VBoxContainer/BottomBar/ProgressContainer"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(200, 20)
+layout_mode = 2
+max_value = 100.0
+value = 0.0
+show_percentage = false
+
+[node name="CaptureButton" type="Button" parent="VBoxContainer/BottomBar"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "CAPTURE"

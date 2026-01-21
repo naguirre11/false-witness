@@ -7,11 +7,27 @@ extends Control
 ## trust level, verification state, and any conflicts.
 
 signal closed
+signal verify_requested(evidence: Evidence)
+
+# --- Constants ---
+
+## Verification requirement messages by trust level.
+const VERIFICATION_REQUIREMENTS: Dictionary = {
+	EvidenceEnums.TrustLevel.UNFALSIFIABLE: "Auto-verified with multiple witnesses",
+	EvidenceEnums.TrustLevel.HIGH: "Need another player to corroborate",
+	EvidenceEnums.TrustLevel.VARIABLE: "Need third player to watch the reading",
+	EvidenceEnums.TrustLevel.LOW: "Need different operator for second reading",
+	EvidenceEnums.TrustLevel.SABOTAGE_RISK: "Need witnesses to setup AND result",
+}
 
 # --- State ---
 
 var _evidence: Evidence = null
 var _evidence_type: EvidenceEnums.EvidenceType
+# Verification UI elements (created dynamically)
+var _verify_container: VBoxContainer = null
+var _verify_button: Button = null
+var _verify_requirement_label: Label = null
 
 # --- Nodes ---
 
@@ -36,6 +52,7 @@ func _ready() -> void:
 		_close_button.pressed.connect(_on_close_pressed)
 	if _dimmer:
 		_dimmer.gui_input.connect(_on_dimmer_input)
+	_create_verification_ui()
 
 
 func _input(event: InputEvent) -> void:
@@ -143,6 +160,9 @@ func _update_collected_display() -> void:
 	# Conflicts
 	_update_conflict_display()
 
+	# Verification helper UI
+	_update_verification_ui()
+
 
 func _update_uncollected_display() -> void:
 	if _collector_label:
@@ -165,6 +185,9 @@ func _update_uncollected_display() -> void:
 
 	if _conflict_container:
 		_conflict_container.hide()
+
+	if _verify_container:
+		_verify_container.hide()
 
 
 func _update_conflict_display() -> void:
@@ -280,3 +303,89 @@ func _on_dimmer_input(event: InputEvent) -> void:
 		var mouse_event := event as InputEventMouseButton
 		if mouse_event.pressed and mouse_event.button_index == MOUSE_BUTTON_LEFT:
 			_close_popup()
+
+
+# --- Verification UI ---
+
+
+func _create_verification_ui() -> void:
+	# Find the content container (parent of close button)
+	if not _close_button:
+		return
+
+	var content_parent := _close_button.get_parent()
+	if not content_parent:
+		return
+
+	# Create verification container
+	_verify_container = VBoxContainer.new()
+	_verify_container.name = "VerifyContainer"
+
+	# Add separator
+	var separator := HSeparator.new()
+	_verify_container.add_child(separator)
+
+	# Add requirement label
+	_verify_requirement_label = Label.new()
+	_verify_requirement_label.name = "RequirementLabel"
+	_verify_requirement_label.add_theme_font_size_override("font_size", 12)
+	_verify_requirement_label.add_theme_color_override("font_color", Color.LIGHT_GRAY)
+	_verify_container.add_child(_verify_requirement_label)
+
+	# Add verify button
+	_verify_button = Button.new()
+	_verify_button.name = "VerifyButton"
+	_verify_button.text = "Verify Evidence"
+	_verify_button.pressed.connect(_on_verify_pressed)
+	_verify_container.add_child(_verify_button)
+
+	# Insert before close button
+	var close_idx := content_parent.get_child_count() - 1  # Assume close is last
+	content_parent.add_child(_verify_container)
+	content_parent.move_child(_verify_container, close_idx)
+
+	_verify_container.hide()
+
+
+func _update_verification_ui() -> void:
+	if not _verify_container:
+		return
+
+	# Hide if no evidence or already verified
+	if not _evidence:
+		_verify_container.hide()
+		return
+
+	if _evidence.is_verified():
+		_verify_container.hide()
+		return
+
+	# Show verification helper
+	_verify_container.show()
+
+	# Get trust level and requirement message
+	var trust := _evidence.trust_level
+	var requirement: String = VERIFICATION_REQUIREMENTS.get(trust, "Verification needed")
+
+	# Check staleness
+	var verification_manager := _get_verification_manager()
+	if verification_manager:
+		var staleness: int = verification_manager.get_evidence_staleness(_evidence)
+		# VerificationManager.StalenessLevel.VERY_STALE = 2
+		if staleness == 2:
+			_verify_requirement_label.text = "Too old to verify (>180s)"
+			_verify_requirement_label.modulate = Color.RED
+			_verify_button.disabled = true
+			_verify_button.text = "Cannot Verify"
+			return
+
+	_verify_requirement_label.text = requirement
+	_verify_requirement_label.modulate = Color.WHITE
+	_verify_button.disabled = false
+	_verify_button.text = "Verify Evidence"
+
+
+func _on_verify_pressed() -> void:
+	if _evidence:
+		verify_requested.emit(_evidence)
+		_close_popup()

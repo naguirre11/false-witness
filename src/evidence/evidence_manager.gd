@@ -36,6 +36,9 @@ signal identification_approved(entity_type: String)
 ## Emitted when identification voting completes with rejection.
 signal identification_rejected(entity_type: String)
 
+## Emitted when entity eliminations change.
+signal eliminations_changed(eliminated: Array, remaining: Array)
+
 # --- State ---
 
 ## All collected evidence indexed by UID.
@@ -58,6 +61,59 @@ var _deliberation_active: bool = false
 
 ## Number of alive players who can vote. Set externally by game systems.
 var _alive_player_count: int = 4
+
+## Entity types that have been eliminated by collected evidence.
+var _eliminated_entities: Array[String] = []
+
+## All possible entity types (must match EntityMatrix.ALL_ENTITIES).
+const ALL_ENTITIES: Array[String] = [
+	"Phantom", "Banshee", "Revenant", "Shade",
+	"Poltergeist", "Wraith", "Mare", "Demon",
+]
+
+## Entity evidence production map (must match EntityMatrix.ENTITY_EVIDENCE_MAP).
+const ENTITY_EVIDENCE_MAP: Dictionary = {
+	"Phantom": [
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		EvidenceEnums.EvidenceType.FREEZING_TEMPERATURE,
+		EvidenceEnums.EvidenceType.VISUAL_MANIFESTATION,
+	],
+	"Banshee": [
+		EvidenceEnums.EvidenceType.PRISM_READING,
+		EvidenceEnums.EvidenceType.AURA_PATTERN,
+		EvidenceEnums.EvidenceType.HUNT_BEHAVIOR,
+	],
+	"Revenant": [
+		EvidenceEnums.EvidenceType.FREEZING_TEMPERATURE,
+		EvidenceEnums.EvidenceType.GHOST_WRITING,
+		EvidenceEnums.EvidenceType.HUNT_BEHAVIOR,
+	],
+	"Shade": [
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		EvidenceEnums.EvidenceType.GHOST_WRITING,
+		EvidenceEnums.EvidenceType.VISUAL_MANIFESTATION,
+	],
+	"Poltergeist": [
+		EvidenceEnums.EvidenceType.PHYSICAL_INTERACTION,
+		EvidenceEnums.EvidenceType.GHOST_WRITING,
+		EvidenceEnums.EvidenceType.AURA_PATTERN,
+	],
+	"Wraith": [
+		EvidenceEnums.EvidenceType.EMF_SIGNATURE,
+		EvidenceEnums.EvidenceType.PRISM_READING,
+		EvidenceEnums.EvidenceType.PHYSICAL_INTERACTION,
+	],
+	"Mare": [
+		EvidenceEnums.EvidenceType.FREEZING_TEMPERATURE,
+		EvidenceEnums.EvidenceType.PRISM_READING,
+		EvidenceEnums.EvidenceType.GHOST_WRITING,
+	],
+	"Demon": [
+		EvidenceEnums.EvidenceType.AURA_PATTERN,
+		EvidenceEnums.EvidenceType.PHYSICAL_INTERACTION,
+		EvidenceEnums.EvidenceType.HUNT_BEHAVIOR,
+	],
+}
 
 
 func _ready() -> void:
@@ -212,6 +268,9 @@ func contest_evidence(uid: String, contester_id: int) -> bool:
 	_emit_verification_to_event_bus(evidence)
 	_emit_contested_to_event_bus(evidence, contester_id)
 
+	# Recalculate eliminations - contested evidence doesn't eliminate
+	recalculate_eliminations()
+
 	return true
 
 
@@ -225,6 +284,70 @@ func _emit_contested_to_event_bus(evidence: Evidence, contester_id: int) -> void
 	var event_bus := _get_event_bus()
 	if event_bus and event_bus.has_signal("evidence_contested"):
 		event_bus.evidence_contested.emit(evidence.uid, contester_id)
+
+
+# --- Public API: Elimination ---
+
+
+## Returns the list of eliminated entity types.
+func get_eliminated_entities() -> Array[String]:
+	return _eliminated_entities.duplicate()
+
+
+## Returns the list of remaining (non-eliminated) entity types.
+func get_remaining_entities() -> Array[String]:
+	var remaining: Array[String] = []
+	for entity_type in ALL_ENTITIES:
+		if entity_type not in _eliminated_entities:
+			remaining.append(entity_type)
+	return remaining
+
+
+## Recalculates entity eliminations based on collected evidence.
+## Called automatically when evidence is collected or contested.
+func recalculate_eliminations() -> void:
+	var old_eliminated := _eliminated_entities.duplicate()
+	_eliminated_entities.clear()
+
+	# Get all collected evidence types (not contested)
+	var collected_types: Array[int] = []
+	for evidence: Evidence in _evidence_by_uid.values():
+		# Skip contested evidence - it doesn't eliminate
+		if evidence.is_contested():
+			continue
+		if evidence.type not in collected_types:
+			collected_types.append(evidence.type)
+
+	# An entity is eliminated if it CANNOT produce any of the collected evidence
+	for entity_type in ALL_ENTITIES:
+		var entity_evidence: Array = ENTITY_EVIDENCE_MAP.get(entity_type, [])
+		var is_eliminated := false
+
+		for collected_type in collected_types:
+			if collected_type not in entity_evidence:
+				is_eliminated = true
+				break
+
+		if is_eliminated:
+			_eliminated_entities.append(entity_type)
+
+	# Only emit if eliminations changed
+	if _eliminated_entities != old_eliminated:
+		var remaining := get_remaining_entities()
+		eliminations_changed.emit(_eliminated_entities.duplicate(), remaining)
+
+
+## Checks if an entity type has been eliminated.
+func is_entity_eliminated(entity_type: String) -> bool:
+	return entity_type in _eliminated_entities
+
+
+## Checks if evidence type can be produced by an entity.
+static func entity_produces_evidence(
+	entity_type: String, evidence_type: EvidenceEnums.EvidenceType
+) -> bool:
+	var entity_evidence: Array = ENTITY_EVIDENCE_MAP.get(entity_type, [])
+	return evidence_type in entity_evidence
 
 
 # --- Public API: Identification ---
@@ -491,7 +614,9 @@ func clear_evidence() -> void:
 	_evidence_by_uid.clear()
 	_initialize_type_index()
 	_evidence_by_collector.clear()
+	_eliminated_entities.clear()
 	evidence_cleared.emit()
+	eliminations_changed.emit([], ALL_ENTITIES.duplicate())
 	print("[EvidenceManager] All evidence cleared")
 
 
@@ -522,6 +647,9 @@ func _add_evidence(evidence: Evidence) -> void:
 	_evidence_by_collector[evidence.collector_id].append(evidence)
 
 	evidence_collected.emit(evidence)
+
+	# Recalculate entity eliminations when evidence is collected
+	recalculate_eliminations()
 
 	var event_bus := _get_event_bus()
 	if event_bus:

@@ -112,8 +112,8 @@ func _ready() -> void:
 func _connect_signals() -> void:
 	var evidence_manager := _get_evidence_manager()
 	if evidence_manager:
-		if evidence_manager.has_signal("evidence_collected"):
-			evidence_manager.evidence_collected.connect(_on_evidence_collected)
+		if evidence_manager.has_signal("eliminations_changed"):
+			evidence_manager.eliminations_changed.connect(_on_eliminations_changed)
 		if evidence_manager.has_signal("evidence_cleared"):
 			evidence_manager.evidence_cleared.connect(_on_evidence_cleared)
 
@@ -178,20 +178,28 @@ func _add_entity_row(entity_type: String) -> void:
 
 
 func _update_eliminations() -> void:
-	_eliminated_entities.clear()
-
-	# An entity is eliminated if it CANNOT produce any of the collected evidence
-	for entity_type in ALL_ENTITIES:
-		var entity_evidence: Array = ENTITY_EVIDENCE_MAP.get(entity_type, [])
-		var is_eliminated := false
-
-		for collected_type in _collected_evidence:
-			if collected_type not in entity_evidence:
-				is_eliminated = true
-				break
-
-		if is_eliminated:
-			_eliminated_entities.append(entity_type)
+	# Sync with EvidenceManager's authoritative elimination state
+	var evidence_manager := _get_evidence_manager()
+	if evidence_manager and evidence_manager.has_method("get_eliminated_entities"):
+		_eliminated_entities = evidence_manager.get_eliminated_entities()
+		_collected_evidence.clear()
+		# Also get collected evidence types for highlighting
+		var all_evidence: Array = evidence_manager.get_all_evidence()
+		for evidence in all_evidence:
+			if evidence.type not in _collected_evidence:
+				_collected_evidence.append(evidence.type)
+	else:
+		# Fallback: calculate locally (for testing without EvidenceManager)
+		_eliminated_entities.clear()
+		for entity_type in ALL_ENTITIES:
+			var entity_evidence: Array = ENTITY_EVIDENCE_MAP.get(entity_type, [])
+			var is_eliminated := false
+			for collected_type in _collected_evidence:
+				if collected_type not in entity_evidence:
+					is_eliminated = true
+					break
+			if is_eliminated:
+				_eliminated_entities.append(entity_type)
 
 	_update_visual_state()
 	_update_remaining_label()
@@ -278,15 +286,19 @@ func set_collected_evidence(evidence_types: Array[int]) -> void:
 	_update_eliminations()
 
 
-func _on_evidence_collected(evidence: Evidence) -> void:
-	if evidence.type not in _collected_evidence:
-		_collected_evidence.append(evidence.type)
-		_update_eliminations()
+func _on_eliminations_changed(eliminated: Array, remaining: Array) -> void:
+	_eliminated_entities.clear()
+	for entity_type in eliminated:
+		_eliminated_entities.append(entity_type)
+	_update_visual_state()
+	_update_remaining_label()
 
 
 func _on_evidence_cleared() -> void:
 	_collected_evidence.clear()
-	_update_eliminations()
+	_eliminated_entities.clear()
+	_update_visual_state()
+	_update_remaining_label()
 
 
 func _on_entity_pressed(entity_type: String) -> void:

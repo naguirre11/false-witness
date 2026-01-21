@@ -213,6 +213,38 @@ signal lobby_can_start(can_start: bool)
 ## Emitted when the host changes (migration or new host).
 signal lobby_host_changed(new_host_peer_id: int, new_host_username: String)
 
+# --- Phenomenon Signals (Network Sync) ---
+
+## Emitted when an object is thrown by entity (server-authoritative).
+## node_path: Path to ThrowableObject, direction: throw direction,
+## force: throw force, entity_type: type of entity, position: starting position.
+signal object_thrown(node_path: String, direction: Vector3, force: float, entity_type: String, position: Vector3)
+
+## Emitted when a thrown object lands.
+signal object_landed(node_path: String, position: Vector3)
+
+## Emitted when an entity manipulates a door (server-authoritative).
+## node_path: Path to InteractableDoor, action: "slam_shut"/"slam_open"/"slow_open"/"slow_close",
+## entity_type: type of entity, position: door position.
+signal door_manipulated(node_path: String, action: String, entity_type: String, position: Vector3)
+
+## Emitted when a light flickers or changes state (server-authoritative).
+## node_path: Path to FlickeringLight, action: "start"/"end",
+## pattern: FlickerPattern enum, entity_type: type of entity, position: light position.
+signal light_flickered(node_path: String, action: String, pattern: int, entity_type: String, position: Vector3)
+
+## Emitted when a light is broken/exploded.
+signal light_broken(node_path: String, entity_type: String, position: Vector3)
+
+## Emitted when a surface manifestation is created (server-authoritative).
+## node_path: Path to SurfaceManifestation, manifestation_type: ManifestationType enum,
+## entity_type: type of entity, position: manifestation position.
+signal surface_manifestation_created(node_path: String, manifestation_type: int, entity_type: String, position: Vector3)
+
+## Emitted when a player reports a phenomenon.
+## report_data: Dictionary with phenomenon_type, location, reporter_id, timestamp, etc.
+signal phenomenon_reported(report_data: Dictionary)
+
 # --- Timer Signals ---
 
 ## Emitted every second during timed phases (investigation, deliberation).

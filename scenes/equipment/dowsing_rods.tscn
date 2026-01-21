@@ -1,0 +1,52 @@
+[gd_scene load_steps=2 format=3 uid="uid://b4lrqpmdt3y5j"]
+
+[ext_resource type="Script" path="res://src/equipment/aura/dowsing_rods.gd" id="1_dowsing_rods"]
+
+[node name="DowsingRods" type="Node3D"]
+script = ExtResource("1_dowsing_rods")
+equipment_name = "Dowsing Rods"
+first_person_offset = Vector3(0, -0.3, -0.4)
+first_person_rotation = Vector3(0, 0, 0)
+
+[node name="Model" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="LeftRod" type="Node3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.08, 0, 0)
+
+[node name="Handle" type="CSGCylinder3D" parent="Model/LeftRod"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+use_collision = true
+radius = 0.012
+height = 0.1
+
+[node name="LongArm" type="CSGCylinder3D" parent="Model/LeftRod"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0.05, -0.15)
+use_collision = true
+radius = 0.006
+height = 0.3
+
+[node name="Bend" type="CSGSphere3D" parent="Model/LeftRod"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+use_collision = true
+radius = 0.01
+
+[node name="RightRod" type="Node3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.08, 0, 0)
+
+[node name="Handle" type="CSGCylinder3D" parent="Model/RightRod"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+use_collision = true
+radius = 0.012
+height = 0.1
+
+[node name="LongArm" type="CSGCylinder3D" parent="Model/RightRod"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0.05, -0.15)
+use_collision = true
+radius = 0.006
+height = 0.3
+
+[node name="Bend" type="CSGSphere3D" parent="Model/RightRod"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+use_collision = true
+radius = 0.01

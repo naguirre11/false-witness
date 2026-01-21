@@ -423,11 +423,17 @@ func _check_and_flag_conflict(evidence: Evidence) -> void:
 			_conflicting_evidence[uid] = desc
 			behavioral_conflict.emit(uid, desc)
 
-			# Also mark evidence as contested in EvidenceManager
+			# Set conflict metadata on the evidence
+			evidence.set_verification_meta("conflict_description", desc)
+
+			# Mark evidence as CONTESTED in EvidenceManager
 			var evidence_manager := _get_evidence_manager()
-			if evidence_manager and evidence_manager.has_method("contest_evidence"):
-				# Set conflict metadata before contesting
-				evidence.set_verification_meta("conflict_description", desc)
+			if evidence_manager:
+				# Use contest_evidence to trigger CONTESTED state and proper signal emission
+				evidence_manager.contest_evidence(uid, 0)  # 0 = system-triggered conflict
+				print(
+					"[ConflictDetector] Marked evidence %s as CONTESTED: %s" % [uid, desc]
+				)
 
 
 # --- Internal: Hunt Behavior Tracking ---

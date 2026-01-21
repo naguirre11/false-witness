@@ -186,7 +186,8 @@ signal deliberation_started
 signal vote_cast(voter_id: int, target_id: int)
 
 ## Emitted when the match ends with a result.
-signal match_ended(result: String)
+## Result dict includes: winning_team, condition, entity_type, cultist_id, etc.
+signal match_ended(result: Dictionary)
 
 # --- Lobby Signals ---
 

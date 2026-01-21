@@ -171,11 +171,15 @@ func _update_verification_display() -> void:
 	if not _collected or not _evidence:
 		_verification_icon.text = ""
 		_verification_icon.modulate = Color.TRANSPARENT
+		_update_contested_styling(false)
 		return
 
 	var state := _evidence.verification_state
 	_verification_icon.text = VERIFICATION_ICONS.get(state, "")
 	_verification_icon.modulate = VERIFICATION_COLORS.get(state, Color.WHITE)
+
+	# Update visual styling for contested evidence
+	_update_contested_styling(state == EvidenceEnums.VerificationState.CONTESTED)
 
 
 func _update_collector_display() -> void:
@@ -344,6 +348,27 @@ func set_keyboard_focused(is_focused: bool) -> void:
 		_background.add_theme_stylebox_override("panel", style)
 	else:
 		# Restore default background
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(0.15, 0.15, 0.15, 0.8)
+		style.set_corner_radius_all(4)
+		_background.add_theme_stylebox_override("panel", style)
+
+
+## Updates the visual styling for contested evidence (yellow/orange highlight).
+func _update_contested_styling(is_contested: bool) -> void:
+	if not _background:
+		return
+
+	if is_contested:
+		# Contested evidence: yellow/orange pulsing background
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(0.6, 0.4, 0.1, 0.8)  # Orange-ish background
+		style.border_color = Color.ORANGE
+		style.set_border_width_all(2)
+		style.set_corner_radius_all(4)
+		_background.add_theme_stylebox_override("panel", style)
+	else:
+		# Normal background - only update if not keyboard focused
 		var style := StyleBoxFlat.new()
 		style.bg_color = Color(0.15, 0.15, 0.15, 0.8)
 		style.set_corner_radius_all(4)

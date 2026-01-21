@@ -278,8 +278,15 @@ func contest_evidence(uid: String, contester_id: int) -> bool:
 
 func _emit_verification_to_event_bus(evidence: Evidence) -> void:
 	var event_bus := _get_event_bus()
-	if event_bus and event_bus.has_signal("evidence_verification_changed"):
+	if not event_bus:
+		return
+
+	if event_bus.has_signal("evidence_verification_changed"):
 		event_bus.evidence_verification_changed.emit(evidence.uid, evidence.verification_state)
+
+	# Also emit specific evidence_verified signal when verified
+	if evidence.is_verified() and event_bus.has_signal("evidence_verified"):
+		event_bus.evidence_verified.emit(evidence.uid, evidence.verifier_id)
 
 
 func _emit_contested_to_event_bus(evidence: Evidence, contester_id: int) -> void:

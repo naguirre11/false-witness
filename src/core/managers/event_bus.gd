@@ -46,6 +46,13 @@ signal evidence_verification_changed(evidence_uid: String, new_state: int)
 ## Emitted when a player disputes collected evidence.
 signal evidence_contested(evidence_uid: String, contester_id: int)
 
+## Emitted when evidence is verified by another player.
+signal evidence_verified(evidence_uid: String, verifier_id: int)
+
+## Emitted when behavioral observation conflicts with equipment evidence.
+## equipment_uid is the Prism/Aura evidence, conflict_desc describes the mismatch.
+signal behavioral_conflict_detected(equipment_uid: String, conflict_desc: String)
+
 # --- Entity Signals ---
 
 ## Emitted before a hunt starts, allowing prevention (e.g., by crucifix).

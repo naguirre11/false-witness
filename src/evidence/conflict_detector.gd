@@ -426,6 +426,9 @@ func _check_and_flag_conflict(evidence: Evidence) -> void:
 			# Set conflict metadata on the evidence
 			evidence.set_verification_meta("conflict_description", desc)
 
+			# Emit to EventBus for global notification
+			_emit_behavioral_conflict_to_event_bus(uid, desc)
+
 			# Mark evidence as CONTESTED in EvidenceManager
 			var evidence_manager := _get_evidence_manager()
 			if evidence_manager:
@@ -646,3 +649,9 @@ func _get_event_bus() -> Node:
 	if has_node("/root/EventBus"):
 		return get_node("/root/EventBus")
 	return null
+
+
+func _emit_behavioral_conflict_to_event_bus(equipment_uid: String, desc: String) -> void:
+	var event_bus := _get_event_bus()
+	if event_bus and event_bus.has_signal("behavioral_conflict_detected"):
+		event_bus.behavioral_conflict_detected.emit(equipment_uid, desc)

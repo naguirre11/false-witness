@@ -27,6 +27,12 @@ signal local_role_received(role: int, is_cultist: bool)
 ## Emitted when action log is sent at match end (for results screen).
 signal action_log_received(action_log: Array)
 
+## Emitted when an emergency vote is called.
+signal emergency_vote_called(caller_id: int)
+
+## Emitted when vote cannot be called (reason provided).
+signal emergency_vote_rejected(reason: String)
+
 # --- Constants ---
 
 ## Minimum players required for a match
@@ -37,6 +43,12 @@ const MAX_PLAYERS := 6
 
 ## Default Cultist count for 6-player games (can be 1 or 2)
 const DEFAULT_CULTIST_COUNT_6P := 1
+
+## Maximum emergency votes allowed per match
+const MAX_EMERGENCY_VOTES := 2
+
+## Time cost (seconds) to call an emergency vote
+const EMERGENCY_VOTE_TIME_COST := 30.0
 
 # --- State ---
 
@@ -74,6 +86,9 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 ## Action log for post-game reveal (server-only)
 ## Each entry: {timestamp, ability_type, player_id, location, target, evidence_uid}
 var _action_log: Array[Dictionary] = []
+
+## Number of emergency votes used this match
+var _emergency_votes_used: int = 0
 
 
 func _ready() -> void:
@@ -227,6 +242,7 @@ func reset() -> void:
 	_local_entity_evidence.clear()
 	_local_allied_cultists.clear()
 	_action_log.clear()
+	_emergency_votes_used = 0
 	print("[CultistManager] Reset for new match")
 
 
@@ -334,6 +350,98 @@ func _get_ability_name(ability_type: int) -> String:
 		_: return "UNKNOWN"
 
 
+# --- Emergency Vote API ---
+
+
+## Calls an emergency vote to identify a Cultist.
+## Can only be called during INVESTIGATION state.
+## Costs 30 seconds of investigation time.
+## Returns true if vote was successfully called.
+func call_emergency_vote(caller_id: int) -> bool:
+	if not _is_server:
+		# Send request to server
+		_request_emergency_vote.rpc_id(1, caller_id)
+		return true  # Request sent, result will come via signal
+
+	return _process_emergency_vote(caller_id)
+
+
+## Processes an emergency vote request (server-only).
+func _process_emergency_vote(caller_id: int) -> bool:
+	# Check if in INVESTIGATION state
+	var game_state := _get_game_state()
+	const INVESTIGATION := 3  # GameManager.GameState.INVESTIGATION
+	if game_state != INVESTIGATION:
+		emergency_vote_rejected.emit("Can only call vote during investigation")
+		print("[CultistManager] Emergency vote rejected: not in INVESTIGATION state")
+		return false
+
+	# Check vote limit
+	if _emergency_votes_used >= MAX_EMERGENCY_VOTES:
+		emergency_vote_rejected.emit("Maximum votes (%d) already used" % MAX_EMERGENCY_VOTES)
+		print("[CultistManager] Emergency vote rejected: limit reached")
+		return false
+
+	# Consume the vote
+	_emergency_votes_used += 1
+
+	# Deduct time from investigation timer
+	_deduct_investigation_time(EMERGENCY_VOTE_TIME_COST)
+
+	# Emit signal to trigger vote UI
+	emergency_vote_called.emit(caller_id)
+
+	# Notify all clients
+	_notify_emergency_vote.rpc(caller_id)
+
+	print(
+		"[CultistManager] Emergency vote called by player %d (vote %d/%d)"
+		% [caller_id, _emergency_votes_used, MAX_EMERGENCY_VOTES]
+	)
+
+	return true
+
+
+## Returns the number of emergency votes used this match.
+func get_emergency_votes_used() -> int:
+	return _emergency_votes_used
+
+
+## Returns the number of emergency votes remaining.
+func get_emergency_votes_remaining() -> int:
+	return MAX_EMERGENCY_VOTES - _emergency_votes_used
+
+
+## Returns true if an emergency vote can be called.
+func can_call_emergency_vote() -> bool:
+	if _emergency_votes_used >= MAX_EMERGENCY_VOTES:
+		return false
+
+	var game_state := _get_game_state()
+	const INVESTIGATION := 3
+	return game_state == INVESTIGATION
+
+
+func _get_game_state() -> int:
+	if has_node("/root/GameManager"):
+		var game_manager := get_node("/root/GameManager")
+		if game_manager.has_method("get_current_state"):
+			return game_manager.get_current_state()
+		if "current_state" in game_manager:
+			return game_manager.current_state
+	return -1
+
+
+func _deduct_investigation_time(seconds: float) -> void:
+	if has_node("/root/GameManager"):
+		var game_manager := get_node("/root/GameManager")
+		if game_manager.has_method("deduct_time"):
+			game_manager.deduct_time(seconds)
+		elif "remaining_time" in game_manager:
+			game_manager.remaining_time = maxf(0.0, game_manager.remaining_time - seconds)
+			print("[CultistManager] Deducted %.0f seconds from investigation time" % seconds)
+
+
 # --- RPC Methods ---
 
 
@@ -367,6 +475,20 @@ func _receive_role(role: int) -> void:
 func _receive_action_log(log_data: Array) -> void:
 	action_log_received.emit(log_data)
 	print("[CultistManager] Received action log with %d entries" % log_data.size())
+
+
+## Client request to call emergency vote.
+@rpc("any_peer", "call_remote", "reliable")
+func _request_emergency_vote(caller_id: int) -> void:
+	if not _is_server:
+		return
+	_process_emergency_vote(caller_id)
+
+
+## Server notifies all clients of emergency vote.
+@rpc("authority", "call_local", "reliable")
+func _notify_emergency_vote(caller_id: int) -> void:
+	emergency_vote_called.emit(caller_id)
 
 
 # --- Internal Methods ---

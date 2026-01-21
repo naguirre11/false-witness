@@ -142,6 +142,10 @@ signal cultist_ability_used(ability_type: String)
 ## Emitted when contamination affects evidence.
 signal evidence_contaminated(evidence_type: String)
 
+## Emitted when contaminated evidence is planted by a Cultist.
+## evidence is the full ContaminatedEvidence object for detailed handling.
+signal contaminated_evidence_planted(evidence: Resource)
+
 # --- Interaction Signals ---
 
 ## Emitted when a player interacts with an object.

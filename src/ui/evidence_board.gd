@@ -46,6 +46,8 @@ var _evidence_slots: Dictionary = {}  # EvidenceType -> EvidenceSlot
 var _is_visible: bool = false
 var _force_visible: bool = false  # True during deliberation
 var _detail_popup: EvidenceDetailPopup = null
+var _focused_slot_index: int = 0  # For keyboard navigation
+var _slot_order: Array[int] = []  # Flat list of evidence types in display order
 
 # --- Nodes ---
 
@@ -65,6 +67,34 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_evidence_board") and not _force_visible:
 		toggle_visibility()
 
+	# Keyboard navigation only when board is visible
+	if not visible:
+		return
+
+	# Check if detail popup is handling input
+	if _detail_popup and _detail_popup.visible:
+		return
+
+	if event.is_action_pressed("ui_left"):
+		_navigate_slots(-1)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_right"):
+		_navigate_slots(1)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_up"):
+		_navigate_slots(-4)  # Move up a row (4 slots per row approx)
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_down"):
+		_navigate_slots(4)  # Move down a row
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_accept"):
+		_select_focused_slot()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_cancel"):
+		if not _force_visible:
+			hide_board()
+			get_viewport().set_input_as_handled()
+
 
 func _connect_signals() -> void:
 	var evidence_manager := _get_evidence_manager()
@@ -83,20 +113,24 @@ func _build_evidence_grid() -> void:
 		push_error("[EvidenceBoard] CategoriesContainer not found")
 		return
 
-	# Clear existing children
+	# Clear existing children and state
 	for child in _categories_container.get_children():
 		child.queue_free()
+	_slot_order.clear()
 
 	var slot_scene: PackedScene = load(EVIDENCE_SLOT_SCENE)
 	if not slot_scene:
 		push_error("[EvidenceBoard] Failed to load evidence slot scene")
 		return
 
-	# Build category rows
+	# Build category rows and populate slot order
 	for category: int in EVIDENCE_BY_CATEGORY:
 		var evidence_types: Array = EVIDENCE_BY_CATEGORY[category]
 		var row := _create_category_row(category, evidence_types, slot_scene)
 		_categories_container.add_child(row)
+		# Add to flat slot order for keyboard navigation
+		for evidence_type in evidence_types:
+			_slot_order.append(evidence_type)
 
 
 func _create_category_row(
@@ -167,6 +201,7 @@ func toggle_visibility() -> void:
 func show_board() -> void:
 	_is_visible = true
 	show()
+	_reset_focus()
 
 
 func hide_board() -> void:
@@ -217,6 +252,52 @@ func _on_slot_pressed(evidence_type: EvidenceEnums.EvidenceType) -> void:
 func _on_verification_changed(evidence: Evidence) -> void:
 	# Re-update the slot to reflect new verification state
 	_update_slot_for_evidence(evidence)
+
+
+# --- Keyboard Navigation ---
+
+
+func _navigate_slots(direction: int) -> void:
+	if _slot_order.is_empty():
+		return
+
+	var old_index := _focused_slot_index
+	_focused_slot_index = clampi(
+		_focused_slot_index + direction, 0, _slot_order.size() - 1
+	)
+
+	if old_index != _focused_slot_index:
+		_update_focus_visual(old_index, false)
+		_update_focus_visual(_focused_slot_index, true)
+
+
+func _select_focused_slot() -> void:
+	if _focused_slot_index < 0 or _focused_slot_index >= _slot_order.size():
+		return
+
+	var evidence_type: int = _slot_order[_focused_slot_index]
+	_show_detail_popup(evidence_type as EvidenceEnums.EvidenceType)
+
+
+func _update_focus_visual(index: int, is_focused: bool) -> void:
+	if index < 0 or index >= _slot_order.size():
+		return
+
+	var evidence_type: int = _slot_order[index]
+	var slot: EvidenceSlot = _evidence_slots.get(evidence_type)
+	if slot:
+		slot.set_keyboard_focused(is_focused)
+
+
+func _reset_focus() -> void:
+	# Clear focus on all slots
+	for evidence_type in _slot_order:
+		var slot: EvidenceSlot = _evidence_slots.get(evidence_type)
+		if slot:
+			slot.set_keyboard_focused(false)
+	_focused_slot_index = 0
+	if not _slot_order.is_empty():
+		_update_focus_visual(0, true)
 
 
 # --- Detail Popup ---

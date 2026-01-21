@@ -327,3 +327,24 @@ func _setup_trust_styling() -> void:
 
 func _get_trust_level() -> EvidenceEnums.TrustLevel:
 	return EvidenceEnums.get_trust_level(evidence_type)
+
+
+## Sets the keyboard focus visual indicator.
+func set_keyboard_focused(is_focused: bool) -> void:
+	if not _background:
+		return
+
+	if is_focused:
+		# Add a bright focus border
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(0.2, 0.3, 0.4, 0.8)
+		style.border_color = Color.CYAN
+		style.set_border_width_all(3)
+		style.set_corner_radius_all(4)
+		_background.add_theme_stylebox_override("panel", style)
+	else:
+		# Restore default background
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(0.15, 0.15, 0.15, 0.8)
+		style.set_corner_radius_all(4)
+		_background.add_theme_stylebox_override("panel", style)

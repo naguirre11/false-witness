@@ -31,6 +31,7 @@ SanityManager="*res://src/entity/sanity_manager.gd"
 AudioManager="*res://src/core/audio_manager.gd"
 EntityAudioManager="*res://src/core/audio/entity_audio_manager.gd"
 MatchManager="*res://src/core/managers/match_manager.gd"
+DeliberationManager="*res://src/deliberation/deliberation_manager.gd"
 
 [display]
 

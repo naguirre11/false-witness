@@ -556,6 +556,68 @@ func get_evidence_by_collector(collector_id: int) -> Array[Evidence]:
 	return result
 
 
+## Marks all evidence collected by a player as suspect.
+## Called when a player is discovered to be the Cultist.
+func mark_collector_evidence_suspect(collector_id: int) -> void:
+	if not _is_server:
+		push_warning("[EvidenceManager] Only server can mark evidence suspect")
+		return
+
+	var evidence_list := get_evidence_by_collector(collector_id)
+	var marked_count := 0
+	for evidence: Evidence in evidence_list:
+		if not evidence.is_suspect:
+			evidence.is_suspect = true
+			marked_count += 1
+			# Lower trust level for suspect evidence
+			if evidence.trust_level != EvidenceEnums.TrustLevel.LOW:
+				evidence.trust_level = EvidenceEnums.TrustLevel.LOW
+
+	print("[EvidenceManager] Marked %d evidence as suspect from collector %d" % [
+		marked_count, collector_id
+	])
+
+	# Sync to clients
+	if marked_count > 0:
+		_sync_suspect_evidence.rpc(collector_id)
+
+
+## Allows re-verification of suspect evidence to restore trust.
+func reverify_suspect_evidence(evidence_uid: String, verifier_id: int) -> bool:
+	var evidence := get_evidence_by_uid(evidence_uid)
+	if evidence == null:
+		return false
+
+	if not evidence.is_suspect:
+		return false  # Not suspect, nothing to re-verify
+
+	# Must be verified by someone other than original collector
+	if evidence.collector_id == verifier_id:
+		return false
+
+	evidence.suspect_reverified = true
+	evidence.trust_level = EvidenceEnums.TrustLevel.VARIABLE  # Restore partial trust
+	evidence.add_witness(verifier_id)
+
+	print("[EvidenceManager] Suspect evidence %s re-verified by player %d" % [
+		evidence_uid, verifier_id
+	])
+
+	return true
+
+
+## RPC to sync suspect evidence marking to clients.
+@rpc("authority", "call_remote", "reliable")
+func _sync_suspect_evidence(collector_id: int) -> void:
+	var evidence_list: Array = _evidence_by_collector.get(collector_id, [])
+	for evidence: Evidence in evidence_list:
+		evidence.is_suspect = true
+		if evidence.trust_level != EvidenceEnums.TrustLevel.LOW:
+			evidence.trust_level = EvidenceEnums.TrustLevel.LOW
+
+	print("[EvidenceManager] Client: Marked evidence from collector %d as suspect" % collector_id)
+
+
 ## Returns evidence by its UID.
 func get_evidence_by_uid(uid: String) -> Evidence:
 	return _evidence_by_uid.get(uid)

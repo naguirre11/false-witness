@@ -816,6 +816,9 @@ func _discover_cultist(player_id: int) -> void:
 
 	_discovered_cultists.append(player_id)
 
+	# Mark evidence collected by this Cultist as suspect
+	_mark_cultist_evidence_suspect(player_id)
+
 	# Emit signals
 	cultist_discovered.emit(player_id)
 	cultist_voted_discovered.emit(player_id)
@@ -827,6 +830,15 @@ func _discover_cultist(player_id: int) -> void:
 	_award_discovery_bonus()
 
 	print("[CultistManager] Cultist %d discovered! Match continues." % player_id)
+
+
+## Marks all evidence collected by a discovered Cultist as suspect.
+func _mark_cultist_evidence_suspect(cultist_id: int) -> void:
+	if has_node("/root/EvidenceManager"):
+		var evidence_manager := get_node("/root/EvidenceManager")
+		if evidence_manager.has_method("mark_collector_evidence_suspect"):
+			evidence_manager.mark_collector_evidence_suspect(cultist_id)
+			print("[CultistManager] Marked evidence from Cultist %d as suspect" % cultist_id)
 
 
 ## Handles an innocent player being voted out.

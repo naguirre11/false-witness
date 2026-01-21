@@ -41,6 +41,13 @@ extends Resource
 ## Keys: "book_moved", "wrong_room", "setup_broken"
 @export var sabotage_flags: Dictionary = {}
 
+@export_group("Cultist Flags")
+## Whether this evidence was collected by a player later discovered to be Cultist.
+## Suspect evidence is weighted lower in entity elimination.
+@export var is_suspect: bool = false
+## Player can re-verify suspect evidence to restore trust.
+@export var suspect_reverified: bool = false
+
 @export_group("Verification Metadata")
 ## Additional verification context
 ## Keys: "single_witness", "late_verification", "different_operators"
@@ -252,6 +259,8 @@ func to_network_dict() -> Dictionary:
 		"sabotage_flags": sabotage_flags,
 		"verification_metadata": verification_metadata,
 		"evidence_metadata": evidence_metadata,
+		"is_suspect": is_suspect,
+		"suspect_reverified": suspect_reverified,
 	}
 
 
@@ -299,6 +308,9 @@ static func from_network_dict(data: Dictionary) -> Evidence:
 	evidence.sabotage_flags = data.get("sabotage_flags", {})
 	evidence.verification_metadata = data.get("verification_metadata", {})
 	evidence.evidence_metadata = data.get("evidence_metadata", {})
+	# Cultist flags
+	evidence.is_suspect = data.get("is_suspect", false)
+	evidence.suspect_reverified = data.get("suspect_reverified", false)
 	return evidence
 
 

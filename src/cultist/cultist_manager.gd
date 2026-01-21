@@ -263,9 +263,10 @@ func _shuffle_array(arr: Array) -> void:
 		arr[j] = temp
 
 
-func _on_game_state_changed(_old_state: int, new_state: int) -> void:
+func _on_game_state_changed(old_state: int, new_state: int) -> void:
 	# LOBBY = 0, SETUP = 1
 	const LOBBY := 0
+	const SETUP := 1
 
 	if new_state == LOBBY:
 		# Returning to lobby - reset state
@@ -276,3 +277,87 @@ func _on_game_state_changed(_old_state: int, new_state: int) -> void:
 			_is_server = NetworkManager.is_game_host()
 		else:
 			_is_server = true  # Single player fallback
+
+	elif new_state == SETUP and old_state == LOBBY:
+		# Transitioning from LOBBY to SETUP - server assigns roles
+		if _is_server:
+			_trigger_role_assignment()
+
+
+## Server triggers role assignment and distributes to all clients.
+func _trigger_role_assignment() -> void:
+	if not _is_server:
+		return
+
+	# Get player IDs from LobbyManager
+	var player_ids: Array[int] = _get_player_ids()
+	if player_ids.size() < MIN_PLAYERS:
+		push_warning("[CultistManager] Not enough players for role assignment")
+		return
+
+	# Get entity info from EntityManager (or placeholder if not available yet)
+	var entity_type := _get_entity_type_for_match()
+	var entity_evidence := _get_entity_evidence_for_match()
+
+	# Assign roles
+	var role_map := assign_roles(player_ids, entity_type, entity_evidence)
+
+	# Distribute roles to clients
+	_distribute_roles_to_clients(role_map)
+
+
+## Distribute role assignments to all clients via RPC.
+func _distribute_roles_to_clients(role_map: Dictionary) -> void:
+	if not _is_server:
+		return
+
+	# Get allied Cultist IDs for 2-Cultist variant
+	var cultist_list := _cultist_ids.duplicate()
+
+	for player_id in role_map.keys():
+		var role: int = role_map[player_id]
+
+		# Send role to this player
+		if player_id == multiplayer.get_unique_id():
+			# Local server player
+			_receive_role(role)
+			if role == 1:  # CULTIST
+				var allies := cultist_list.filter(func(id): return id != player_id)
+				_receive_cultist_data(_entity_type, _entity_evidence, allies)
+		else:
+			# Remote player
+			_receive_role.rpc_id(player_id, role)
+			if role == 1:  # CULTIST
+				var allies := cultist_list.filter(func(id): return id != player_id)
+				_receive_cultist_data.rpc_id(player_id, _entity_type, _entity_evidence, allies)
+
+
+func _get_player_ids() -> Array[int]:
+	# Get player IDs from LobbyManager
+	if has_node("/root/LobbyManager"):
+		var lobby_manager := get_node("/root/LobbyManager")
+		if lobby_manager.has_method("get_player_ids"):
+			return lobby_manager.get_player_ids()
+		# Fallback: try to get from slots
+		if lobby_manager.has_method("get_player_slots"):
+			var slots: Array = lobby_manager.get_player_slots()
+			var ids: Array[int] = []
+			for slot in slots:
+				if slot.is_occupied and slot.peer_id > 0:
+					ids.append(slot.peer_id)
+			return ids
+
+	# Single player fallback
+	return [1]
+
+
+func _get_entity_type_for_match() -> String:
+	# Get entity type from EntityManager or random selection
+	# For now, placeholder - will be connected to entity selection later
+	return "Unknown Entity"
+
+
+func _get_entity_evidence_for_match() -> Array[String]:
+	# Get entity evidence types from EntityManager
+	# For now, placeholder - will be connected to entity selection later
+	return ["EMF_SIGNATURE", "FREEZING_TEMPERATURE", "GHOST_WRITING"]

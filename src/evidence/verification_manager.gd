@@ -22,6 +22,15 @@ signal auto_verified(evidence: Evidence, witness_ids: Array)
 ## Emitted when verification fails due to rule violation.
 signal verification_rule_failed(evidence: Evidence, reason: String)
 
+# --- Enums ---
+
+## Staleness levels for evidence.
+enum StalenessLevel {
+	FRESH,  ## Under 60s - easy to verify
+	STALE,  ## 60-120s - verification needs explanation
+	VERY_STALE,  ## Over 180s - cannot be newly verified
+}
+
 # --- Configuration ---
 
 ## Location tolerance for HIGH trust verification (meters).
@@ -32,6 +41,11 @@ const TIME_TOLERANCE := 30.0
 
 ## Minimum witnesses required for auto-verification.
 const MIN_WITNESSES_AUTO_VERIFY := 2
+
+## Evidence staleness thresholds (seconds since collection).
+const STALENESS_FRESH := 60.0  ## Under 60s = fresh, easy to verify
+const STALENESS_STALE := 120.0  ## 60-120s = stale, verification needs explanation
+const STALENESS_VERY_STALE := 180.0  ## Over 180s = very stale, cannot be newly verified
 
 # --- State ---
 
@@ -95,6 +109,18 @@ func try_verify(evidence: Evidence, verifier_id: int) -> Dictionary:
 		result = _fail_result("already_verified")
 		_emit_verification_result(evidence, verifier_id, result)
 		return result
+
+	# Check staleness - very stale evidence cannot be newly verified
+	var staleness := get_evidence_staleness(evidence)
+	if staleness == StalenessLevel.VERY_STALE:
+		result = _fail_result("too_stale_to_verify")
+		evidence.set_verification_meta("staleness_blocked", true)
+		_emit_verification_result(evidence, verifier_id, result)
+		return result
+
+	# Track staleness on stale evidence
+	if staleness == StalenessLevel.STALE:
+		evidence.set_verification_meta("late_verification", true)
 
 	# Dispatch to trust-level-specific rules
 	match evidence.trust_level:
@@ -188,6 +214,58 @@ func report_sabotage(evidence: Evidence, flag: String) -> void:
 		return
 
 	evidence.set_sabotage_flag(flag)
+
+
+# --- Public API: Staleness ---
+
+
+## Returns the staleness level for evidence based on age.
+func get_evidence_staleness(evidence: Evidence) -> StalenessLevel:
+	if evidence == null:
+		return StalenessLevel.VERY_STALE
+
+	var age := get_evidence_age(evidence)
+
+	if age < STALENESS_FRESH:
+		return StalenessLevel.FRESH
+	if age < STALENESS_VERY_STALE:
+		return StalenessLevel.STALE
+	return StalenessLevel.VERY_STALE
+
+
+## Returns the age of evidence in seconds since collection.
+func get_evidence_age(evidence: Evidence) -> float:
+	if evidence == null:
+		return 999999.0
+
+	var current_time := Time.get_ticks_msec() / 1000.0
+	return current_time - evidence.timestamp
+
+
+## Returns a human-readable staleness description for UI display.
+func get_staleness_description(staleness: StalenessLevel) -> String:
+	match staleness:
+		StalenessLevel.FRESH:
+			return "Fresh - easy to verify"
+		StalenessLevel.STALE:
+			return "Stale - verification requires explanation"
+		StalenessLevel.VERY_STALE:
+			return "Very stale - cannot be newly verified"
+		_:
+			return "Unknown"
+
+
+## Returns the staleness color for UI display.
+func get_staleness_color(staleness: StalenessLevel) -> Color:
+	match staleness:
+		StalenessLevel.FRESH:
+			return Color.GREEN
+		StalenessLevel.STALE:
+			return Color.YELLOW
+		StalenessLevel.VERY_STALE:
+			return Color.RED
+		_:
+			return Color.WHITE
 
 
 # --- Internal: Trust-Level Verification Rules ---

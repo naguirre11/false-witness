@@ -95,10 +95,12 @@ func _update_collected_display() -> void:
 		_collector_label.text = collector_text
 		_collector_label.show()
 
-	# Timestamp
+	# Timestamp with staleness
 	if _timestamp_label:
 		var time_str := _format_timestamp(_evidence.timestamp)
-		_timestamp_label.text = "Time: %s" % time_str
+		var staleness_info := _get_staleness_info()
+		_timestamp_label.text = "Time: %s (%s)" % [time_str, staleness_info.description]
+		_timestamp_label.modulate = staleness_info.color
 		_timestamp_label.show()
 
 	# Location
@@ -236,6 +238,24 @@ func _format_timestamp(timestamp: float) -> String:
 
 func _format_location(location: Vector3) -> String:
 	return "(%.0f, %.0f, %.0f)" % [location.x, location.y, location.z]
+
+
+func _get_staleness_info() -> Dictionary:
+	var verification_manager := _get_verification_manager()
+	if not verification_manager or not _evidence:
+		return {"description": "Unknown", "color": Color.WHITE}
+
+	var staleness_level: int = verification_manager.get_evidence_staleness(_evidence)
+	var description: String = verification_manager.get_staleness_description(staleness_level)
+	var color: Color = verification_manager.get_staleness_color(staleness_level)
+
+	return {"description": description, "color": color}
+
+
+func _get_verification_manager() -> Node:
+	if has_node("/root/VerificationManager"):
+		return get_node("/root/VerificationManager")
+	return null
 
 
 func _on_close_pressed() -> void:

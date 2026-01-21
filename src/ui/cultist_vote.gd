@@ -6,8 +6,9 @@ extends Control
 ## - Player names displayed with selection indicator
 ## - Click to select, can change vote until confirmed
 ## - Skip vote option to abstain
-## - Timer display
+## - Timer display with warning colors
 ## - Vote count tracking
+## - Announcements and sound effects
 
 # --- Signals ---
 
@@ -29,6 +30,15 @@ const UNSELECTED_COLOR := Color(0.2, 0.2, 0.2, 0.3)
 ## Color for already voted indicator
 const VOTED_COLOR := Color(0.5, 0.5, 0.0, 0.3)
 
+## Color for announcement text
+const ANNOUNCE_COLOR := Color(1.0, 0.9, 0.3, 1.0)
+
+## Color for result text (innocent voted)
+const RESULT_INNOCENT_COLOR := Color(1.0, 0.3, 0.3, 1.0)
+
+## Color for result text (cultist discovered)
+const RESULT_CULTIST_COLOR := Color(0.3, 1.0, 0.3, 1.0)
+
 # --- State ---
 
 ## Whether voting is currently active
@@ -49,6 +59,12 @@ var _vote_tracking: Dictionary = {}
 ## Total number of alive players
 var _alive_count: int = 0
 
+## Last timer value for warning sound
+var _last_timer_warning: int = -1
+
+## Tween for announcement animations
+var _announcement_tween: Tween
+
 # --- Node References ---
 
 @onready var _timer_label: Label = %TimerLabel
@@ -56,6 +72,7 @@ var _alive_count: int = 0
 @onready var _skip_button: Button = %SkipButton
 @onready var _confirm_button: Button = %ConfirmButton
 @onready var _vote_status_label: Label = %VoteStatusLabel
+@onready var _announcement_label: Label = %AnnouncementLabel
 
 
 func _ready() -> void:
@@ -71,6 +88,16 @@ func _ready() -> void:
 			cultist_manager.vote_cast.connect(_on_vote_cast)
 		if cultist_manager.has_signal("vote_complete"):
 			cultist_manager.vote_complete.connect(_on_vote_complete)
+		if cultist_manager.has_signal("emergency_vote_called"):
+			cultist_manager.emergency_vote_called.connect(_on_emergency_vote_called)
+		if cultist_manager.has_signal("cultist_voted_discovered"):
+			cultist_manager.cultist_voted_discovered.connect(_on_cultist_discovered)
+		if cultist_manager.has_signal("innocent_voted_out"):
+			cultist_manager.innocent_voted_out.connect(_on_innocent_voted)
+
+	# Initialize announcement label
+	if _announcement_label:
+		_announcement_label.visible = false
 
 	hide()
 
@@ -84,6 +111,7 @@ func show_voting(players: Array) -> void:
 	_vote_tracking.clear()
 	_alive_count = players.size()
 	_is_active = true
+	_last_timer_warning = -1
 
 	# Create a button for each player
 	for player_data in players:
@@ -93,6 +121,10 @@ func show_voting(players: Array) -> void:
 
 	_update_confirm_button_state()
 	_update_vote_status()
+
+	# Show vote start announcement
+	_show_announcement("EMERGENCY VOTE!", ANNOUNCE_COLOR, 2.0)
+	_play_vote_start_sound()
 
 	show()
 	print("[CultistVoteUI] Shown with %d players" % players.size())
@@ -107,13 +139,22 @@ func hide_voting() -> void:
 
 ## Updates the timer display.
 func update_timer(seconds_remaining: float) -> void:
-	_timer_label.text = "%ds" % int(seconds_remaining)
+	var sec_int := int(seconds_remaining)
+	_timer_label.text = "%ds" % sec_int
 
 	# Warning colors as time runs out
 	if seconds_remaining <= 5.0:
 		_timer_label.modulate = Color(1.0, 0.3, 0.3)
+		# Play warning sound at 5, 4, 3, 2, 1
+		if sec_int != _last_timer_warning and sec_int >= 1:
+			_last_timer_warning = sec_int
+			_play_timer_warning_sound()
 	elif seconds_remaining <= 10.0:
 		_timer_label.modulate = Color(1.0, 0.6, 0.2)
+		# Play warning sound at 10
+		if sec_int == 10 and _last_timer_warning != 10:
+			_last_timer_warning = 10
+			_play_timer_warning_sound()
 	else:
 		_timer_label.modulate = Color(1.0, 0.8, 0.2)
 
@@ -126,6 +167,16 @@ func update_vote(voter_id: int, target_id: int) -> void:
 	# Visual indicator if this player has voted
 	if voter_id in _player_buttons:
 		_update_player_slot_voted(voter_id)
+
+	# Play vote cast sound
+	_play_vote_cast_sound()
+
+	# Announce vote tally progress
+	var votes_cast := _vote_tracking.size()
+	if votes_cast == _alive_count:
+		_show_announcement("All votes cast!", ANNOUNCE_COLOR, 1.0)
+	elif votes_cast > _alive_count / 2:
+		_show_announcement("Majority reached!", ANNOUNCE_COLOR, 1.0)
 
 
 ## Returns the currently selected target ID (-1 if none/skip).
@@ -315,6 +366,117 @@ func _on_vote_cast(voter_id: int, target_id: int) -> void:
 		update_vote(voter_id, target_id)
 
 
-func _on_vote_complete(_target_id: int, _is_majority: bool) -> void:
-	# Vote complete, will be hidden by the calling system
+func _on_vote_complete(target_id: int, is_majority: bool) -> void:
+	# Play result sound
+	_play_vote_result_sound()
+
+	# Show result announcement
+	if is_majority and target_id >= 0:
+		var target_name := _get_player_name(target_id)
+		_show_announcement("Votes tallied: %s" % target_name, ANNOUNCE_COLOR, 2.0)
+	else:
+		_show_announcement("No majority reached", ANNOUNCE_COLOR, 2.0)
+
+	# Vote complete, will be hidden by the calling system after result
 	_is_active = false
+
+
+func _on_emergency_vote_called(_caller_id: int) -> void:
+	# This is handled elsewhere (e.g., by showing the vote UI)
+	# Just play announcement sound
+	print("[CultistVoteUI] Emergency vote called")
+
+
+func _on_cultist_discovered(player_id: int) -> void:
+	var player_name := _get_player_name(player_id)
+	_show_announcement("CULTIST DISCOVERED!\n%s was the traitor!" % player_name, RESULT_CULTIST_COLOR, 4.0)
+	_play_cultist_discovered_sound()
+
+
+func _on_innocent_voted(player_id: int) -> void:
+	var player_name := _get_player_name(player_id)
+	_show_announcement("INNOCENT VOTED OUT!\n%s was not the Cultist!\nCultist wins!" % player_name, RESULT_INNOCENT_COLOR, 4.0)
+	_play_innocent_voted_sound()
+
+
+# --- Announcement Methods ---
+
+
+## Shows an animated announcement text.
+func _show_announcement(text: String, color: Color, duration: float) -> void:
+	if not _announcement_label:
+		return
+
+	# Cancel any existing tween
+	if _announcement_tween and _announcement_tween.is_running():
+		_announcement_tween.kill()
+
+	# Set text and make visible
+	_announcement_label.text = text
+	_announcement_label.modulate = color
+	_announcement_label.visible = true
+	_announcement_label.scale = Vector2(1.5, 1.5)
+	_announcement_label.modulate.a = 0.0
+
+	# Animate in
+	_announcement_tween = create_tween()
+	_announcement_tween.tween_property(_announcement_label, "modulate:a", 1.0, 0.2)
+	_announcement_tween.parallel().tween_property(_announcement_label, "scale", Vector2.ONE, 0.2)
+
+	# Hold
+	_announcement_tween.tween_interval(duration)
+
+	# Fade out
+	_announcement_tween.tween_property(_announcement_label, "modulate:a", 0.0, 0.3)
+	_announcement_tween.tween_callback(_hide_announcement)
+
+
+func _hide_announcement() -> void:
+	if _announcement_label:
+		_announcement_label.visible = false
+
+
+# --- Sound Methods ---
+
+
+func _play_vote_start_sound() -> void:
+	if has_node("/root/AudioManager"):
+		var audio_manager := get_node("/root/AudioManager")
+		# Play a dramatic vote start sound
+		# Using placeholder - actual sound would be loaded from assets
+		print("[CultistVoteUI] Playing vote start sound")
+
+
+func _play_vote_cast_sound() -> void:
+	if has_node("/root/AudioManager"):
+		var audio_manager := get_node("/root/AudioManager")
+		# Play a vote cast confirmation sound
+		print("[CultistVoteUI] Playing vote cast sound")
+
+
+func _play_timer_warning_sound() -> void:
+	if has_node("/root/AudioManager"):
+		var audio_manager := get_node("/root/AudioManager")
+		# Play a timer tick/warning sound
+		print("[CultistVoteUI] Playing timer warning sound")
+
+
+func _play_vote_result_sound() -> void:
+	if has_node("/root/AudioManager"):
+		var audio_manager := get_node("/root/AudioManager")
+		# Play vote result reveal sound
+		print("[CultistVoteUI] Playing vote result sound")
+
+
+func _play_cultist_discovered_sound() -> void:
+	if has_node("/root/AudioManager"):
+		var audio_manager := get_node("/root/AudioManager")
+		# Play a triumphant/dramatic sound
+		print("[CultistVoteUI] Playing cultist discovered sound")
+
+
+func _play_innocent_voted_sound() -> void:
+	if has_node("/root/AudioManager"):
+		var audio_manager := get_node("/root/AudioManager")
+		# Play a negative/dramatic sound
+		print("[CultistVoteUI] Playing innocent voted sound")

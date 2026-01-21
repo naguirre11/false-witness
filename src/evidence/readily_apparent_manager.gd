@@ -308,6 +308,117 @@ func is_multi_witness_report(uid: String) -> bool:
 
 
 # ===========================================================================
+# Public API: Evidence Generation
+# ===========================================================================
+
+
+## Creates VISUAL_MANIFESTATION evidence when a player reports a manifestation.
+## Returns the Evidence if created, null if failed.
+func create_manifestation_evidence(
+	phenomenon_uid: String,
+	reporter_id: int
+) -> Evidence:
+	if phenomenon_uid not in _phenomena:
+		return null
+
+	var record: Dictionary = _phenomena[phenomenon_uid]
+	if record["type"] != "manifestation":
+		return null
+
+	# Report the phenomenon first
+	if not report_phenomenon(phenomenon_uid, reporter_id):
+		return null
+
+	# Determine quality based on manifestation clarity
+	var manifestation_type: int = record["subtype"]
+	var quality := EvidenceEnums.ReadingQuality.STRONG
+	if not ManifestationEnums.is_clear_manifestation(manifestation_type):
+		quality = EvidenceEnums.ReadingQuality.WEAK
+
+	# Create evidence via EvidenceManager
+	var evidence_manager := _get_evidence_manager()
+	if not evidence_manager:
+		return null
+
+	var location: Vector3 = record["location"]
+	var evidence: Evidence = evidence_manager.collect_evidence(
+		EvidenceEnums.EvidenceType.VISUAL_MANIFESTATION,
+		reporter_id,
+		location,
+		quality,
+		""  # No equipment used
+	)
+
+	if evidence:
+		# Add witness list to evidence metadata
+		evidence.witness_ids = record["witnesses"].duplicate()
+		evidence.evidence_metadata["manifestation_type"] = manifestation_type
+		evidence.evidence_metadata["manifestation_name"] = ManifestationEnums.get_manifestation_name(
+			manifestation_type
+		)
+		evidence.evidence_metadata["phenomenon_uid"] = phenomenon_uid
+
+	return evidence
+
+
+## Creates PHYSICAL_INTERACTION evidence when a player reports an interaction.
+## Returns the Evidence if created, null if failed.
+func create_interaction_evidence(
+	phenomenon_uid: String,
+	reporter_id: int
+) -> Evidence:
+	if phenomenon_uid not in _phenomena:
+		return null
+
+	var record: Dictionary = _phenomena[phenomenon_uid]
+	if record["type"] != "interaction":
+		return null
+
+	# Report the phenomenon first
+	if not report_phenomenon(phenomenon_uid, reporter_id):
+		return null
+
+	# All physical interactions are considered strong evidence
+	var quality := EvidenceEnums.ReadingQuality.STRONG
+
+	# Create evidence via EvidenceManager
+	var evidence_manager := _get_evidence_manager()
+	if not evidence_manager:
+		return null
+
+	var location: Vector3 = record["location"]
+	var evidence: Evidence = evidence_manager.collect_evidence(
+		EvidenceEnums.EvidenceType.PHYSICAL_INTERACTION,
+		reporter_id,
+		location,
+		quality,
+		""  # No equipment used
+	)
+
+	if evidence:
+		var interaction_type: int = record["subtype"]
+		# Add witness list and interaction details to evidence metadata
+		evidence.witness_ids = record["witnesses"].duplicate()
+		evidence.evidence_metadata["interaction_type"] = interaction_type
+		evidence.evidence_metadata["interaction_name"] = ManifestationEnums.get_interaction_name(
+			interaction_type
+		)
+		evidence.evidence_metadata["affected_object"] = record.get("affected_object", "")
+		evidence.evidence_metadata["phenomenon_uid"] = phenomenon_uid
+		evidence.evidence_metadata["is_persistent"] = ManifestationEnums.is_persistent_interaction(
+			interaction_type
+		)
+
+	return evidence
+
+
+func _get_evidence_manager() -> Node:
+	if has_node("/root/EvidenceManager"):
+		return get_node("/root/EvidenceManager")
+	return null
+
+
+# ===========================================================================
 # Public API: Cultist Omission Tracking
 # ===========================================================================
 

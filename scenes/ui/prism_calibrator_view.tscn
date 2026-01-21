@@ -1,0 +1,181 @@
+[gd_scene load_steps=3 format=3 uid="uid://dqrx8kp2t4vnc"]
+
+[ext_resource type="Script" path="res://src/ui/prism_calibrator_view.gd" id="1_view"]
+[ext_resource type="Script" path="res://src/ui/blob_display.gd" id="2_blob"]
+
+[node name="PrismCalibratorView" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_view")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.05, 0.1, 0.95)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="TitleBar" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="VBoxContainer/TitleBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "SPECTRAL CALIBRATOR"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="VBoxContainer/TitleBar"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Adjusting Filters..."
+horizontal_alignment = 2
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="MainContent" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="FilterPanel" type="VBoxContainer" parent="VBoxContainer/MainContent"]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 12
+
+[node name="FilterTitle" type="Label" parent="VBoxContainer/MainContent/FilterPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "FILTERS"
+horizontal_alignment = 1
+
+[node name="Filter1Container" type="VBoxContainer" parent="VBoxContainer/MainContent/FilterPanel"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Filter1Label" type="Label" parent="VBoxContainer/MainContent/FilterPanel/Filter1Container"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Filter 1 (Q/E)"
+horizontal_alignment = 1
+
+[node name="Filter1Indicator" type="ProgressBar" parent="VBoxContainer/MainContent/FilterPanel/Filter1Container"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 16)
+layout_mode = 2
+max_value = 100.0
+value = 0.0
+show_percentage = false
+
+[node name="Filter2Container" type="VBoxContainer" parent="VBoxContainer/MainContent/FilterPanel"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Filter2Label" type="Label" parent="VBoxContainer/MainContent/FilterPanel/Filter2Container"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Filter 2 (Z/C)"
+horizontal_alignment = 1
+
+[node name="Filter2Indicator" type="ProgressBar" parent="VBoxContainer/MainContent/FilterPanel/Filter2Container"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 16)
+layout_mode = 2
+max_value = 100.0
+value = 0.0
+show_percentage = false
+
+[node name="Filter3Container" type="VBoxContainer" parent="VBoxContainer/MainContent/FilterPanel"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Filter3Label" type="Label" parent="VBoxContainer/MainContent/FilterPanel/Filter3Container"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Filter 3 (1/3)"
+horizontal_alignment = 1
+
+[node name="Filter3Indicator" type="ProgressBar" parent="VBoxContainer/MainContent/FilterPanel/Filter3Container"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 16)
+layout_mode = 2
+max_value = 100.0
+value = 0.0
+show_percentage = false
+
+[node name="ViewfinderPanel" type="PanelContainer" parent="VBoxContainer/MainContent"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ViewfinderMargin" type="MarginContainer" parent="VBoxContainer/MainContent/ViewfinderPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="ViewfinderFrame" type="Panel" parent="VBoxContainer/MainContent/ViewfinderPanel/ViewfinderMargin"]
+layout_mode = 2
+
+[node name="BlobDisplay" type="Control" parent="VBoxContainer/MainContent/ViewfinderPanel/ViewfinderMargin/ViewfinderFrame"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_blob")
+
+[node name="HSeparator2" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="BottomBar" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="ProgressContainer" type="VBoxContainer" parent="VBoxContainer/BottomBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="ProgressLabel" type="Label" parent="VBoxContainer/BottomBar/ProgressContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "0% Aligned"
+
+[node name="AlignmentProgress" type="ProgressBar" parent="VBoxContainer/BottomBar/ProgressContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 20)
+layout_mode = 2
+max_value = 100.0
+value = 0.0
+show_percentage = false
+
+[node name="LockButton" type="Button" parent="VBoxContainer/BottomBar"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "LOCK"

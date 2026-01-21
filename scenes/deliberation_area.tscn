@@ -1,0 +1,41 @@
+[gd_scene load_steps=3 format=3 uid="uid://d2jvk8fxoqm6t"]
+
+[ext_resource type="Script" path="res://src/deliberation/deliberation_area.gd" id="1_deliberation"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1"]
+size = Vector3(12, 6, 12)
+
+[node name="DeliberationArea" type="Node3D"]
+script = ExtResource("1_deliberation")
+
+[node name="BoundaryArea" type="Area3D" parent="."]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="BoundaryShape" type="CollisionShape3D" parent="BoundaryArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+shape = SubResource("BoxShape3D_1")
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+
+[node name="Spawn0" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0, 2.5)
+
+[node name="Spawn1" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.5)
+
+[node name="Spawn2" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, 2.5)
+
+[node name="Spawn3" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0, -2.5)
+
+[node name="Spawn4" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.5)
+
+[node name="Spawn5" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, -2.5)
+
+[node name="EvidenceBoardFocus" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -5)

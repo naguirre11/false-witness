@@ -4,8 +4,15 @@ extends CultistAbility
 ##
 ## Creates contaminated evidence that appears as EMF Level 5 readings.
 ## Evidence decays over 3 minutes and then disappears.
+##
+## Decay visual tells (via ContaminatedEMFSource):
+## - PLANTED (0-60s): Steady Level 5, indistinguishable from real
+## - UNSTABLE (60-120s): Flickers between levels randomly
+## - DEGRADED (120-180s): Resets to 0 periodically, erratic behavior
+## - EXPIRED (180+s): Source disappears, no longer detected
 
 const ContaminatedEvidenceScript := preload("res://src/cultist/contaminated_evidence.gd")
+const ContaminatedEMFSourceScript := preload("res://src/cultist/contaminated_emf_source.gd")
 
 
 func _init() -> void:
@@ -29,14 +36,33 @@ func create_evidence(cultist_id: int, location: Vector3) -> ContaminatedEvidence
 	return evidence
 
 
-## Executes the ability - creates evidence and emits signals.
-func execute(cultist_id: int, location: Vector3) -> ContaminatedEvidence:
+## Creates the contaminated EMF source node that applies decay visual tells.
+## Returns the node which must be added to the scene tree by the caller.
+func create_emf_source(evidence: ContaminatedEvidence, location: Vector3) -> Node3D:
+	var source: Node3D = ContaminatedEMFSourceScript.new()
+	source.name = "ContaminatedEMFSource_%s" % evidence.uid
+	source.position = location
+	source.initialize(evidence)
+
+	# Connect expiration to auto-cleanup
+	if source.has_signal("expired"):
+		source.expired.connect(_on_source_expired.bind(source))
+
+	return source
+
+
+## Executes the ability - creates evidence, spawns source, and emits signals.
+## Returns both the evidence and the source node in a Dictionary.
+func execute(cultist_id: int, location: Vector3) -> Dictionary:
 	if not can_use():
-		return null
+		return {}
 
 	var evidence := create_evidence(cultist_id, location)
 	if evidence == null:
-		return null
+		return {}
+
+	# Create the EMF source node for detection
+	var source := create_emf_source(evidence, location)
 
 	# Use the charge and emit signals
 	use(location)
@@ -49,7 +75,13 @@ func execute(cultist_id: int, location: Vector3) -> ContaminatedEvidence:
 		if event_bus.has_signal("contaminated_evidence_planted"):
 			event_bus.contaminated_evidence_planted.emit(evidence)
 
-	return evidence
+	return {"evidence": evidence, "source": source}
+
+
+## Called when a contaminated EMF source expires.
+func _on_source_expired(source: Node3D) -> void:
+	if source and is_instance_valid(source):
+		source.queue_free()
 
 
 ## Override get_node for Resource (needs tree access for EventBus).

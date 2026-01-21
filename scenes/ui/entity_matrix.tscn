@@ -1,0 +1,57 @@
+[gd_scene load_steps=2 format=3 uid="uid://c4rjnxk6v2h8m"]
+
+[ext_resource type="Script" path="res://src/ui/entity_matrix.gd" id="1_matrix"]
+
+[node name="EntityMatrix" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_matrix")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="HeaderRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="VBox/HeaderRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Entity Possibility Matrix"
+
+[node name="Spacer" type="Control" parent="VBox/HeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RemainingLabel" type="Label" parent="VBox/HeaderRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "8 possible entities"
+
+[node name="HSeparator" type="HSeparator" parent="VBox"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 2
+
+[node name="MatrixGrid" type="GridContainer" parent="VBox/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 2
+columns = 9

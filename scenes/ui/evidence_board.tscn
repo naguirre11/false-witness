@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://dpr8hnq2mskvu"]
+[gd_scene load_steps=3 format=3 uid="uid://dpr8hnq2mskvu"]
 
 [ext_resource type="Script" path="res://src/ui/evidence_board.gd" id="1_board"]
+[ext_resource type="PackedScene" uid="uid://c4rjnxk6v2h8m" path="res://scenes/ui/entity_matrix.tscn" id="2_matrix"]
 
 [node name="EvidenceBoard" type="Control"]
 layout_mode = 3
@@ -21,7 +22,7 @@ grow_vertical = 2
 
 [node name="BoardPanel" type="PanelContainer" parent="CenterContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(600, 400)
+custom_minimum_size = Vector2(700, 600)
 layout_mode = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="CenterContainer/BoardPanel"]
@@ -55,3 +56,11 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 16
+
+[node name="HSeparator2" type="HSeparator" parent="CenterContainer/BoardPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="EntityMatrix" parent="CenterContainer/BoardPanel/MarginContainer/VBoxContainer" instance=ExtResource("2_matrix")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3

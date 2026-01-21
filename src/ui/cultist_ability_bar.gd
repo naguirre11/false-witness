@@ -30,6 +30,12 @@ const ABILITY_ORDER: Array[int] = [
 ## Whether this player is a Cultist (if false, bar stays hidden)
 var _is_cultist: bool = false
 
+## Whether this Cultist has been discovered (abilities disabled)
+var _is_discovered: bool = false
+
+## Whether this Cultist is dead (abilities disabled)
+var _is_dead: bool = false
+
 ## Ability instances by type
 var _abilities: Dictionary = {}  # AbilityType -> CultistAbility
 
@@ -192,6 +198,14 @@ func _connect_signals() -> void:
 			cultist_manager.local_role_received.connect(_on_local_role_received)
 		if cultist_manager.has_signal("ability_charges_changed"):
 			cultist_manager.ability_charges_changed.connect(_on_ability_charges_changed)
+		if cultist_manager.has_signal("cultist_discovered"):
+			cultist_manager.cultist_discovered.connect(_on_cultist_discovered)
+
+	# Connect to EventBus for death events
+	if has_node("/root/EventBus"):
+		var event_bus := get_node("/root/EventBus")
+		if event_bus.has_signal("player_died"):
+			event_bus.player_died.connect(_on_player_died)
 
 
 func _on_game_state_changed(_old_state: int, _new_state: int) -> void:
@@ -221,6 +235,71 @@ func _on_ability_charges_changed(
 			break
 
 
+func _on_cultist_discovered(player_id: int) -> void:
+	# Check if this is the local player being discovered
+	var local_id := _get_local_player_id()
+	if player_id != local_id:
+		return
+
+	_is_discovered = true
+
+	# Update header to show discovered state
+	_header_label.text = "ABILITIES DISABLED"
+	_header_label.modulate = Color(0.5, 0.5, 0.5, 1.0)
+
+	# Disable all ability slots visually
+	_update_discovered_state()
+
+
+func _update_discovered_state() -> void:
+	if not _is_discovered:
+		return
+
+	for slot in _ability_slots:
+		# Gray out the entire slot
+		slot.modulate = Color(0.3, 0.3, 0.3, 0.7)
+
+		# Add disabled overlay if not already present
+		var cooldown_overlay: ColorRect = slot.get_node_or_null("CooldownOverlay")
+		if cooldown_overlay:
+			cooldown_overlay.visible = true
+			cooldown_overlay.color = Color(0.2, 0.0, 0.0, 0.8)  # Dark red tint
+
+		# Update charges label to show "DISABLED"
+		var vbox: VBoxContainer = slot.get_child(0) as VBoxContainer
+		if vbox:
+			var charges_label: Label = vbox.get_node_or_null("ChargesLabel")
+			if charges_label:
+				charges_label.text = "DISABLED"
+				charges_label.modulate = Color(1.0, 0.3, 0.3)
+
+
+func _get_local_player_id() -> int:
+	if has_node("/root/NetworkManager"):
+		var network_manager := get_node("/root/NetworkManager")
+		if network_manager.has_method("get_local_player_id"):
+			return network_manager.get_local_player_id()
+	if multiplayer.has_multiplayer_peer():
+		return multiplayer.get_unique_id()
+	return 1  # Single player fallback
+
+
+func _on_player_died(player_id: int) -> void:
+	# Check if this is the local player dying
+	var local_id := _get_local_player_id()
+	if player_id != local_id:
+		return
+
+	# Only affect Cultists
+	if not _is_cultist:
+		return
+
+	_is_dead = true
+
+	# Hide the ability bar entirely for dead Cultists (now Echo)
+	visible = false
+
+
 func _handle_keybind(keycode: int) -> void:
 	# Map number keys to ability slots
 	var slot_index := -1
@@ -245,6 +324,10 @@ func _handle_keybind(keycode: int) -> void:
 
 
 func _select_ability(ability_type: int) -> void:
+	# Silently fail if discovered or dead
+	if _is_discovered or _is_dead:
+		return
+
 	_selected_ability = ability_type
 	_selected_label.text = "Selected: %s" % CultistEnums.get_ability_name(ability_type)
 	ability_selected.emit(ability_type)
@@ -286,6 +369,9 @@ func get_selected_ability() -> int:
 
 ## Check if an ability can be used.
 func can_use_ability(ability_type: int) -> bool:
+	# Discovered or dead Cultists cannot use abilities
+	if _is_discovered or _is_dead:
+		return false
 	var ability: CultistAbility = _abilities.get(ability_type)
 	if ability == null:
 		return false

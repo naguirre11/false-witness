@@ -56,6 +56,9 @@ var _pending_identification: Dictionary = {}  # {entity_type, submitter_id, vote
 ## Whether we're in DELIBERATION state (identification allowed).
 var _deliberation_active: bool = false
 
+## Number of alive players who can vote. Set externally by game systems.
+var _alive_player_count: int = 4
+
 
 func _ready() -> void:
 	_connect_to_event_bus()
@@ -294,6 +297,104 @@ func is_deliberation_active() -> bool:
 	return _deliberation_active
 
 
+# --- Public API: Voting ---
+
+
+## Casts a vote on the current identification proposal.
+## Only valid during DELIBERATION with a pending identification. Server-authoritative.
+## Returns true if the vote was accepted.
+func vote_for_identification(voter_id: int, approve: bool) -> bool:
+	if not _deliberation_active:
+		push_warning("[EvidenceManager] Vote attempted outside DELIBERATION")
+		return false
+
+	if _pending_identification.is_empty():
+		push_warning("[EvidenceManager] No pending identification to vote on")
+		return false
+
+	if not _is_server():
+		_request_vote_identification(voter_id, approve)
+		return true  # Optimistic - actual result comes from server
+
+	# Record vote
+	var votes: Dictionary = _pending_identification.get("votes", {})
+	votes[voter_id] = approve
+	_pending_identification["votes"] = votes
+
+	print(
+		"[EvidenceManager] Vote recorded: player %d voted %s"
+		% [voter_id, "approve" if approve else "reject"]
+	)
+
+	_broadcast_vote_cast(voter_id, approve)
+
+	# Check if majority reached
+	_check_vote_result()
+
+	return true
+
+
+## Sets the number of alive players for majority calculation.
+func set_alive_player_count(player_count: int) -> void:
+	_alive_player_count = maxi(1, player_count)
+
+
+## Returns the current alive player count.
+func get_alive_player_count() -> int:
+	return _alive_player_count
+
+
+## Returns the number of votes needed for majority.
+func get_majority_threshold() -> int:
+	# Majority = more than 50%, so (count / 2) + 1 for even, ceil for odd
+	return (_alive_player_count / 2) + 1
+
+
+## Returns the current vote counts: {approve: int, reject: int}.
+func get_vote_counts() -> Dictionary:
+	if _pending_identification.is_empty():
+		return {"approve": 0, "reject": 0}
+
+	var votes: Dictionary = _pending_identification.get("votes", {})
+	var approve_count: int = 0
+	var reject_count: int = 0
+
+	for vote_value: bool in votes.values():
+		if vote_value:
+			approve_count += 1
+		else:
+			reject_count += 1
+
+	return {"approve": approve_count, "reject": reject_count}
+
+
+## Checks if voting has concluded and emits appropriate signal.
+func _check_vote_result() -> void:
+	if _pending_identification.is_empty():
+		return
+
+	var counts := get_vote_counts()
+	var threshold := get_majority_threshold()
+	var entity_type: String = _pending_identification.get("entity_type", "")
+
+	if counts["approve"] >= threshold:
+		print(
+			"[EvidenceManager] Identification APPROVED: %s (%d/%d votes)"
+			% [entity_type, counts["approve"], threshold]
+		)
+		identification_approved.emit(entity_type)
+		_broadcast_identification_result(entity_type, true)
+	elif counts["reject"] >= threshold:
+		print(
+			"[EvidenceManager] Identification REJECTED: %s (%d/%d votes)"
+			% [entity_type, counts["reject"], threshold]
+		)
+		identification_rejected.emit(entity_type)
+		_broadcast_identification_result(entity_type, false)
+		# Clear pending so another proposal can be made
+		_pending_identification.clear()
+
+
 # --- Public API: Queries ---
 
 
@@ -507,6 +608,20 @@ func _broadcast_identification_submitted(entity_type: String, submitter_id: int)
 	_rpc_identification_submitted.rpc(entity_type, submitter_id)
 
 
+func _broadcast_vote_cast(voter_id: int, approve: bool) -> void:
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		return
+
+	_rpc_vote_cast.rpc(voter_id, approve)
+
+
+func _broadcast_identification_result(entity_type: String, approved: bool) -> void:
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		return
+
+	_rpc_identification_result.rpc(entity_type, approved)
+
+
 # --- RPC: Client Requests ---
 
 
@@ -558,6 +673,13 @@ func _request_submit_identification(entity_type: String, submitter_id: int) -> v
 		return
 
 	_rpc_request_identification.rpc_id(1, entity_type, submitter_id)
+
+
+func _request_vote_identification(voter_id: int, approve: bool) -> void:
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		return
+
+	_rpc_request_vote.rpc_id(1, voter_id, approve)
 
 
 # --- RPC: Server Handlers ---
@@ -629,6 +751,14 @@ func _rpc_request_identification(entity_type: String, submitter_id: int) -> void
 	submit_identification(entity_type, submitter_id)
 
 
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_request_vote(voter_id: int, approve: bool) -> void:
+	if not _is_server():
+		return
+
+	vote_for_identification(voter_id, approve)
+
+
 # --- RPC: Server Broadcasts ---
 
 
@@ -677,3 +807,28 @@ func _rpc_identification_submitted(entity_type: String, submitter_id: int) -> vo
 	}
 
 	identification_submitted.emit(entity_type, submitter_id)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_vote_cast(voter_id: int, approve: bool) -> void:
+	if _is_server():
+		return
+
+	# Update local pending identification votes
+	if not _pending_identification.is_empty():
+		var votes: Dictionary = _pending_identification.get("votes", {})
+		votes[voter_id] = approve
+		_pending_identification["votes"] = votes
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_identification_result(entity_type: String, approved: bool) -> void:
+	if _is_server():
+		return
+
+	if approved:
+		identification_approved.emit(entity_type)
+	else:
+		identification_rejected.emit(entity_type)
+		# Clear pending so another proposal can be made
+		_pending_identification.clear()

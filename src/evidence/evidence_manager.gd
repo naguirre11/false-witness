@@ -27,6 +27,15 @@ signal evidence_contested(evidence: Evidence, contesting_player_id: int)
 ## Emitted when all evidence is cleared (new round).
 signal evidence_cleared
 
+## Emitted when an entity identification is submitted.
+signal identification_submitted(entity_type: String, submitter_id: int)
+
+## Emitted when identification voting completes with approval.
+signal identification_approved(entity_type: String)
+
+## Emitted when identification voting completes with rejection.
+signal identification_rejected(entity_type: String)
+
 # --- State ---
 
 ## All collected evidence indexed by UID.
@@ -40,6 +49,12 @@ var _evidence_by_collector: Dictionary = {}
 
 ## Whether evidence collection is currently allowed.
 var _collection_enabled: bool = false
+
+## Pending identification submission (during DELIBERATION).
+var _pending_identification: Dictionary = {}  # {entity_type, submitter_id, votes: {}}
+
+## Whether we're in DELIBERATION state (identification allowed).
+var _deliberation_active: bool = false
 
 
 func _ready() -> void:
@@ -209,6 +224,76 @@ func _emit_contested_to_event_bus(evidence: Evidence, contester_id: int) -> void
 		event_bus.evidence_contested.emit(evidence.uid, contester_id)
 
 
+# --- Public API: Identification ---
+
+
+## Submits an entity identification during deliberation phase.
+## Only valid during DELIBERATION state. Server-authoritative.
+## Returns true if submission was accepted.
+func submit_identification(entity_type: String, submitter_id: int) -> bool:
+	if not _deliberation_active:
+		push_warning("[EvidenceManager] Identification attempted outside DELIBERATION")
+		return false
+
+	if entity_type.is_empty():
+		push_warning("[EvidenceManager] Empty entity type submitted")
+		return false
+
+	if not _is_server():
+		_request_submit_identification(entity_type, submitter_id)
+		return true  # Optimistic - actual result comes from server
+
+	# Clear any previous pending identification
+	_pending_identification = {
+		"entity_type": entity_type,
+		"submitter_id": submitter_id,
+		"votes": {},  # player_id -> bool (approve/reject)
+	}
+
+	print(
+		"[EvidenceManager] Identification submitted: %s by player %d"
+		% [entity_type, submitter_id]
+	)
+
+	identification_submitted.emit(entity_type, submitter_id)
+	_broadcast_identification_submitted(entity_type, submitter_id)
+
+	return true
+
+
+## Returns the current pending identification, or empty dict if none.
+func get_pending_identification() -> Dictionary:
+	return _pending_identification.duplicate()
+
+
+## Returns true if there's a pending identification.
+func has_pending_identification() -> bool:
+	return not _pending_identification.is_empty()
+
+
+## Clears any pending identification. Called when moving to RESULTS or new round.
+func clear_pending_identification() -> void:
+	_pending_identification.clear()
+
+
+## Enables deliberation mode. Called when entering DELIBERATION state.
+func enable_deliberation() -> void:
+	_deliberation_active = true
+	print("[EvidenceManager] Deliberation mode enabled")
+
+
+## Disables deliberation mode. Called when leaving DELIBERATION state.
+func disable_deliberation() -> void:
+	_deliberation_active = false
+	clear_pending_identification()
+	print("[EvidenceManager] Deliberation mode disabled")
+
+
+## Returns true if deliberation is active.
+func is_deliberation_active() -> bool:
+	return _deliberation_active
+
+
 # --- Public API: Queries ---
 
 
@@ -367,18 +452,26 @@ func _on_game_state_changed(old_state: int, new_state: int) -> void:
 	const INVESTIGATION := 3
 	const HUNT := 4
 	const LOBBY := 1
+	const DELIBERATION := 5
 
 	match new_state:
 		INVESTIGATION:
 			enable_collection()
 		HUNT:
 			pass
+		DELIBERATION:
+			disable_collection()
+			enable_deliberation()
 		LOBBY:
 			clear_evidence()
 			disable_collection()
+			disable_deliberation()
 
 	if old_state == INVESTIGATION and new_state != HUNT:
 		disable_collection()
+
+	if old_state == DELIBERATION and new_state != DELIBERATION:
+		disable_deliberation()
 
 
 # --- Internal: Networking ---
@@ -405,6 +498,13 @@ func _broadcast_verification_changed(evidence: Evidence) -> void:
 		return
 
 	_rpc_verification_changed.rpc(evidence.uid, evidence.verification_state)
+
+
+func _broadcast_identification_submitted(entity_type: String, submitter_id: int) -> void:
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		return
+
+	_rpc_identification_submitted.rpc(entity_type, submitter_id)
 
 
 # --- RPC: Client Requests ---
@@ -451,6 +551,13 @@ func _request_contest_evidence(uid: String, contester_id: int) -> void:
 		return
 
 	_rpc_request_contest.rpc_id(1, uid, contester_id)
+
+
+func _request_submit_identification(entity_type: String, submitter_id: int) -> void:
+	if not multiplayer or not multiplayer.has_multiplayer_peer():
+		return
+
+	_rpc_request_identification.rpc_id(1, entity_type, submitter_id)
 
 
 # --- RPC: Server Handlers ---
@@ -514,6 +621,14 @@ func _rpc_request_contest(uid: String, contester_id: int) -> void:
 	contest_evidence(uid, contester_id)
 
 
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_request_identification(entity_type: String, submitter_id: int) -> void:
+	if not _is_server():
+		return
+
+	submit_identification(entity_type, submitter_id)
+
+
 # --- RPC: Server Broadcasts ---
 
 
@@ -548,3 +663,17 @@ func _rpc_sync_all_evidence(all_data: Array) -> void:
 		_add_evidence(evidence)
 
 	print("[EvidenceManager] Synced %d evidence items from server" % all_data.size())
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_identification_submitted(entity_type: String, submitter_id: int) -> void:
+	if _is_server():
+		return
+
+	_pending_identification = {
+		"entity_type": entity_type,
+		"submitter_id": submitter_id,
+		"votes": {},
+	}
+
+	identification_submitted.emit(entity_type, submitter_id)

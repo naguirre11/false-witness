@@ -39,31 +39,7 @@ signal identification_rejected(entity_type: String)
 ## Emitted when entity eliminations change.
 signal eliminations_changed(eliminated: Array, remaining: Array)
 
-# --- State ---
-
-## All collected evidence indexed by UID.
-var _evidence_by_uid: Dictionary = {}
-
-## Evidence indexed by type for fast queries.
-var _evidence_by_type: Dictionary = {}
-
-## Evidence indexed by collector ID for fast queries.
-var _evidence_by_collector: Dictionary = {}
-
-## Whether evidence collection is currently allowed.
-var _collection_enabled: bool = false
-
-## Pending identification submission (during DELIBERATION).
-var _pending_identification: Dictionary = {}  # {entity_type, submitter_id, votes: {}}
-
-## Whether we're in DELIBERATION state (identification allowed).
-var _deliberation_active: bool = false
-
-## Number of alive players who can vote. Set externally by game systems.
-var _alive_player_count: int = 4
-
-## Entity types that have been eliminated by collected evidence.
-var _eliminated_entities: Array[String] = []
+# --- Constants ---
 
 ## All possible entity types (must match EntityMatrix.ALL_ENTITIES).
 const ALL_ENTITIES: Array[String] = [
@@ -114,6 +90,32 @@ const ENTITY_EVIDENCE_MAP: Dictionary = {
 		EvidenceEnums.EvidenceType.HUNT_BEHAVIOR,
 	],
 }
+
+# --- State ---
+
+## All collected evidence indexed by UID.
+var _evidence_by_uid: Dictionary = {}
+
+## Evidence indexed by type for fast queries.
+var _evidence_by_type: Dictionary = {}
+
+## Evidence indexed by collector ID for fast queries.
+var _evidence_by_collector: Dictionary = {}
+
+## Whether evidence collection is currently allowed.
+var _collection_enabled: bool = false
+
+## Pending identification submission (during DELIBERATION).
+var _pending_identification: Dictionary = {}  # {entity_type, submitter_id, votes: {}}
+
+## Whether we're in DELIBERATION state (identification allowed).
+var _deliberation_active: bool = false
+
+## Number of alive players who can vote. Set externally by game systems.
+var _alive_player_count: int = 4
+
+## Entity types that have been eliminated by collected evidence.
+var _eliminated_entities: Array[String] = []
 
 
 func _ready() -> void:
@@ -233,9 +235,9 @@ func verify_evidence(uid: String, verifier_id: int) -> bool:
 		if not result.get("success", false):
 			return false
 
-	# Perform the actual verification
+	# Perform the actual verification with timestamp tracking
 	evidence.verify()
-	evidence.verifier_id = verifier_id
+	evidence.record_verification(verifier_id)
 	evidence_verification_changed.emit(evidence)
 	_broadcast_verification_changed(evidence)
 	_emit_verification_to_event_bus(evidence)

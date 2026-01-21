@@ -119,11 +119,24 @@ func _update_collected_display() -> void:
 			_quality_label.modulate = Color.WHITE
 		_quality_label.show()
 
-	# Verification state
+	# Verification state with verifier info
 	if _verification_label:
 		var verif_name := EvidenceEnums.get_verification_name(_evidence.verification_state)
 		var verif_desc := _get_verification_description(_evidence.verification_state)
-		_verification_label.text = "Status: %s\n%s" % [verif_name, verif_desc]
+		var verif_text := "Status: %s\n%s" % [verif_name, verif_desc]
+
+		# Add verifier info if verified
+		if _evidence.is_verified() and _evidence.verifier_id != 0:
+			var verifier_name := _get_player_name(_evidence.verifier_id)
+			var verif_time := _format_timestamp(_evidence.verification_timestamp)
+			verif_text += "\nVerified by: %s at %s" % [verifier_name, verif_time]
+
+			# Show additional verifiers if any
+			var history := _evidence.get_verification_history()
+			if history.size() > 1:
+				verif_text += "\n(%d total verifications)" % history.size()
+
+		_verification_label.text = verif_text
 		_verification_label.modulate = _get_verification_color(_evidence.verification_state)
 		_verification_label.show()
 

@@ -27,7 +27,10 @@ extends Resource
 
 @export_group("Witness Tracking")
 @export var witness_ids: Array[int] = []  ## Players who witnessed this evidence
-@export var verifier_id: int = 0  ## Player who verified this evidence
+@export var verifier_id: int = 0  ## Player who verified this evidence (primary/first verifier)
+@export var verification_timestamp: float = 0.0  ## When evidence was verified
+## Multiple verifications: {verifier_id, timestamp}
+@export var verification_history: Array[Dictionary] = []
 
 @export_group("Ghost Writing Witnesses")
 @export var setup_witness_id: int = 0  ## Player who witnessed book setup
@@ -121,9 +124,11 @@ func get_trust_name() -> String:
 	return EvidenceEnums.get_trust_name(trust_level)
 
 
-## Marks this evidence as verified.
+## Marks this evidence as verified. Records timestamp if not already set.
 func verify() -> void:
 	verification_state = EvidenceEnums.VerificationState.VERIFIED
+	if verification_timestamp == 0.0:
+		verification_timestamp = Time.get_ticks_msec() / 1000.0
 
 
 ## Marks this evidence as contested.
@@ -134,6 +139,32 @@ func contest() -> void:
 ## Resets verification to unverified.
 func reset_verification() -> void:
 	verification_state = EvidenceEnums.VerificationState.UNVERIFIED
+
+
+## Records a verification by a specific player with timestamp.
+func record_verification(peer_id: int) -> void:
+	var timestamp := Time.get_ticks_msec() / 1000.0
+
+	# Set primary verifier if not already set
+	if verifier_id == 0:
+		verifier_id = peer_id
+		verification_timestamp = timestamp
+
+	# Add to verification history
+	verification_history.append({
+		"verifier_id": peer_id,
+		"timestamp": timestamp,
+	})
+
+
+## Returns the number of verifications recorded.
+func get_verification_count() -> int:
+	return verification_history.size()
+
+
+## Returns the verification history as an array of {verifier_id, timestamp} dicts.
+func get_verification_history() -> Array[Dictionary]:
+	return verification_history.duplicate()
 
 
 ## Adds a witness to this evidence.
@@ -214,6 +245,8 @@ func to_network_dict() -> Dictionary:
 		"notes": notes,
 		"witness_ids": witness_ids,
 		"verifier_id": verifier_id,
+		"verification_timestamp": verification_timestamp,
+		"verification_history": verification_history,
 		"setup_witness_id": setup_witness_id,
 		"result_witness_id": result_witness_id,
 		"sabotage_flags": sabotage_flags,
@@ -253,6 +286,12 @@ static func from_network_dict(data: Dictionary) -> Evidence:
 	for id in raw_witness_ids:
 		evidence.witness_ids.append(id as int)
 	evidence.verifier_id = data.get("verifier_id", 0)
+	evidence.verification_timestamp = data.get("verification_timestamp", 0.0)
+	# Verification history
+	var raw_history: Array = data.get("verification_history", [])
+	evidence.verification_history = []
+	for entry: Dictionary in raw_history:
+		evidence.verification_history.append(entry.duplicate())
 	# Ghost Writing witnesses
 	evidence.setup_witness_id = data.get("setup_witness_id", 0)
 	evidence.result_witness_id = data.get("result_witness_id", 0)

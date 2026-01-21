@@ -33,6 +33,15 @@ signal emergency_vote_called(caller_id: int)
 ## Emitted when vote cannot be called (reason provided).
 signal emergency_vote_rejected(reason: String)
 
+## Emitted when a player casts a vote.
+signal vote_cast(voter_id: int, target_id: int)
+
+## Emitted when voting completes.
+signal vote_complete(target_id: int, is_majority: bool)
+
+## Emitted when voting timer updates.
+signal vote_timer_updated(seconds_remaining: float)
+
 # --- Constants ---
 
 ## Minimum players required for a match
@@ -49,6 +58,9 @@ const MAX_EMERGENCY_VOTES := 2
 
 ## Time cost (seconds) to call an emergency vote
 const EMERGENCY_VOTE_TIME_COST := 30.0
+
+## Duration of voting period
+const VOTING_DURATION := 30.0
 
 # --- State ---
 
@@ -90,12 +102,38 @@ var _action_log: Array[Dictionary] = []
 ## Number of emergency votes used this match
 var _emergency_votes_used: int = 0
 
+## Whether a vote is currently in progress
+var _voting_in_progress: bool = false
+
+## Votes cast: voter_id -> target_id (-1 = skip)
+var _current_votes: Dictionary = {}
+
+## Voting timer remaining
+var _voting_timer: float = 0.0
+
+## List of alive player IDs for current vote
+var _alive_players: Array[int] = []
+
 
 func _ready() -> void:
 	# Connect to game state changes
 	if EventBus:
 		EventBus.game_state_changed.connect(_on_game_state_changed)
 	print("[CultistManager] Initialized")
+
+
+func _process(delta: float) -> void:
+	if not _is_server or not _voting_in_progress:
+		return
+
+	# Update voting timer
+	_voting_timer -= delta
+	if _voting_timer <= 0.0:
+		_end_voting()
+	elif int(_voting_timer) != int(_voting_timer + delta):
+		# Emit every second
+		vote_timer_updated.emit(_voting_timer)
+		_notify_vote_timer.rpc(_voting_timer)
 
 
 # --- Public API ---
@@ -243,6 +281,10 @@ func reset() -> void:
 	_local_allied_cultists.clear()
 	_action_log.clear()
 	_emergency_votes_used = 0
+	_voting_in_progress = false
+	_current_votes.clear()
+	_voting_timer = 0.0
+	_alive_players.clear()
 	print("[CultistManager] Reset for new match")
 
 
@@ -442,6 +484,133 @@ func _deduct_investigation_time(seconds: float) -> void:
 			print("[CultistManager] Deducted %.0f seconds from investigation time" % seconds)
 
 
+# --- Vote Tracking API ---
+
+
+## Starts the voting period. Called when emergency vote is triggered.
+## alive_player_ids: List of players who can vote and be voted on.
+func start_voting(alive_player_ids: Array[int]) -> void:
+	if not _is_server:
+		push_warning("[CultistManager] Only server can start voting")
+		return
+
+	if _voting_in_progress:
+		push_warning("[CultistManager] Voting already in progress")
+		return
+
+	_voting_in_progress = true
+	_current_votes.clear()
+	_voting_timer = VOTING_DURATION
+	_alive_players = alive_player_ids.duplicate()
+
+	# Notify all clients
+	_notify_voting_started.rpc(alive_player_ids, VOTING_DURATION)
+
+	print("[CultistManager] Voting started: %d players, %.0fs timer" % [
+		alive_player_ids.size(), VOTING_DURATION
+	])
+
+
+## Casts a vote for a target player.
+## voter_id: Player casting the vote.
+## target_id: Player being voted for (-1 to skip).
+func cast_vote(voter_id: int, target_id: int) -> void:
+	if not _is_server:
+		# Send to server
+		_request_cast_vote.rpc_id(1, voter_id, target_id)
+		return
+
+	_process_vote(voter_id, target_id)
+
+
+func _process_vote(voter_id: int, target_id: int) -> void:
+	if not _voting_in_progress:
+		push_warning("[CultistManager] No vote in progress")
+		return
+
+	if voter_id not in _alive_players:
+		push_warning("[CultistManager] Voter %d not in alive players" % voter_id)
+		return
+
+	# Valid targets: alive players or -1 (skip)
+	if target_id != -1 and target_id not in _alive_players:
+		push_warning("[CultistManager] Invalid vote target %d" % target_id)
+		return
+
+	# Record or update vote
+	_current_votes[voter_id] = target_id
+
+	# Emit signal
+	vote_cast.emit(voter_id, target_id)
+	_notify_vote_cast.rpc(voter_id, target_id)
+
+	print("[CultistManager] Vote cast: player %d -> target %d" % [voter_id, target_id])
+
+	# Check if all alive players have voted
+	if _current_votes.size() >= _alive_players.size():
+		_end_voting()
+
+
+## Returns true if a vote is currently in progress.
+func is_voting_in_progress() -> bool:
+	return _voting_in_progress
+
+
+## Returns the current votes (voter_id -> target_id).
+func get_current_votes() -> Dictionary:
+	return _current_votes.duplicate()
+
+
+## Returns the voting time remaining.
+func get_voting_time_remaining() -> float:
+	return _voting_timer
+
+
+## Ends the voting period and calculates the result.
+func _end_voting() -> void:
+	if not _voting_in_progress:
+		return
+
+	_voting_in_progress = false
+	_voting_timer = 0.0
+
+	# Count votes for each target
+	var vote_counts: Dictionary = {}
+	for voter_id in _current_votes:
+		var target_id: int = _current_votes[voter_id]
+		if target_id == -1:
+			continue  # Skip votes don't count
+		if target_id not in vote_counts:
+			vote_counts[target_id] = 0
+		vote_counts[target_id] += 1
+
+	# Find the target with most votes
+	var majority_threshold := _alive_players.size() / 2.0  # More than 50%
+	var top_target: int = -1
+	var top_count: int = 0
+	var is_tie := false
+
+	for target_id in vote_counts:
+		var count: int = vote_counts[target_id]
+		if count > top_count:
+			top_count = count
+			top_target = target_id
+			is_tie = false
+		elif count == top_count:
+			is_tie = true
+
+	# Determine if majority was reached
+	var is_majority := top_count > majority_threshold and not is_tie
+
+	# Emit result
+	vote_complete.emit(top_target if is_majority else -1, is_majority)
+	_notify_vote_complete.rpc(top_target if is_majority else -1, is_majority)
+
+	print("[CultistManager] Voting ended: target=%d, majority=%s (votes=%d, threshold=%.1f)" % [
+		top_target if is_majority else -1, is_majority, top_count, majority_threshold
+	])
+
+
 # --- RPC Methods ---
 
 
@@ -489,6 +658,46 @@ func _request_emergency_vote(caller_id: int) -> void:
 @rpc("authority", "call_local", "reliable")
 func _notify_emergency_vote(caller_id: int) -> void:
 	emergency_vote_called.emit(caller_id)
+
+
+## Client request to cast vote.
+@rpc("any_peer", "call_remote", "reliable")
+func _request_cast_vote(voter_id: int, target_id: int) -> void:
+	if not _is_server:
+		return
+	_process_vote(voter_id, target_id)
+
+
+## Server notifies clients that voting has started.
+@rpc("authority", "call_local", "reliable")
+func _notify_voting_started(alive_player_ids: Array, duration: float) -> void:
+	_voting_in_progress = true
+	_alive_players.clear()
+	for pid in alive_player_ids:
+		_alive_players.append(int(pid))
+	_voting_timer = duration
+	_current_votes.clear()
+
+
+## Server notifies clients of a vote cast.
+@rpc("authority", "call_local", "reliable")
+func _notify_vote_cast(voter_id: int, target_id: int) -> void:
+	_current_votes[voter_id] = target_id
+	vote_cast.emit(voter_id, target_id)
+
+
+## Server notifies clients of voting timer.
+@rpc("authority", "call_local", "reliable")
+func _notify_vote_timer(seconds_remaining: float) -> void:
+	_voting_timer = seconds_remaining
+	vote_timer_updated.emit(seconds_remaining)
+
+
+## Server notifies clients of vote completion.
+@rpc("authority", "call_local", "reliable")
+func _notify_vote_complete(target_id: int, is_majority: bool) -> void:
+	_voting_in_progress = false
+	vote_complete.emit(target_id, is_majority)
 
 
 # --- Internal Methods ---

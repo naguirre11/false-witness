@@ -97,6 +97,7 @@ func _ready() -> void:
 	_populate_equipment_grid()
 	_setup_signals()
 	_update_selection_display()
+	_setup_cultist_visibility()
 
 
 func _populate_equipment_grid() -> void:
@@ -234,8 +235,37 @@ func _on_timer_tick(time_remaining: float) -> void:
 
 
 func _on_teammate_loadout_changed(player_id: int, loadout: Array) -> void:
-	# Update teammate display
-	_update_teammate_display(player_id, loadout)
+	# Cultists see all teammate equipment selections in real-time
+	# Non-Cultists only see after EQUIPMENT_SELECT phase ends
+	if _can_see_teammate_loadout():
+		_update_teammate_display(player_id, loadout)
+
+
+## Returns true if local player can see teammate equipment selections.
+## Cultists can see all selections during EQUIPMENT_SELECT for strategic planning.
+func _can_see_teammate_loadout() -> bool:
+	# Check if CultistManager exists and local player is a Cultist
+	if has_node("/root/CultistManager"):
+		var cultist_manager := get_node("/root/CultistManager")
+		if cultist_manager.has_method("is_local_player_cultist"):
+			return cultist_manager.is_local_player_cultist()
+	# Default: don't show teammate selections
+	return false
+
+
+## Setup visibility UI based on Cultist status.
+func _setup_cultist_visibility() -> void:
+	# Hide teammates list for non-Cultists, show for Cultists
+	if _teammates_list:
+		_teammates_list.visible = _can_see_teammate_loadout()
+
+		# Add header label for Cultist advantage
+		if _can_see_teammate_loadout():
+			var header := Label.new()
+			header.text = "Team Loadouts (Cultist Intel)"
+			header.add_theme_color_override("font_color", Color(0.8, 0.3, 0.3))
+			_teammates_list.add_child(header)
+			_teammates_list.move_child(header, 0)
 
 
 func _update_teammate_display(player_id: int, loadout: Array) -> void:

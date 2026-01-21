@@ -408,3 +408,136 @@ func test_undiscovered_cultist_can_use_abilities() -> void:
 		_cultist_manager.can_cultist_use_abilities(cultist_id),
 		"Undiscovered Cultist should be able to use abilities"
 	)
+
+
+# --- Discovery Restrictions Tests (FW-053-12) ---
+
+
+func test_get_discovery_state_returns_hidden_for_undiscovered() -> void:
+	_setup_match_with_cultist()
+	var cultist_ids: Array[int] = _cultist_manager.get_cultist_ids()
+	var cultist_id: int = cultist_ids[0]
+
+	# Check discovery state before voting
+	var state: int = _cultist_manager.get_discovery_state(cultist_id)
+	# DiscoveryState.HIDDEN = 0
+	assert_eq(state, 0, "Undiscovered Cultist should have HIDDEN state")
+
+
+func test_get_discovery_state_returns_discovered_after_vote() -> void:
+	_setup_match_with_cultist()
+	var cultist_ids: Array[int] = _cultist_manager.get_cultist_ids()
+	var cultist_id: int = cultist_ids[0]
+	var alive_players: Array[int] = [1, 2, 3, 4]
+
+	# Discover via vote
+	_cultist_manager.start_voting(alive_players)
+	for pid in alive_players:
+		if pid != cultist_id:
+			_cultist_manager.cast_vote(pid, cultist_id)
+		else:
+			_cultist_manager.cast_vote(pid, -1)
+
+	await get_tree().process_frame
+
+	# Check discovery state after voting
+	var state: int = _cultist_manager.get_discovery_state(cultist_id)
+	# DiscoveryState.DISCOVERED = 1
+	assert_eq(state, 1, "Discovered Cultist should have DISCOVERED state")
+
+
+func test_can_use_ability_returns_false_when_discovered() -> void:
+	_setup_match_with_cultist()
+	var cultist_ids: Array[int] = _cultist_manager.get_cultist_ids()
+	var cultist_id: int = cultist_ids[0]
+	var alive_players: Array[int] = [1, 2, 3, 4]
+
+	# Discover via vote
+	_cultist_manager.start_voting(alive_players)
+	for pid in alive_players:
+		if pid != cultist_id:
+			_cultist_manager.cast_vote(pid, cultist_id)
+		else:
+			_cultist_manager.cast_vote(pid, -1)
+
+	await get_tree().process_frame
+
+	# Test can_use_ability for each ability type
+	# CultistEnums.AbilityType.EMF_SPOOF = 1
+	assert_false(
+		_cultist_manager.can_use_ability(cultist_id, 1),
+		"Discovered Cultist should not be able to use EMF_SPOOF"
+	)
+
+
+func test_non_cultist_cannot_use_abilities() -> void:
+	_setup_match_with_cultist()
+	var cultist_ids: Array[int] = _cultist_manager.get_cultist_ids()
+
+	# Find an innocent player
+	var innocent_id := 1
+	for pid in [1, 2, 3, 4]:
+		if pid not in cultist_ids:
+			innocent_id = pid
+			break
+
+	assert_false(
+		_cultist_manager.can_use_ability(innocent_id, 1),
+		"Non-Cultist should not be able to use abilities"
+	)
+
+
+func test_discovered_cultists_list_contains_player_after_vote() -> void:
+	_setup_match_with_cultist()
+	var cultist_ids: Array[int] = _cultist_manager.get_cultist_ids()
+	var cultist_id: int = cultist_ids[0]
+	var alive_players: Array[int] = [1, 2, 3, 4]
+
+	# Verify not in discovered list initially
+	assert_false(
+		_cultist_manager.is_cultist_discovered(cultist_id),
+		"Cultist should not be in discovered list initially"
+	)
+
+	# Discover via vote
+	_cultist_manager.start_voting(alive_players)
+	for pid in alive_players:
+		if pid != cultist_id:
+			_cultist_manager.cast_vote(pid, cultist_id)
+		else:
+			_cultist_manager.cast_vote(pid, -1)
+
+	await get_tree().process_frame
+
+	# Verify in discovered list after vote
+	assert_true(
+		_cultist_manager.is_cultist_discovered(cultist_id),
+		"Cultist should be in discovered list after correct vote"
+	)
+
+
+func test_cultist_voted_discovered_signal_emitted() -> void:
+	_setup_match_with_cultist()
+	var cultist_ids: Array[int] = _cultist_manager.get_cultist_ids()
+	var cultist_id: int = cultist_ids[0]
+	var alive_players: Array[int] = [1, 2, 3, 4]
+
+	# Track signal
+	var signal_state := {"received": false, "player_id": -1}
+	_cultist_manager.cultist_voted_discovered.connect(func(player_id):
+		signal_state["received"] = true
+		signal_state["player_id"] = player_id
+	)
+
+	# Discover via vote
+	_cultist_manager.start_voting(alive_players)
+	for pid in alive_players:
+		if pid != cultist_id:
+			_cultist_manager.cast_vote(pid, cultist_id)
+		else:
+			_cultist_manager.cast_vote(pid, -1)
+
+	await get_tree().process_frame
+
+	assert_true(signal_state["received"], "cultist_voted_discovered should be emitted")
+	assert_eq(signal_state["player_id"], cultist_id, "Signal should contain correct player ID")

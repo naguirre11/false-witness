@@ -24,6 +24,9 @@ signal cultist_discovered(player_id: int)
 ## Emitted when local player receives their role.
 signal local_role_received(role: int, is_cultist: bool)
 
+## Emitted when action log is sent at match end (for results screen).
+signal action_log_received(action_log: Array)
+
 # --- Constants ---
 
 ## Minimum players required for a match
@@ -67,6 +70,10 @@ var _cultist_count_6p: int = DEFAULT_CULTIST_COUNT_6P
 
 ## Random number generator for role assignment
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+
+## Action log for post-game reveal (server-only)
+## Each entry: {timestamp, ability_type, player_id, location, target, evidence_uid}
+var _action_log: Array[Dictionary] = []
 
 
 func _ready() -> void:
@@ -219,7 +226,112 @@ func reset() -> void:
 	_local_entity_type = ""
 	_local_entity_evidence.clear()
 	_local_allied_cultists.clear()
+	_action_log.clear()
 	print("[CultistManager] Reset for new match")
+
+
+# --- Action Logging API ---
+
+
+## Logs a Cultist ability use for post-game reveal.
+## Called when a Cultist uses a contamination ability.
+## Returns the action entry dictionary for linking with evidence.
+func log_ability_use(
+	player_id: int,
+	ability_type: int,
+	location: Vector3,
+	target: int = -1,  # Optional target player ID
+	evidence_uid: String = ""  # Optional link to ContaminatedEvidence
+) -> Dictionary:
+	if not _is_server:
+		push_warning("[CultistManager] Only server can log ability use")
+		return {}
+
+	var entry := {
+		"timestamp": Time.get_unix_time_from_system(),
+		"ability_type": ability_type,
+		"player_id": player_id,
+		"location": {"x": location.x, "y": location.y, "z": location.z},
+		"target": target,
+		"evidence_uid": evidence_uid,
+	}
+
+	_action_log.append(entry)
+
+	# Emit signal for real-time tracking
+	var ability_name := _get_ability_name(ability_type)
+	ability_used.emit(player_id, ability_name, location)
+
+	print("[CultistManager] Logged ability use: %s by player %d" % [ability_name, player_id])
+	return entry
+
+
+## Links an evidence UID to an existing action log entry.
+## Call this after evidence is created to connect it to the ability use.
+func link_evidence_to_action(evidence_uid: String, action_index: int = -1) -> void:
+	if not _is_server:
+		return
+
+	# Default to most recent action if index not specified
+	var idx := action_index if action_index >= 0 else _action_log.size() - 1
+	if idx >= 0 and idx < _action_log.size():
+		_action_log[idx]["evidence_uid"] = evidence_uid
+
+
+## Gets the full action log (server-only).
+func get_action_log() -> Array[Dictionary]:
+	if not _is_server:
+		push_warning("[CultistManager] Only server can get full action log")
+		return []
+	return _action_log.duplicate()
+
+
+## Gets the number of logged actions.
+func get_action_count() -> int:
+	return _action_log.size()
+
+
+## Gets actions for a specific player.
+func get_player_actions(player_id: int) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for entry in _action_log:
+		if entry.player_id == player_id:
+			result.append(entry)
+	return result
+
+
+## Sends the action log to all clients at match end.
+## Call this when the match ends to reveal Cultist actions.
+func send_action_log_to_clients() -> void:
+	if not _is_server:
+		return
+
+	# Convert to serializable format
+	var log_data: Array = []
+	for entry: Dictionary in _action_log:
+		log_data.append(entry)
+
+	# Send to all clients
+	_receive_action_log.rpc(log_data)
+
+	# Also emit locally for server player
+	action_log_received.emit(log_data)
+
+	print("[CultistManager] Sent action log (%d entries) to all clients" % _action_log.size())
+
+
+func _get_ability_name(ability_type: int) -> String:
+	# CultistEnums.AbilityType mapping
+	match ability_type:
+		0: return "NONE"
+		1: return "EMF_SPOOF"
+		2: return "TEMPERATURE_MANIPULATION"
+		3: return "PRISM_INTERFERENCE"
+		4: return "AURA_DISRUPTION"
+		5: return "PROVOCATION"
+		6: return "FALSE_ALARM"
+		7: return "EQUIPMENT_SABOTAGE"
+		_: return "UNKNOWN"
 
 
 # --- RPC Methods ---
@@ -248,6 +360,13 @@ func _receive_role(role: int) -> void:
 	var is_cultist := role == 1  # CultistEnums.PlayerRole.CULTIST
 	local_role_received.emit(role, is_cultist)
 	print("[CultistManager] Received role: %s" % ("CULTIST" if is_cultist else "INVESTIGATOR"))
+
+
+## Receives action log from server at match end.
+@rpc("authority", "call_remote", "reliable")
+func _receive_action_log(log_data: Array) -> void:
+	action_log_received.emit(log_data)
+	print("[CultistManager] Received action log with %d entries" % log_data.size())
 
 
 # --- Internal Methods ---

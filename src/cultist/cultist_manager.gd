@@ -42,6 +42,12 @@ signal vote_complete(target_id: int, is_majority: bool)
 ## Emitted when voting timer updates.
 signal vote_timer_updated(seconds_remaining: float)
 
+## Emitted when a Cultist is discovered via vote.
+signal cultist_voted_discovered(player_id: int)
+
+## Emitted when an innocent player is wrongly voted out.
+signal innocent_voted_out(player_id: int)
+
 # --- Constants ---
 
 ## Minimum players required for a match
@@ -113,6 +119,9 @@ var _voting_timer: float = 0.0
 
 ## List of alive player IDs for current vote
 var _alive_players: Array[int] = []
+
+## Discovered Cultist IDs (discovery_state = DISCOVERED)
+var _discovered_cultists: Array[int] = []
 
 
 func _ready() -> void:
@@ -285,6 +294,7 @@ func reset() -> void:
 	_current_votes.clear()
 	_voting_timer = 0.0
 	_alive_players.clear()
+	_discovered_cultists.clear()
 	print("[CultistManager] Reset for new match")
 
 
@@ -610,6 +620,108 @@ func _end_voting() -> void:
 		top_target if is_majority else -1, is_majority, top_count, majority_threshold
 	])
 
+	# Process the vote result if majority was reached
+	if is_majority:
+		_process_vote_result(top_target)
+
+
+# --- Vote Result Processing ---
+
+
+## Processes the result of a successful vote.
+## Called when majority votes a player out.
+func _process_vote_result(target_id: int) -> void:
+	if not _is_server:
+		return
+
+	if is_cultist(target_id):
+		# Correct vote - Cultist discovered!
+		_discover_cultist(target_id)
+	else:
+		# Wrong vote - innocent voted out
+		_innocent_voted(target_id)
+
+
+## Marks a Cultist as discovered.
+## Called when players correctly vote out a Cultist.
+func _discover_cultist(player_id: int) -> void:
+	if player_id in _discovered_cultists:
+		return  # Already discovered
+
+	_discovered_cultists.append(player_id)
+
+	# Emit signals
+	cultist_discovered.emit(player_id)
+	cultist_voted_discovered.emit(player_id)
+
+	# Notify all clients
+	_notify_cultist_discovered.rpc(player_id)
+
+	# Award bonus win condition progress to investigators
+	_award_discovery_bonus()
+
+	print("[CultistManager] Cultist %d discovered! Match continues." % player_id)
+
+
+## Handles an innocent player being voted out.
+## Results in immediate Cultist victory.
+func _innocent_voted(player_id: int) -> void:
+	# Emit signal
+	innocent_voted_out.emit(player_id)
+
+	# Notify all clients
+	_notify_innocent_voted.rpc(player_id)
+
+	# Trigger Cultist win via MatchManager
+	_trigger_cultist_win_innocent_voted()
+
+	print("[CultistManager] Innocent player %d voted out! Cultist wins." % player_id)
+
+
+## Awards bonus win progress to investigators for correct discovery.
+func _award_discovery_bonus() -> void:
+	if has_node("/root/MatchManager"):
+		var match_manager := get_node("/root/MatchManager")
+		if match_manager.has_method("add_investigator_progress"):
+			# Award 25% bonus progress for correct identification
+			match_manager.add_investigator_progress(0.25)
+		elif "investigator_progress" in match_manager:
+			match_manager.investigator_progress = minf(
+				1.0, match_manager.investigator_progress + 0.25
+			)
+
+
+## Triggers Cultist victory due to innocent being voted out.
+func _trigger_cultist_win_innocent_voted() -> void:
+	if has_node("/root/MatchManager"):
+		var match_manager := get_node("/root/MatchManager")
+		if match_manager.has_method("trigger_cultist_win"):
+			match_manager.trigger_cultist_win("INNOCENT_VOTED_OUT")
+
+
+## Returns true if the given Cultist has been discovered.
+func is_cultist_discovered(player_id: int) -> bool:
+	return player_id in _discovered_cultists
+
+
+## Returns the discovery state for a player.
+## Returns HIDDEN for non-Cultists, DISCOVERED for discovered Cultists.
+func get_discovery_state(player_id: int) -> int:
+	const DiscoveryState := CultistEnums.DiscoveryState
+	if not is_cultist(player_id):
+		return DiscoveryState.HIDDEN
+	if player_id in _discovered_cultists:
+		return DiscoveryState.DISCOVERED
+	return DiscoveryState.HIDDEN
+
+
+## Returns true if the Cultist can use abilities.
+## Discovered Cultists cannot use abilities.
+func can_cultist_use_abilities(player_id: int) -> bool:
+	if not is_cultist(player_id):
+		return false
+	return not is_cultist_discovered(player_id)
+
 
 # --- RPC Methods ---
 
@@ -698,6 +810,21 @@ func _notify_vote_timer(seconds_remaining: float) -> void:
 func _notify_vote_complete(target_id: int, is_majority: bool) -> void:
 	_voting_in_progress = false
 	vote_complete.emit(target_id, is_majority)
+
+
+## Server notifies clients that a Cultist was discovered.
+@rpc("authority", "call_local", "reliable")
+func _notify_cultist_discovered(player_id: int) -> void:
+	if player_id not in _discovered_cultists:
+		_discovered_cultists.append(player_id)
+	cultist_discovered.emit(player_id)
+	cultist_voted_discovered.emit(player_id)
+
+
+## Server notifies clients that an innocent was voted out.
+@rpc("authority", "call_local", "reliable")
+func _notify_innocent_voted(player_id: int) -> void:
+	innocent_voted_out.emit(player_id)
 
 
 # --- Internal Methods ---

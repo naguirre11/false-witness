@@ -190,6 +190,8 @@ func _connect_signals() -> void:
 		var cultist_manager := get_node("/root/CultistManager")
 		if cultist_manager.has_signal("local_role_received"):
 			cultist_manager.local_role_received.connect(_on_local_role_received)
+		if cultist_manager.has_signal("ability_charges_changed"):
+			cultist_manager.ability_charges_changed.connect(_on_ability_charges_changed)
 
 
 func _on_game_state_changed(_old_state: int, _new_state: int) -> void:
@@ -199,6 +201,24 @@ func _on_game_state_changed(_old_state: int, _new_state: int) -> void:
 func _on_local_role_received(_role: int, is_cultist: bool) -> void:
 	_is_cultist = is_cultist
 	visible = _is_cultist
+
+
+func _on_ability_charges_changed(
+	_player_id: int, ability_type: int, current: int, maximum: int
+) -> void:
+	if not _is_cultist:
+		return
+
+	# Update the specific ability slot's charges display
+	for slot in _ability_slots:
+		var slot_type: int = slot.get_meta("ability_type")
+		if slot_type == ability_type:
+			var vbox: VBoxContainer = slot.get_child(0) as VBoxContainer
+			if vbox:
+				var charges_label: Label = vbox.get_node_or_null("ChargesLabel")
+				if charges_label:
+					charges_label.text = "%d/%d" % [current, maximum]
+			break
 
 
 func _handle_keybind(keycode: int) -> void:

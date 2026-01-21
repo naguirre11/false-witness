@@ -18,6 +18,9 @@ signal roles_assigned(role_map: Dictionary)
 ## Emitted when a Cultist uses an ability.
 signal ability_used(player_id: int, ability_type: String, location: Vector3)
 
+## Emitted when ability charges change (for UI updates).
+signal ability_charges_changed(player_id: int, ability_type: int, current: int, maximum: int)
+
 ## Emitted when a Cultist is discovered via vote.
 signal cultist_discovered(player_id: int)
 
@@ -123,12 +126,49 @@ var _alive_players: Array[int] = []
 ## Discovered Cultist IDs (discovery_state = DISCOVERED)
 var _discovered_cultists: Array[int] = []
 
+## Server-authoritative ability charges by player.
+## Structure: {player_id: {ability_type: current_charges}}
+var _player_ability_charges: Dictionary = {}
+
+## Maximum charges for each ability type (loaded from CultistEnums).
+var _ability_max_charges: Dictionary = {}
+
 
 func _ready() -> void:
 	# Connect to game state changes
 	if EventBus:
 		EventBus.game_state_changed.connect(_on_game_state_changed)
+
+	# Initialize max charges from CultistEnums
+	_init_ability_max_charges()
 	print("[CultistManager] Initialized")
+
+
+func _init_ability_max_charges() -> void:
+	# Load default max charges for each ability type
+	_ability_max_charges = {
+		CultistEnums.AbilityType.EMF_SPOOF: CultistEnums.get_default_charges(
+			CultistEnums.AbilityType.EMF_SPOOF
+		),
+		CultistEnums.AbilityType.TEMPERATURE_MANIPULATION: CultistEnums.get_default_charges(
+			CultistEnums.AbilityType.TEMPERATURE_MANIPULATION
+		),
+		CultistEnums.AbilityType.PRISM_INTERFERENCE: CultistEnums.get_default_charges(
+			CultistEnums.AbilityType.PRISM_INTERFERENCE
+		),
+		CultistEnums.AbilityType.AURA_DISRUPTION: CultistEnums.get_default_charges(
+			CultistEnums.AbilityType.AURA_DISRUPTION
+		),
+		CultistEnums.AbilityType.PROVOCATION: CultistEnums.get_default_charges(
+			CultistEnums.AbilityType.PROVOCATION
+		),
+		CultistEnums.AbilityType.FALSE_ALARM: CultistEnums.get_default_charges(
+			CultistEnums.AbilityType.FALSE_ALARM
+		),
+		CultistEnums.AbilityType.EQUIPMENT_SABOTAGE: CultistEnums.get_default_charges(
+			CultistEnums.AbilityType.EQUIPMENT_SABOTAGE
+		),
+	}
 
 
 func _process(delta: float) -> void:
@@ -295,6 +335,7 @@ func reset() -> void:
 	_voting_timer = 0.0
 	_alive_players.clear()
 	_discovered_cultists.clear()
+	_player_ability_charges.clear()
 	print("[CultistManager] Reset for new match")
 
 
@@ -386,6 +427,131 @@ func send_action_log_to_clients() -> void:
 	action_log_received.emit(log_data)
 
 	print("[CultistManager] Sent action log (%d entries) to all clients" % _action_log.size())
+
+
+# --- Ability Charge API (Server-Authoritative) ---
+
+
+## Initializes ability charges for a Cultist player.
+## Called when roles are assigned.
+func _init_player_charges(player_id: int) -> void:
+	if not _is_server:
+		return
+
+	var charges: Dictionary = {}
+	for ability_type in _ability_max_charges.keys():
+		charges[ability_type] = _ability_max_charges[ability_type]
+
+	_player_ability_charges[player_id] = charges
+	print("[CultistManager] Initialized charges for player %d" % player_id)
+
+
+## Gets the current charges for an ability (server-only for full data).
+## Returns -1 if player not found or not a Cultist.
+func get_ability_charges(player_id: int, ability_type: int) -> int:
+	if player_id not in _player_ability_charges:
+		return -1
+	var charges: Dictionary = _player_ability_charges[player_id]
+	if ability_type not in charges:
+		return -1
+	return charges[ability_type]
+
+
+## Gets all ability charges for a player.
+## Returns empty dictionary if player not found.
+func get_all_ability_charges(player_id: int) -> Dictionary:
+	if player_id not in _player_ability_charges:
+		return {}
+	return _player_ability_charges[player_id].duplicate()
+
+
+## Gets the maximum charges for an ability type.
+func get_ability_max_charges(ability_type: int) -> int:
+	if ability_type not in _ability_max_charges:
+		return 0
+	return _ability_max_charges[ability_type]
+
+
+## Checks if a Cultist can use an ability (has charges and not discovered).
+func can_use_ability(player_id: int, ability_type: int) -> bool:
+	if not is_cultist(player_id):
+		return false
+	if is_cultist_discovered(player_id):
+		return false
+	return get_ability_charges(player_id, ability_type) > 0
+
+
+## Consumes a charge for an ability (server-only).
+## Returns true if charge was consumed, false if no charges available.
+func consume_ability_charge(player_id: int, ability_type: int) -> bool:
+	if not _is_server:
+		push_warning("[CultistManager] Only server can consume charges")
+		return false
+
+	var current := get_ability_charges(player_id, ability_type)
+	if current <= 0:
+		return false
+
+	# Decrement charge
+	_player_ability_charges[player_id][ability_type] = current - 1
+	var new_count: int = _player_ability_charges[player_id][ability_type]
+	var max_count: int = _ability_max_charges.get(ability_type, 0)
+
+	# Emit signal
+	ability_charges_changed.emit(player_id, ability_type, new_count, max_count)
+
+	# Sync to client
+	_sync_ability_charges(player_id, ability_type, new_count, max_count)
+
+	print("[CultistManager] Consumed charge: player=%d, ability=%d, remaining=%d" % [
+		player_id, ability_type, new_count
+	])
+
+	return true
+
+
+## Syncs ability charges to a specific client.
+func _sync_ability_charges(
+	player_id: int, ability_type: int, current: int, maximum: int
+) -> void:
+	if not _is_server:
+		return
+
+	# Send to the Cultist player
+	if player_id == multiplayer.get_unique_id():
+		# Local server player
+		_receive_ability_charges(ability_type, current, maximum)
+	else:
+		# Remote player
+		_receive_ability_charges.rpc_id(player_id, ability_type, current, maximum)
+
+
+## Sends all ability charges to a Cultist (called after role assignment).
+func send_initial_charges_to_cultist(player_id: int) -> void:
+	if not _is_server:
+		return
+
+	if player_id not in _player_ability_charges:
+		return
+
+	var charges: Dictionary = _player_ability_charges[player_id]
+	for ability_type in charges.keys():
+		var current: int = charges[ability_type]
+		var maximum: int = _ability_max_charges.get(ability_type, 0)
+		_sync_ability_charges(player_id, ability_type, current, maximum)
+
+
+## Client-side request to use an ability.
+## Server validates and either allows or denies.
+func request_use_ability(ability_type: int, position: Vector3) -> void:
+	if _is_server:
+		# Server processes directly
+		var player_id := multiplayer.get_unique_id()
+		_process_ability_use_request(player_id, ability_type, position)
+	else:
+		# Send request to server
+		var pos_dict := {"x": position.x, "y": position.y, "z": position.z}
+		_request_ability_use.rpc_id(1, ability_type, pos_dict)
 
 
 func _get_ability_name(ability_type: int) -> String:
@@ -758,6 +924,94 @@ func _receive_action_log(log_data: Array) -> void:
 	print("[CultistManager] Received action log with %d entries" % log_data.size())
 
 
+## Receives ability charge update from server.
+@rpc("authority", "call_remote", "reliable")
+func _receive_ability_charges(ability_type: int, current: int, maximum: int) -> void:
+	# Update local tracking for UI
+	ability_charges_changed.emit(
+		multiplayer.get_unique_id(), ability_type, current, maximum
+	)
+	print("[CultistManager] Received charge update: ability=%d, charges=%d/%d" % [
+		ability_type, current, maximum
+	])
+
+
+## Client request to use an ability.
+@rpc("any_peer", "call_remote", "reliable")
+func _request_ability_use(ability_type: int, position_dict: Dictionary) -> void:
+	if not _is_server:
+		return
+
+	var caller_id := multiplayer.get_remote_sender_id()
+	var position := Vector3(
+		position_dict.get("x", 0.0),
+		position_dict.get("y", 0.0),
+		position_dict.get("z", 0.0)
+	)
+	_process_ability_use_request(caller_id, ability_type, position)
+
+
+## Server processes ability use request.
+func _process_ability_use_request(player_id: int, ability_type: int, position: Vector3) -> void:
+	if not _is_server:
+		return
+
+	# Validate player is a Cultist
+	if not is_cultist(player_id):
+		_notify_ability_denied.rpc_id(player_id, ability_type, "Not a Cultist")
+		return
+
+	# Check if discovered
+	if is_cultist_discovered(player_id):
+		_notify_ability_denied.rpc_id(player_id, ability_type, "Cultist discovered")
+		return
+
+	# Check charges
+	var charges := get_ability_charges(player_id, ability_type)
+	if charges <= 0:
+		_notify_ability_denied.rpc_id(player_id, ability_type, "No charges remaining")
+		return
+
+	# Consume charge and approve
+	consume_ability_charge(player_id, ability_type)
+
+	# Notify client that ability is approved
+	if player_id == multiplayer.get_unique_id():
+		_receive_ability_approved(ability_type, position)
+	else:
+		var pos_dict := {"x": position.x, "y": position.y, "z": position.z}
+		_notify_ability_approved.rpc_id(player_id, ability_type, pos_dict)
+
+	# Log the ability use
+	log_ability_use(player_id, ability_type, position)
+
+
+## Server notifies client that ability was approved.
+@rpc("authority", "call_remote", "reliable")
+func _notify_ability_approved(ability_type: int, position_dict: Dictionary) -> void:
+	var position := Vector3(
+		position_dict.get("x", 0.0),
+		position_dict.get("y", 0.0),
+		position_dict.get("z", 0.0)
+	)
+	_receive_ability_approved(ability_type, position)
+
+
+## Local handler for approved ability use.
+func _receive_ability_approved(ability_type: int, position: Vector3) -> void:
+	# Emit signal for ability execution
+	if EventBus:
+		EventBus.cultist_ability_used.emit(_get_ability_name(ability_type))
+
+	print("[CultistManager] Ability %d approved at %v" % [ability_type, position])
+
+
+## Server notifies client that ability was denied.
+@rpc("authority", "call_remote", "reliable")
+func _notify_ability_denied(ability_type: int, reason: String) -> void:
+	push_warning("[CultistManager] Ability %d denied: %s" % [ability_type, reason])
+
+
 ## Client request to call emergency vote.
 @rpc("any_peer", "call_remote", "reliable")
 func _request_emergency_vote(caller_id: int) -> void:
@@ -891,6 +1145,10 @@ func _distribute_roles_to_clients(role_map: Dictionary) -> void:
 	# Get allied Cultist IDs for 2-Cultist variant
 	var cultist_list := _cultist_ids.duplicate()
 
+	# Initialize ability charges for each Cultist on server
+	for cultist_id in _cultist_ids:
+		_init_player_charges(cultist_id)
+
 	for player_id in role_map.keys():
 		var role: int = role_map[player_id]
 
@@ -901,12 +1159,16 @@ func _distribute_roles_to_clients(role_map: Dictionary) -> void:
 			if role == 1:  # CULTIST
 				var allies := cultist_list.filter(func(id): return id != player_id)
 				_receive_cultist_data(_entity_type, _entity_evidence, allies)
+				# Send initial charges
+				send_initial_charges_to_cultist(player_id)
 		else:
 			# Remote player
 			_receive_role.rpc_id(player_id, role)
 			if role == 1:  # CULTIST
 				var allies := cultist_list.filter(func(id): return id != player_id)
 				_receive_cultist_data.rpc_id(player_id, _entity_type, _entity_evidence, allies)
+				# Send initial charges after small delay to ensure role is received first
+				send_initial_charges_to_cultist(player_id)
 
 
 func _get_player_ids() -> Array[int]:

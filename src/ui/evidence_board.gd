@@ -14,6 +14,7 @@ extends Control
 # --- Constants ---
 
 const EVIDENCE_SLOT_SCENE := "res://scenes/ui/evidence_slot.tscn"
+const EVIDENCE_DETAIL_POPUP_SCENE := "res://scenes/ui/evidence_detail_popup.tscn"
 
 # Evidence types organized by category for display order
 const EVIDENCE_BY_CATEGORY: Dictionary = {
@@ -44,6 +45,7 @@ const EVIDENCE_BY_CATEGORY: Dictionary = {
 var _evidence_slots: Dictionary = {}  # EvidenceType -> EvidenceSlot
 var _is_visible: bool = false
 var _force_visible: bool = false  # True during deliberation
+var _detail_popup: EvidenceDetailPopup = null
 
 # --- Nodes ---
 
@@ -208,13 +210,36 @@ func _on_game_state_changed(old_state: int, new_state: int) -> void:
 
 
 func _on_slot_pressed(evidence_type: EvidenceEnums.EvidenceType) -> void:
-	# Log slot press for debugging (collector details shown via tooltip)
-	print("[EvidenceBoard] Slot pressed: %s" % EvidenceEnums.get_evidence_name(evidence_type))
+	# Show detail popup for this evidence slot
+	_show_detail_popup(evidence_type)
 
 
 func _on_verification_changed(evidence: Evidence) -> void:
 	# Re-update the slot to reflect new verification state
 	_update_slot_for_evidence(evidence)
+
+
+# --- Detail Popup ---
+
+
+func _show_detail_popup(evidence_type: EvidenceEnums.EvidenceType) -> void:
+	# Create popup if it doesn't exist
+	if not _detail_popup:
+		var popup_scene: PackedScene = load(EVIDENCE_DETAIL_POPUP_SCENE)
+		if not popup_scene:
+			push_error("[EvidenceBoard] Failed to load detail popup scene")
+			return
+		_detail_popup = popup_scene.instantiate()
+		add_child(_detail_popup)
+
+	# Get the evidence for this slot (may be null if uncollected)
+	var slot: EvidenceSlot = _evidence_slots.get(evidence_type)
+	var evidence: Evidence = null
+	if slot:
+		evidence = slot.get_evidence()
+
+	# Show popup with evidence details
+	_detail_popup.show_evidence(evidence_type, evidence)
 
 
 # --- Helpers ---

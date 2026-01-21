@@ -75,6 +75,26 @@ const AURA_COLOR_BEHAVIOR_MAP: Dictionary = {
 }
 
 
+# --- Hunt Behavior Observation Data ---
+
+## Observation data structure for tracking behavior during hunts.
+## Keys: observer_id, timestamp, speed, aggression, targeting, category
+const OBSERVATION_KEYS: Array[String] = [
+	"observer_id", "timestamp", "speed", "aggression", "targeting", "category",
+]
+
+
+## Speed thresholds for behavior categorization.
+const SPEED_SLOW := 2.0  ## Below this = PASSIVE/TERRITORIAL
+const SPEED_MEDIUM := 4.0  ## Below this = MOBILE, above = AGGRESSIVE
+
+
+## Aggression thresholds (0.0 to 1.0 scale).
+const AGGRESSION_LOW := 0.3  ## Below this = PASSIVE
+const AGGRESSION_MEDIUM := 0.6  ## Below this = TERRITORIAL/MOBILE
+const AGGRESSION_HIGH := 0.8  ## Above this = AGGRESSIVE
+
+
 # --- State ---
 
 ## Tracks observed hunt behavior by entity. Key = "entity_name", Value = BehaviorCategory
@@ -82,6 +102,16 @@ var _observed_behaviors: Dictionary = {}
 
 ## Tracks equipment evidence UIDs that have been flagged as conflicting.
 var _conflicting_evidence: Dictionary = {}  # UID -> conflict_description
+
+## Accumulated hunt observations from multiple observers.
+## Key = hunt_id (generated per hunt), Value = Array of observation dicts.
+var _hunt_observations: Dictionary = {}
+
+## Current active hunt ID (set when hunt starts, cleared when hunt ends).
+var _current_hunt_id: String = ""
+
+## Counter for generating hunt IDs.
+var _hunt_counter: int = 0
 
 
 func _ready() -> void:
@@ -97,6 +127,14 @@ func _connect_signals() -> void:
 		if evidence_manager.has_signal("evidence_cleared"):
 			evidence_manager.evidence_cleared.connect(_on_evidence_cleared)
 
+	# Connect to EventBus for hunt state tracking
+	var event_bus := _get_event_bus()
+	if event_bus:
+		if event_bus.has_signal("hunt_started"):
+			event_bus.hunt_started.connect(_on_hunt_started)
+		if event_bus.has_signal("hunt_ended"):
+			event_bus.hunt_ended.connect(_on_hunt_ended)
+
 
 # --- Public API ---
 
@@ -107,6 +145,111 @@ func record_hunt_behavior(behavior: BehaviorCategory) -> void:
 	_observed_behaviors["last_observed"] = behavior
 	# Check for conflicts with existing equipment evidence
 	_check_all_equipment_conflicts()
+
+
+# --- Public API: Hunt Observation Tracking ---
+
+
+## Starts tracking a new hunt. Call when a hunt begins.
+## Returns the hunt ID for this hunt.
+func start_hunt_tracking() -> String:
+	_hunt_counter += 1
+	_current_hunt_id = "hunt_%d_%d" % [Time.get_ticks_msec(), _hunt_counter]
+	_hunt_observations[_current_hunt_id] = []
+	print("[ConflictDetector] Started tracking hunt: %s" % _current_hunt_id)
+	return _current_hunt_id
+
+
+## Records a player's observation of entity behavior during a hunt.
+## This is the primary method for tracking hunt behavior.
+## @param observer_id: Player peer ID who observed the behavior.
+## @param speed: Observed entity movement speed (units per second).
+## @param aggression: Observed aggression level (0.0 to 1.0).
+## @param targeting: Was the entity targeting players? (true/false).
+## @param location: Where the observation was made.
+func record_observation(
+	observer_id: int,
+	speed: float,
+	aggression: float,
+	targeting: bool,
+	location: Vector3 = Vector3.ZERO
+) -> void:
+	if _current_hunt_id.is_empty():
+		# Auto-start tracking if not already started
+		start_hunt_tracking()
+
+	var category := _categorize_behavior(speed, aggression, targeting)
+	var observation := {
+		"observer_id": observer_id,
+		"timestamp": Time.get_ticks_msec() / 1000.0,
+		"speed": speed,
+		"aggression": aggression,
+		"targeting": targeting,
+		"category": category,
+		"location": location,
+	}
+
+	_hunt_observations[_current_hunt_id].append(observation)
+	print(
+		"[ConflictDetector] Observation from player %d: speed=%.1f, aggression=%.1f, cat=%s"
+		% [observer_id, speed, aggression, _behavior_to_name(category)]
+	)
+
+
+## Ends the current hunt tracking and creates HUNT_BEHAVIOR evidence.
+## Returns the Evidence resource if created, null if no observations.
+func end_hunt_tracking() -> Evidence:
+	if _current_hunt_id.is_empty():
+		return null
+
+	var observations: Array = _hunt_observations.get(_current_hunt_id, [])
+	if observations.is_empty():
+		_current_hunt_id = ""
+		return null
+
+	# Aggregate observations to determine final behavior category
+	var final_category := _aggregate_observations(observations)
+
+	# Store as the last observed behavior for conflict checking
+	_observed_behaviors["last_observed"] = final_category
+
+	# Create HUNT_BEHAVIOR evidence
+	var evidence := _create_hunt_behavior_evidence(observations, final_category)
+
+	# Clear hunt state
+	var ended_hunt_id := _current_hunt_id
+	_current_hunt_id = ""
+	print("[ConflictDetector] Ended hunt tracking: %s with %d observers" % [
+		ended_hunt_id, _get_unique_observers(observations).size()
+	])
+
+	# Check for conflicts with existing equipment evidence
+	_check_all_equipment_conflicts()
+
+	return evidence
+
+
+## Returns the current hunt ID, or empty string if no hunt active.
+func get_current_hunt_id() -> String:
+	return _current_hunt_id
+
+
+## Returns true if a hunt is currently being tracked.
+func is_hunt_active() -> bool:
+	return not _current_hunt_id.is_empty()
+
+
+## Returns observations for a specific hunt.
+func get_hunt_observations(hunt_id: String) -> Array:
+	return _hunt_observations.get(hunt_id, []).duplicate()
+
+
+## Returns the number of unique observers for the current hunt.
+func get_current_observer_count() -> int:
+	if _current_hunt_id.is_empty():
+		return 0
+	var observations: Array = _hunt_observations.get(_current_hunt_id, [])
+	return _get_unique_observers(observations).size()
 
 
 ## Gets the last observed behavior category.
@@ -154,6 +297,8 @@ func clear_conflict(evidence_uid: String) -> void:
 func clear_all() -> void:
 	_observed_behaviors.clear()
 	_conflicting_evidence.clear()
+	_hunt_observations.clear()
+	_current_hunt_id = ""
 
 
 # --- Internal: Conflict Detection ---
@@ -285,6 +430,178 @@ func _check_and_flag_conflict(evidence: Evidence) -> void:
 				evidence.set_verification_meta("conflict_description", desc)
 
 
+# --- Internal: Hunt Behavior Tracking ---
+
+
+## Categorizes observed behavior based on measured values.
+func _categorize_behavior(speed: float, aggression: float, targeting: bool) -> int:
+	# High aggression + targeting = AGGRESSIVE
+	if aggression >= AGGRESSION_HIGH and targeting:
+		return BehaviorCategory.AGGRESSIVE
+
+	# High aggression without targeting = TERRITORIAL (defends area)
+	if aggression >= AGGRESSION_MEDIUM and not targeting:
+		return BehaviorCategory.TERRITORIAL
+
+	# Fast speed + low aggression = MOBILE (roaming)
+	if speed >= SPEED_MEDIUM and aggression < AGGRESSION_MEDIUM:
+		return BehaviorCategory.MOBILE
+
+	# Slow speed + low aggression = PASSIVE
+	if speed < SPEED_SLOW and aggression < AGGRESSION_LOW:
+		return BehaviorCategory.PASSIVE
+
+	# Medium speed with medium aggression = TERRITORIAL
+	if speed < SPEED_MEDIUM and aggression >= AGGRESSION_LOW:
+		return BehaviorCategory.TERRITORIAL
+
+	# Default to MOBILE for unpredictable movement patterns
+	return BehaviorCategory.MOBILE
+
+
+## Aggregates multiple observations to determine the consensus behavior.
+## Multiple observers strengthen the evidence quality.
+func _aggregate_observations(observations: Array) -> int:
+	if observations.is_empty():
+		return BehaviorCategory.PASSIVE
+
+	# Count votes for each category
+	var category_votes: Dictionary = {
+		BehaviorCategory.PASSIVE: 0,
+		BehaviorCategory.AGGRESSIVE: 0,
+		BehaviorCategory.TERRITORIAL: 0,
+		BehaviorCategory.MOBILE: 0,
+	}
+
+	for obs: Dictionary in observations:
+		var cat: int = obs.get("category", BehaviorCategory.PASSIVE)
+		category_votes[cat] = category_votes.get(cat, 0) + 1
+
+	# Find the category with most votes
+	var max_votes: int = 0
+	var winning_category: int = BehaviorCategory.PASSIVE
+	for cat: int in category_votes:
+		if category_votes[cat] > max_votes:
+			max_votes = category_votes[cat]
+			winning_category = cat
+
+	return winning_category
+
+
+## Creates HUNT_BEHAVIOR evidence from aggregated observations.
+func _create_hunt_behavior_evidence(observations: Array, category: int) -> Evidence:
+	var evidence_manager := _get_evidence_manager()
+	if not evidence_manager:
+		return null
+
+	# Get unique observers
+	var observer_ids := _get_unique_observers(observations)
+	if observer_ids.is_empty():
+		return null
+
+	# Use first observer's location, or average of all locations
+	var avg_location := _get_average_location(observations)
+
+	# Determine quality based on observer count
+	# Multiple observers = STRONG, single observer = WEAK
+	var quality: EvidenceEnums.ReadingQuality
+	if observer_ids.size() >= 2:
+		quality = EvidenceEnums.ReadingQuality.STRONG
+	else:
+		quality = EvidenceEnums.ReadingQuality.WEAK
+
+	# Collect evidence through EvidenceManager
+	var evidence: Evidence = evidence_manager.collect_evidence(
+		EvidenceEnums.EvidenceType.HUNT_BEHAVIOR,
+		observer_ids[0],  # Primary collector is first observer
+		avg_location,
+		quality,
+		"HuntObservation"
+	)
+
+	if evidence:
+		# Add all observers as witnesses
+		for observer_id: int in observer_ids:
+			evidence.add_witness(observer_id)
+
+		# Store behavior metadata
+		evidence.set_metadata("behavior_category", category)
+		evidence.set_metadata("behavior_name", _behavior_to_name(category))
+		evidence.set_metadata("observer_count", observer_ids.size())
+		evidence.set_metadata("observation_count", observations.size())
+
+		# Store averaged measurement data
+		var avg_speed := _get_average_speed(observations)
+		var avg_aggression := _get_average_aggression(observations)
+		evidence.set_metadata("avg_speed", avg_speed)
+		evidence.set_metadata("avg_aggression", avg_aggression)
+
+		# Multiple observers = auto-verified (UNFALSIFIABLE trust level)
+		if observer_ids.size() >= 2:
+			evidence.verify()
+			print(
+				"[ConflictDetector] Created VERIFIED hunt behavior evidence: %s (%d observers)"
+				% [_behavior_to_name(category), observer_ids.size()]
+			)
+		else:
+			print(
+				"[ConflictDetector] Created hunt behavior evidence: %s (single observer)"
+				% _behavior_to_name(category)
+			)
+
+	return evidence
+
+
+## Returns unique observer IDs from observations.
+func _get_unique_observers(observations: Array) -> Array[int]:
+	var observers: Array[int] = []
+	for obs: Dictionary in observations:
+		var observer_id: int = obs.get("observer_id", 0)
+		if observer_id != 0 and observer_id not in observers:
+			observers.append(observer_id)
+	return observers
+
+
+## Returns the average location from observations.
+func _get_average_location(observations: Array) -> Vector3:
+	if observations.is_empty():
+		return Vector3.ZERO
+
+	var total := Vector3.ZERO
+	var count: int = 0
+	for obs: Dictionary in observations:
+		var loc: Vector3 = obs.get("location", Vector3.ZERO)
+		if loc != Vector3.ZERO:
+			total += loc
+			count += 1
+
+	if count == 0:
+		return Vector3.ZERO
+	return total / float(count)
+
+
+## Returns the average speed from observations.
+func _get_average_speed(observations: Array) -> float:
+	if observations.is_empty():
+		return 0.0
+
+	var total: float = 0.0
+	for obs: Dictionary in observations:
+		total += obs.get("speed", 0.0)
+	return total / float(observations.size())
+
+
+## Returns the average aggression from observations.
+func _get_average_aggression(observations: Array) -> float:
+	if observations.is_empty():
+		return 0.0
+
+	var total: float = 0.0
+	for obs: Dictionary in observations:
+		total += obs.get("aggression", 0.0)
+	return total / float(observations.size())
+
+
 # --- Signal Handlers ---
 
 
@@ -300,10 +617,26 @@ func _on_evidence_cleared() -> void:
 	clear_all()
 
 
+func _on_hunt_started() -> void:
+	# Auto-start hunt tracking when a hunt begins
+	start_hunt_tracking()
+
+
+func _on_hunt_ended() -> void:
+	# Auto-end hunt tracking and create evidence when hunt ends
+	end_hunt_tracking()
+
+
 # --- Helpers ---
 
 
 func _get_evidence_manager() -> Node:
 	if has_node("/root/EvidenceManager"):
 		return get_node("/root/EvidenceManager")
+	return null
+
+
+func _get_event_bus() -> Node:
+	if has_node("/root/EventBus"):
+		return get_node("/root/EventBus")
 	return null

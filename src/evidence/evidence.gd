@@ -43,6 +43,11 @@ extends Resource
 ## Keys: "single_witness", "late_verification", "different_operators"
 @export var verification_metadata: Dictionary = {}
 
+@export_group("Evidence-Specific Metadata")
+## Stores evidence-specific data (prism_shape, aura_color, behavior_category, etc.)
+## This is separate from verification_metadata which tracks verification context.
+@export var evidence_metadata: Dictionary = {}
+
 @export_group("Metadata")
 @export var uid: String = ""  ## Unique identifier for network sync
 @export var notes: String = ""  ## Optional player notes
@@ -180,6 +185,16 @@ func set_verification_meta(key: String, value: Variant) -> void:
 	verification_metadata[key] = value
 
 
+## Gets an evidence-specific metadata value (e.g., prism_shape, aura_color).
+func get_metadata(key: String, default_value: Variant = null) -> Variant:
+	return evidence_metadata.get(key, default_value)
+
+
+## Sets an evidence-specific metadata value.
+func set_metadata(key: String, value: Variant) -> void:
+	evidence_metadata[key] = value
+
+
 ## Serializes this evidence for network transmission.
 func to_network_dict() -> Dictionary:
 	return {
@@ -203,6 +218,7 @@ func to_network_dict() -> Dictionary:
 		"result_witness_id": result_witness_id,
 		"sabotage_flags": sabotage_flags,
 		"verification_metadata": verification_metadata,
+		"evidence_metadata": evidence_metadata,
 	}
 
 
@@ -243,6 +259,7 @@ static func from_network_dict(data: Dictionary) -> Evidence:
 	# Sabotage and metadata
 	evidence.sabotage_flags = data.get("sabotage_flags", {})
 	evidence.verification_metadata = data.get("verification_metadata", {})
+	evidence.evidence_metadata = data.get("evidence_metadata", {})
 	return evidence
 
 

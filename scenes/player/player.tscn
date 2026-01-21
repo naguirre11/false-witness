@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://cvqx7h6hxjm5r"]
+[gd_scene load_steps=8 format=3 uid="uid://cvqx7h6hxjm5r"]
 
 [ext_resource type="Script" path="res://src/player/player_controller.gd" id="1_player"]
 [ext_resource type="Script" path="res://src/interaction/interaction_manager.gd" id="2_interaction"]
 [ext_resource type="Script" path="res://src/equipment/equipment_manager.gd" id="3_equipment"]
 [ext_resource type="Script" path="res://src/core/audio/footstep_manager.gd" id="4_footstep"]
+[ext_resource type="Script" path="res://src/ui/player_name_label_3d.gd" id="5_name_label"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.35
@@ -45,5 +46,10 @@ equipment_holder_path = NodePath("../Head/EquipmentHolder")
 
 [node name="FootstepManager" type="Node" parent="."]
 script = ExtResource("4_footstep")
+
+[node name="NameLabel" type="Node3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+script = ExtResource("5_name_label")
 
 [connection signal="footstep" from="." to="FootstepManager" method="on_footstep"]

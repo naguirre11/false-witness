@@ -89,12 +89,19 @@ var footstep_timer: float = 0.0
 var input_enabled: bool = true
 var is_local_player: bool = true
 
+## Network peer ID for this player.
+var player_id: int = -1
+
+## Display name for this player.
+var player_name: String = ""
+
 # --- Node References ---
 
 var _head: Node3D
 var _camera: Camera3D
 var _collision_shape: CollisionShape3D
 var _footstep_player: AudioStreamPlayer3D
+var _name_label: Node3D
 var _original_head_y: float = 0.0
 var _target_height: float = 1.8
 
@@ -116,6 +123,7 @@ func _setup_nodes() -> void:
 
 	_collision_shape = get_node_or_null("CollisionShape3D")
 	_footstep_player = get_node_or_null("FootstepPlayer")
+	_name_label = get_node_or_null("NameLabel")
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -353,6 +361,36 @@ func set_local_player(is_local: bool) -> void:
 	is_local_player = is_local
 	if is_local and input_enabled:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+	# Hide name label for local player (can't see own head)
+	if _name_label:
+		_name_label.visible = not is_local
+
+
+## Sets the network peer ID for this player.
+func set_player_id(id: int) -> void:
+	player_id = id
+	# Update name label with player ID for discovery tracking
+	if _name_label and _name_label.has_method("set_player_id"):
+		_name_label.set_player_id(id)
+
+
+## Sets the display name for this player.
+func set_player_name(display_name: String) -> void:
+	player_name = display_name
+	# Update name label
+	if _name_label and _name_label.has_method("set_player_name"):
+		_name_label.set_player_name(display_name)
+
+
+## Gets the network peer ID for this player.
+func get_player_id() -> int:
+	return player_id
+
+
+## Gets the display name for this player.
+func get_player_name() -> String:
+	return player_name
 
 
 ## Enables or disables player input.

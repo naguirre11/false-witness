@@ -8,11 +8,21 @@ extends CanvasLayer
 
 const SLOT_COUNT := 3
 
+## Base scale for voice icon when transmitting.
+const VOICE_ICON_BASE_SCALE := 1.0
+
+## Max scale when voice icon pulses with amplitude.
+const VOICE_ICON_PULSE_SCALE := 1.3
+
+## Speed of pulse animation.
+const VOICE_PULSE_SPEED := 8.0
+
 # --- State ---
 
 var _is_voice_active: bool = false
 var _current_phase: String = "Investigation"
 var _active_slot: int = 0
+var _voice_pulse_time: float = 0.0
 
 # --- Node References ---
 
@@ -46,20 +56,33 @@ func _setup_signals() -> void:
 		if event_bus.has_signal("player_became_echo"):
 			event_bus.player_became_echo.connect(_on_player_became_echo)
 
-	# TODO: Connect to voice system when implemented
+	# Connect to VoiceManager for voice indicator
+	if has_node("/root/VoiceManager"):
+		var voice_manager := get_node("/root/VoiceManager")
+
+		if voice_manager.has_signal("voice_state_changed"):
+			voice_manager.voice_state_changed.connect(_on_voice_state_changed)
+
 	# TODO: Connect to InteractionManager for prompts
+
+
+func _process(delta: float) -> void:
+	# Animate voice icon pulse when transmitting
+	if _is_voice_active and _voice_icon.visible:
+		_voice_pulse_time += delta * VOICE_PULSE_SPEED
+		var pulse: float = (sin(_voice_pulse_time) + 1.0) / 2.0  # 0.0 to 1.0
+		var voice_scale: float = lerpf(VOICE_ICON_BASE_SCALE, VOICE_ICON_PULSE_SCALE, pulse)
+		_voice_icon.scale = Vector2(voice_scale, voice_scale)
+
+		# Also modulate color intensity
+		var color_pulse: float = lerpf(0.8, 1.0, pulse)
+		_voice_icon.modulate = Color(color_pulse, color_pulse, color_pulse, 1.0)
 
 
 func _input(event: InputEvent) -> void:
 	# Toggle evidence board with Tab
 	if event.is_action_pressed("toggle_evidence_board"):
 		_toggle_evidence_board()
-
-	# Placeholder: Toggle voice with V key (for testing)
-	if event is InputEventKey:
-		var key_event: InputEventKey = event
-		if key_event.keycode == KEY_V and key_event.pressed and not key_event.echo:
-			_toggle_voice_indicator()
 
 
 # --- Public API ---
@@ -140,9 +163,9 @@ func set_timer(time_remaining: float, phase_name: String) -> void:
 # --- Signal Handlers ---
 
 
-func _on_game_state_changed(old_state: int, new_state: int) -> void:
+func _on_game_state_changed(_old_state: int, new_state: int) -> void:
 	# Show/hide HUD based on game state
-	# GameState enum values: NONE=0, LOBBY=1, SETUP=2, INVESTIGATION=3, HUNT=4, DELIBERATION=5, RESULTS=6
+	# GameState: NONE=0, LOBBY=1, SETUP=2, INVESTIGATION=3, HUNT=4, DELIBERATION=5, RESULTS=6
 	match new_state:
 		0, 1, 6:  # NONE, LOBBY, RESULTS
 			visible = false
@@ -173,6 +196,12 @@ func _on_player_became_echo(player_id: int) -> void:
 		show_death_overlay()
 
 
+func _on_voice_state_changed(state: int) -> void:
+	# VoiceState: IDLE=0, TRANSMITTING=1, RECEIVING=2
+	var is_transmitting: bool = (state == 1)
+	_set_voice_active(is_transmitting)
+
+
 # --- Internal Methods ---
 
 
@@ -201,10 +230,19 @@ func _toggle_evidence_board() -> void:
 		print("[HUD] Evidence board toggle requested")
 
 
-func _toggle_voice_indicator() -> void:
-	_is_voice_active = not _is_voice_active
-	_voice_icon.visible = _is_voice_active
-	_voice_label.visible = _is_voice_active
+func _set_voice_active(active: bool) -> void:
+	_is_voice_active = active
+	_voice_icon.visible = active
+	_voice_label.visible = active
+
+	if active:
+		# Reset pulse animation
+		_voice_pulse_time = 0.0
+		_voice_label.text = "Transmitting..."
+	else:
+		# Reset icon scale and color when not transmitting
+		_voice_icon.scale = Vector2.ONE
+		_voice_icon.modulate = Color.WHITE
 
 
 func _get_local_player_id() -> int:

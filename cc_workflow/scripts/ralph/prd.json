@@ -156,7 +156,7 @@
         "gdlint scenes/ passes"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "High tension area; common entity spawn"
     },
     {
@@ -173,7 +173,7 @@
         "gdlint scenes/ passes"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "Scary location; limited escape routes"
     },
     {

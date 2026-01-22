@@ -96,6 +96,17 @@ signal entity_manifestation_ended
 ## Emitted when entity state changes.
 signal entity_state_changed(old_state: int, new_state: int)
 
+## Emitted when entity performs a physical interaction (door, light, throw).
+## interaction_type is ManifestationEnums.InteractionType.
+signal entity_interaction(interaction_type: int, position: Vector3)
+
+## Emitted when entity creates a temperature zone (freezing temperature evidence).
+## position is center of zone, temperature is degrees Celsius, radius in meters.
+signal entity_temperature_zone(position: Vector3, temperature: float, radius: float)
+
+## Emitted when ghost writing is triggered by entity.
+signal ghost_writing_triggered(position: Vector3)
+
 # --- Sanity Signals ---
 
 ## Emitted when a player's sanity changes.
@@ -243,7 +254,13 @@ signal lobby_host_changed(new_host_peer_id: int, new_host_username: String)
 ## Emitted when an object is thrown by entity (server-authoritative).
 ## node_path: Path to ThrowableObject, direction: throw direction,
 ## force: throw force, entity_type: type of entity, position: starting position.
-signal object_thrown(node_path: String, direction: Vector3, force: float, entity_type: String, position: Vector3)
+signal object_thrown(
+	node_path: String,
+	direction: Vector3,
+	force: float,
+	entity_type: String,
+	position: Vector3
+)
 
 ## Emitted when a thrown object lands.
 signal object_landed(node_path: String, position: Vector3)
@@ -256,7 +273,13 @@ signal door_manipulated(node_path: String, action: String, entity_type: String, 
 ## Emitted when a light flickers or changes state (server-authoritative).
 ## node_path: Path to FlickeringLight, action: "start"/"end",
 ## pattern: FlickerPattern enum, entity_type: type of entity, position: light position.
-signal light_flickered(node_path: String, action: String, pattern: int, entity_type: String, position: Vector3)
+signal light_flickered(
+	node_path: String,
+	action: String,
+	pattern: int,
+	entity_type: String,
+	position: Vector3
+)
 
 ## Emitted when a light is broken/exploded.
 signal light_broken(node_path: String, entity_type: String, position: Vector3)
@@ -264,7 +287,12 @@ signal light_broken(node_path: String, entity_type: String, position: Vector3)
 ## Emitted when a surface manifestation is created (server-authoritative).
 ## node_path: Path to SurfaceManifestation, manifestation_type: ManifestationType enum,
 ## entity_type: type of entity, position: manifestation position.
-signal surface_manifestation_created(node_path: String, manifestation_type: int, entity_type: String, position: Vector3)
+signal surface_manifestation_created(
+	node_path: String,
+	manifestation_type: int,
+	entity_type: String,
+	position: Vector3
+)
 
 ## Emitted when a player reports a phenomenon.
 ## report_data: Dictionary with phenomenon_type, location, reporter_id, timestamp, etc.

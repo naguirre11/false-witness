@@ -61,6 +61,25 @@ const VOICE_TURN_SPEED: float = 3.0
 ## Volume of dormant ambient sound (0-1).
 @export_range(0.0, 1.0, 0.1) var dormant_sound_volume: float = 0.3
 
+@export_group("Active Phase Behavior")
+## Interval between roaming destination updates (seconds).
+@export_range(5.0, 30.0, 1.0) var roam_interval: float = 15.0
+
+## Interval between interaction attempts (seconds).
+@export_range(10.0, 60.0, 5.0) var interaction_interval: float = 30.0
+
+## Interval between manifestation attempts (seconds).
+@export_range(20.0, 120.0, 10.0) var manifestation_interval: float = 45.0
+
+## Interval between temperature zone updates in favorite room (seconds).
+@export_range(5.0, 30.0, 5.0) var temperature_interval: float = 10.0
+
+## Chance (0-1) to interact with a ghost writing book when nearby.
+@export_range(0.0, 1.0, 0.1) var ghost_writing_chance: float = 0.7
+
+## Detection range for ghost writing books (meters).
+@export_range(1.0, 10.0, 0.5) var ghost_writing_range: float = 5.0
+
 # --- State Variables ---
 
 ## Whether Listener is currently in dormant (listening) phase.
@@ -83,6 +102,26 @@ var _voice_source_position: Vector3 = Vector3.ZERO
 
 ## ID of last speaker that triggered interest.
 var _last_speaker_id: int = -1
+
+# --- Active Phase Behavior Timers ---
+
+## Timer for roaming destination updates.
+var _roam_timer: float = 0.0
+
+## Timer for interaction attempts (door slam, light flicker, etc).
+var _interaction_timer: float = 0.0
+
+## Timer for manifestation attempts.
+var _manifestation_timer_listener: float = 0.0
+
+## Timer for temperature zone updates.
+var _temperature_timer: float = 0.0
+
+## Current roam target position (for navigation).
+var _roam_target: Vector3 = Vector3.ZERO
+
+## Whether currently roaming to a target.
+var _is_roaming: bool = false
 
 
 func _ready() -> void:
@@ -217,8 +256,39 @@ func _process_active_behavior(delta: float) -> void:
 	if _voice_hunt_cooldown > 0:
 		_voice_hunt_cooldown -= delta
 
-	# Standard roaming behavior during active phase
-	# (Movement handled by Entity base class)
+	# --- Roaming behavior ---
+	_roam_timer -= delta
+	if _roam_timer <= 0:
+		_roam_timer = roam_interval + randf_range(-5.0, 5.0)  # Add randomness
+		_select_new_roam_target()
+
+	# Navigate toward roam target
+	if _is_roaming and _roam_target != Vector3.ZERO:
+		navigate_to(_roam_target)
+		if is_navigation_finished():
+			_is_roaming = false
+
+	# --- Interactions (door slam, light flicker, object throw) ---
+	_interaction_timer -= delta
+	if _interaction_timer <= 0:
+		_interaction_timer = interaction_interval + randf_range(-10.0, 10.0)
+		_attempt_interaction()
+
+	# --- Manifestation attempts ---
+	_manifestation_timer_listener -= delta
+	if _manifestation_timer_listener <= 0:
+		_manifestation_timer_listener = manifestation_interval + randf_range(-15.0, 15.0)
+		_attempt_manifestation()
+
+	# --- Temperature zone in favorite room ---
+	if _is_in_favorite_room():
+		_temperature_timer -= delta
+		if _temperature_timer <= 0:
+			_temperature_timer = temperature_interval
+			_create_freezing_zone()
+
+	# --- Ghost writing book detection ---
+	_check_ghost_writing_books()
 
 
 func _process_hunting_behavior(delta: float) -> void:
@@ -321,6 +391,178 @@ func _process_voice_reaction(delta: float) -> void:
 func _check_behavioral_tell() -> bool:
 	# Tell triggers through _start_voice_reaction, not here
 	return false
+
+
+# --- Active Phase Behaviors ---
+
+
+## Selects a new roaming target position.
+## Prefers favorite room but occasionally roams elsewhere.
+func _select_new_roam_target() -> void:
+	# 60% chance to roam toward favorite room, 40% random
+	var go_to_favorite := randf() < 0.6 and _favorite_room != ""
+
+	if go_to_favorite:
+		_roam_target = _get_favorite_room_position()
+	else:
+		_roam_target = _get_random_roam_position()
+
+	if _roam_target != Vector3.ZERO:
+		_is_roaming = true
+
+
+## Gets a position within the favorite room.
+func _get_favorite_room_position() -> Vector3:
+	# Try to find evidence spawn points in favorite room
+	var spawn_points := get_tree().get_nodes_in_group("evidence_spawn_points")
+	var room_points: Array[Node3D] = []
+
+	for point in spawn_points:
+		if point is Node3D:
+			if point.get("room_name") == _favorite_room:
+				room_points.append(point as Node3D)
+
+	if not room_points.is_empty():
+		var chosen: Node3D = room_points[randi() % room_points.size()]
+		return chosen.global_position
+
+	# Fallback: use current position with small offset
+	return global_position + Vector3(randf_range(-2, 2), 0, randf_range(-2, 2))
+
+
+## Gets a random roaming position on the navigation mesh.
+func _get_random_roam_position() -> Vector3:
+	# Try to find any evidence spawn point
+	var spawn_points := get_tree().get_nodes_in_group("evidence_spawn_points")
+	if not spawn_points.is_empty():
+		var point: Node = spawn_points[randi() % spawn_points.size()]
+		if point is Node3D:
+			return (point as Node3D).global_position
+
+	# Fallback: random offset from current position
+	return global_position + Vector3(randf_range(-10, 10), 0, randf_range(-10, 10))
+
+
+## Attempts to perform a physical interaction.
+func _attempt_interaction() -> void:
+	# Find interactable objects nearby
+	var interaction_range := 5.0
+
+	# Try doors first
+	var doors := get_tree().get_nodes_in_group("doors")
+	for door in doors:
+		if door is Node3D:
+			var dist: float = global_position.distance_to((door as Node3D).global_position)
+			if dist < interaction_range:
+				if door.has_method("entity_interact"):
+					door.entity_interact(self)
+					_emit_interaction(ManifestationEnums.InteractionType.DOOR_SLAM)
+					print("[Listener] Interacted with door")
+					return
+
+	# Try light switches
+	var switches := get_tree().get_nodes_in_group("light_switches")
+	for switch in switches:
+		if switch is Node3D:
+			var dist: float = global_position.distance_to((switch as Node3D).global_position)
+			if dist < interaction_range:
+				if switch.has_method("toggle"):
+					switch.toggle()
+					_emit_interaction(ManifestationEnums.InteractionType.LIGHT_FLICKER)
+					print("[Listener] Flickered light")
+					return
+
+	# Try throwable objects
+	var throwables := get_tree().get_nodes_in_group("throwables")
+	for throwable in throwables:
+		if throwable is Node3D:
+			var dist: float = global_position.distance_to((throwable as Node3D).global_position)
+			if dist < interaction_range:
+				if throwable.has_method("entity_throw"):
+					var direction := Vector3(randf_range(-1, 1), 0.5, randf_range(-1, 1)).normalized()
+					throwable.entity_throw(direction * 5.0)
+					_emit_interaction(ManifestationEnums.InteractionType.OBJECT_THROW)
+					print("[Listener] Threw object")
+					return
+
+
+## Emits an interaction signal via EventBus.
+func _emit_interaction(interaction_type: ManifestationEnums.InteractionType) -> void:
+	if EventBus and EventBus.has_signal("entity_interaction"):
+		EventBus.entity_interaction.emit(interaction_type, global_position)
+
+
+## Attempts to manifest visually.
+func _attempt_manifestation() -> void:
+	# Only manifest if cooldown allows
+	if _manifestation_cooldown_timer > 0:
+		return
+
+	# 30% chance to manifest on each attempt
+	if randf() > 0.3:
+		return
+
+	# Start manifestation via base class
+	var started := start_manifestation()
+	if started:
+		print("[Listener] Manifestation started")
+
+
+## Checks if entity is currently in the favorite room.
+func _is_in_favorite_room() -> bool:
+	if _favorite_room == "":
+		return false
+
+	# Check nearby evidence spawn points for room name
+	var spawn_points := get_tree().get_nodes_in_group("evidence_spawn_points")
+	for point in spawn_points:
+		if not point is Node3D:
+			continue
+		var dist: float = global_position.distance_to((point as Node3D).global_position)
+		if dist < 3.0 and point.get("room_name") == _favorite_room:
+			return true
+
+	return false
+
+
+## Creates a freezing temperature zone at current position.
+func _create_freezing_zone() -> void:
+	# Emit EventBus signal for temperature zone
+	if EventBus and EventBus.has_signal("entity_temperature_zone"):
+		EventBus.entity_temperature_zone.emit(global_position, -10.0, 5.0)  # -10°C, 5m radius
+		print("[Listener] Created freezing zone at %v" % global_position)
+
+
+## Checks for nearby ghost writing books and potentially writes in them.
+func _check_ghost_writing_books() -> void:
+	var books := get_tree().get_nodes_in_group("ghost_writing_books")
+	for book in books:
+		if not book is Node3D:
+			continue
+
+		var dist: float = global_position.distance_to((book as Node3D).global_position)
+		if dist > ghost_writing_range:
+			continue
+
+		# Check if book is placed and ready for writing
+		if not book.has_method("is_placed") or not book.is_placed():
+			continue
+
+		# Check if already written in
+		if book.has_method("has_writing") and book.has_writing():
+			continue
+
+		# Chance-based writing
+		if randf() < ghost_writing_chance:
+			if book.has_method("entity_write"):
+				book.entity_write(self)
+				print("[Listener] Wrote in ghost writing book")
+
+				# Emit evidence signal
+				if EventBus and EventBus.has_signal("ghost_writing_triggered"):
+					EventBus.ghost_writing_triggered.emit(
+						(book as Node3D).global_position
+					)
 
 
 # --- Helper Methods ---

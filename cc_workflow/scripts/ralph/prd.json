@@ -1,507 +1,613 @@
 {
   "project": "False Witness",
-  "branchName": "ralph/networking-voice",
-  "description": "Steam integration and proximity-based voice chat system",
-  "tickets": ["FW-013", "FW-014"],
+  "branchName": "ralph/map-entity",
+  "description": "First playable map (Abandoned House) and voice-reactive Listener entity",
+  "tickets": ["FW-071", "FW-046"],
   "userStories": [
     {
-      "id": "FW-013-01",
-      "title": "Install and configure GodotSteam plugin",
-      "description": "Set up GodotSteam GDExtension in project",
+      "id": "FW-071-01",
+      "title": "Create map scene structure",
+      "description": "Set up abandoned house scene hierarchy",
       "acceptanceCriteria": [
-        "GodotSteam plugin installed in addons/godotsteam/",
-        "GDExtension configured in project.godot",
-        "Steam app ID configured (use 480 for testing)",
-        "Plugin loads without errors on startup",
-        "$GODOT --headless --import succeeds",
-        "gdlint src/ passes"
+        "Create scenes/maps/abandoned_house.tscn (Node3D root)",
+        "Add Rooms (Node3D) container for room geometry",
+        "Add Spawns (Node3D) for player spawn points",
+        "Add Lighting (Node3D) for light fixtures",
+        "Add Navigation (NavigationRegion3D) for entity pathfinding",
+        "Add EvidencePoints (Node3D) for evidence spawn markers",
+        "Scene loads without errors",
+        "gdlint scenes/ passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "GodotSteam already in addons/. App ID 480 is Spacewar (testing)."
+      "notes": "File: scenes/maps/abandoned_house.tscn"
     },
     {
-      "id": "FW-013-02",
-      "title": "Enhance SteamManager initialization",
-      "description": "Update existing SteamManager with full Steam API init",
+      "id": "FW-071-02",
+      "title": "Design floor plan layout",
+      "description": "Create 8-12 room layout document",
       "acceptanceCriteria": [
-        "SteamManager calls Steam.steamInit() on _ready()",
-        "Check Steam.isSteamRunning() before operations",
-        "Store local Steam ID: Steam.getSteamID()",
-        "Store local display name: Steam.getPersonaName()",
-        "Emit steam_initialized signal on success",
-        "Handle init failure gracefully",
-        "gdlint src/ passes"
+        "Create docs/maps/abandoned_house_layout.md",
+        "Document room names and purposes",
+        "Include floor plan sketch (ASCII or image)",
+        "Mark entry points, connecting hallways",
+        "Mark hiding spot locations",
+        "Mark evidence spawn areas per room",
+        "gdlint passes (no code changes)"
       ],
       "priority": 2,
-      "passes": true,
-      "notes": "File: src/core/steam_manager.gd already exists"
+      "passes": false,
+      "notes": "Design first, build second. Small house: living room, kitchen, 2 bedrooms, bathroom, basement, attic."
     },
     {
-      "id": "FW-013-03",
-      "title": "Implement Steam lobby creation",
-      "description": "Create private Steam lobbies",
+      "id": "FW-071-03",
+      "title": "Create entrance/spawn area",
+      "description": "Build starting area where players spawn",
       "acceptanceCriteria": [
-        "Add create_lobby(max_members: int) method to SteamManager",
-        "Use Steam.createLobby(Steam.LOBBY_TYPE_FRIENDS_ONLY, max_members)",
-        "Connect to lobby_created callback",
-        "Generate 6-character lobby code from lobby ID",
-        "Store lobby_id when created",
-        "Emit lobby_created(lobby_id, code) signal",
-        "gdlint src/ passes"
+        "Create entryway room with door to outside",
+        "Add 4-6 spawn points (Position3D markers)",
+        "Spawn points spaced to avoid overlap",
+        "Clear sightlines for initial team gathering",
+        "Door to rest of house clearly visible",
+        "gdlint scenes/ passes"
       ],
       "priority": 3,
-      "passes": true,
-      "notes": "Private lobbies only per GDD (LOBBY_TYPE_FRIENDS_ONLY)"
+      "passes": false,
+      "notes": "Players spawn here at investigation start"
     },
     {
-      "id": "FW-013-04",
-      "title": "Implement lobby code system",
-      "description": "Generate and decode lobby codes",
+      "id": "FW-071-04",
+      "title": "Build living room",
+      "description": "Main gathering room of house",
       "acceptanceCriteria": [
-        "Add _generate_lobby_code(lobby_id: int) -> String method",
-        "Code is 6 alphanumeric characters",
-        "Add _decode_lobby_code(code: String) -> int method",
-        "Code encodes lobby ID reversibly",
-        "Store code<->ID mapping for session",
-        "gdlint src/ passes"
+        "Create living room with CSG or imported mesh",
+        "PS1/PS2 aesthetic: low-poly, simple textures",
+        "Add placeholder furniture: couch, chairs, TV stand",
+        "Connect to entryway and kitchen",
+        "Add light fixture with switch",
+        "Add 2-3 evidence spawn points",
+        "gdlint scenes/ passes"
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "Base36 encoding of lobby ID works well for 6 chars"
+      "passes": false,
+      "notes": "Low-poly models; vertex colors or 256x256 textures"
     },
     {
-      "id": "FW-013-05",
-      "title": "Implement Steam lobby joining",
-      "description": "Join lobby by code or direct ID",
+      "id": "FW-071-05",
+      "title": "Build kitchen",
+      "description": "Kitchen with interactable elements",
       "acceptanceCriteria": [
-        "Add join_lobby(code: String) method",
-        "Decode code to lobby ID",
-        "Call Steam.joinLobby(lobby_id)",
-        "Connect to lobby_joined callback",
-        "Emit lobby_joined(lobby_id) signal on success",
-        "Emit lobby_join_failed(reason) on failure",
-        "gdlint src/ passes"
+        "Create kitchen room geometry",
+        "Add placeholder furniture: cabinets, table, chairs",
+        "Add interactable drawers/cabinets (open/close)",
+        "Connect to living room and hallway",
+        "Add light fixture with switch",
+        "Add 2-3 evidence spawn points",
+        "gdlint scenes/ passes"
       ],
       "priority": 5,
-      "passes": true,
-      "notes": "Handle invalid codes gracefully"
+      "passes": false,
+      "notes": "Cabinets can be opened for hiding spots"
     },
     {
-      "id": "FW-013-06",
-      "title": "Implement lobby member tracking",
-      "description": "Track who is in the lobby",
+      "id": "FW-071-06",
+      "title": "Build master bedroom",
+      "description": "Large bedroom with hiding spots",
       "acceptanceCriteria": [
-        "Connect to lobby_chat_update callback for joins/leaves",
-        "Maintain _lobby_members: Array[int] of Steam IDs",
-        "Add get_lobby_members() -> Array method",
-        "Add get_member_name(steam_id: int) -> String method",
-        "Emit lobby_member_joined(steam_id) signal",
-        "Emit lobby_member_left(steam_id) signal",
-        "gdlint src/ passes"
+        "Create bedroom room geometry",
+        "Add placeholder furniture: bed, dresser, nightstands",
+        "Add closet with interactable door (hiding spot)",
+        "Add under-bed hiding spot",
+        "Connect to upstairs hallway",
+        "Add light fixture with switch",
+        "Add 2-3 evidence spawn points",
+        "gdlint scenes/ passes"
       ],
       "priority": 6,
-      "passes": true,
-      "notes": "Steam provides persona names for all members"
+      "passes": false,
+      "notes": "Primary hiding location for hunts"
     },
     {
-      "id": "FW-013-07",
-      "title": "Implement lobby data sync",
-      "description": "Sync game settings via lobby data",
+      "id": "FW-071-07",
+      "title": "Build second bedroom",
+      "description": "Smaller bedroom",
       "acceptanceCriteria": [
-        "Add set_lobby_data(key: String, value: String) method",
-        "Add get_lobby_data(key: String) -> String method",
-        "Sync host settings: map, max_players, game_mode",
-        "Connect to lobby_data_update callback",
-        "Emit lobby_data_changed(key, value) signal",
-        "gdlint src/ passes"
+        "Create smaller bedroom geometry",
+        "Add placeholder furniture: bed, desk",
+        "Add closet hiding spot",
+        "Connect to upstairs hallway",
+        "Add light fixture with switch",
+        "Add 2 evidence spawn points",
+        "gdlint scenes/ passes"
       ],
       "priority": 7,
-      "passes": true,
-      "notes": "Lobby data is key-value strings visible to all members"
+      "passes": false,
+      "notes": "Potential entity favorite room"
     },
     {
-      "id": "FW-013-08",
-      "title": "Integrate Steam lobby with LobbyManager",
-      "description": "Connect SteamManager to existing LobbyManager",
+      "id": "FW-071-08",
+      "title": "Build bathroom",
+      "description": "Bathroom with mirror interactions",
       "acceptanceCriteria": [
-        "LobbyManager.create_lobby() calls SteamManager.create_lobby()",
-        "LobbyManager.join_lobby() calls SteamManager.join_lobby()",
-        "Steam lobby members map to LobbyManager slots",
-        "Ready state synced via lobby member data",
-        "Host determined by lobby owner",
-        "gdlint src/ passes"
+        "Create bathroom room geometry",
+        "Add placeholder fixtures: toilet, sink, bathtub/shower",
+        "Add mirror (potential manifestation surface)",
+        "Add light fixture with switch",
+        "Connect to upstairs hallway",
+        "Add 2 evidence spawn points",
+        "gdlint scenes/ passes"
       ],
       "priority": 8,
-      "passes": true,
-      "notes": "LobbyManager is at src/core/lobby_manager.gd"
+      "passes": false,
+      "notes": "Mirror can show writing manifestations"
     },
     {
-      "id": "FW-013-09",
-      "title": "Implement Steam friend invite",
-      "description": "Invite Steam friends to lobby",
+      "id": "FW-071-09",
+      "title": "Build basement",
+      "description": "Dark basement area",
       "acceptanceCriteria": [
-        "Add invite_friend(steam_id: int) method",
-        "Use Steam.inviteUserToLobby(lobby_id, steam_id)",
-        "Steam overlay handles invite UI",
-        "Invited players see invite notification",
-        "Accept invite joins lobby automatically",
-        "gdlint src/ passes"
+        "Create basement room geometry",
+        "Stairs from main floor",
+        "Darker lighting than rest of house",
+        "Add storage items, shelving",
+        "Add 1-2 hiding spots behind shelves",
+        "Add light fixture with switch (dim)",
+        "Add 3-4 evidence spawn points",
+        "gdlint scenes/ passes"
       ],
       "priority": 9,
-      "passes": true,
-      "notes": "Steam overlay provides invite picker UI"
+      "passes": false,
+      "notes": "High tension area; common entity spawn"
     },
     {
-      "id": "FW-013-10",
-      "title": "Implement Steam Networking Sockets P2P",
-      "description": "Use Steam relay for P2P connections",
+      "id": "FW-071-10",
+      "title": "Build attic",
+      "description": "Cramped attic space",
       "acceptanceCriteria": [
-        "Initialize Steam Networking Sockets API",
-        "Add connect_to_player(steam_id: int) method",
-        "Use Steam relay when direct P2P fails",
-        "Handle connection state callbacks",
-        "Emit peer_connected(steam_id) signal",
-        "Emit peer_disconnected(steam_id) signal",
-        "gdlint src/ passes"
+        "Create attic room geometry with sloped ceiling",
+        "Access via pull-down ladder or stairs",
+        "Cramped, limited visibility",
+        "Add storage boxes, old furniture",
+        "No light fixture (flashlight required)",
+        "Add 2-3 evidence spawn points",
+        "gdlint scenes/ passes"
       ],
       "priority": 10,
-      "passes": true,
-      "notes": "Steam relay provides NAT traversal fallback. Using legacy P2P API with allowP2PPacketRelay(true)"
+      "passes": false,
+      "notes": "Scary location; limited escape routes"
     },
     {
-      "id": "FW-013-11",
-      "title": "Integrate Steam P2P with NetworkManager",
-      "description": "Use Steam networking as NetworkManager backend",
+      "id": "FW-071-11",
+      "title": "Build connecting hallways",
+      "description": "Hallways connecting rooms",
       "acceptanceCriteria": [
-        "NetworkManager detects Steam availability",
-        "When Steam available, use Steam P2P instead of ENet",
-        "Peer IDs map to Steam IDs",
-        "RPC calls route through Steam networking",
-        "Fallback to ENet if Steam unavailable",
-        "gdlint src/ passes"
+        "Create main floor hallway connecting rooms",
+        "Create upstairs hallway connecting bedrooms/bathroom",
+        "Add staircase between floors",
+        "Hallways narrow for tension",
+        "Add light fixtures in hallways",
+        "gdlint scenes/ passes"
       ],
       "priority": 11,
-      "passes": true,
-      "notes": "NetworkManager at src/core/network_manager.gd has dual backend. Already implemented."
+      "passes": false,
+      "notes": "Tight corridors per GDD guidance"
     },
     {
-      "id": "FW-013-12",
-      "title": "Implement Steam Rich Presence",
-      "description": "Show game state in Steam friends list",
+      "id": "FW-071-12",
+      "title": "Create Door interactable",
+      "description": "Doors that open/close",
       "acceptanceCriteria": [
-        "Add update_rich_presence(state: String) method",
-        "Update presence when game state changes",
-        "Show: 'In Lobby (4/6)', 'Investigating', 'In Hunt', etc.",
-        "Friends can see current status",
-        "'Join Game' button appears for friends",
-        "gdlint src/ passes"
+        "Create scenes/interactables/door.tscn extending Interactable",
+        "Add open/close animation (rotate on hinge)",
+        "Toggle state on interaction",
+        "Door blocks line of sight when closed",
+        "Sound effect on open/close",
+        "Network sync door state",
+        "gdlint src/ scenes/ passes"
       ],
       "priority": 12,
-      "passes": true,
-      "notes": "Uses Steam.setRichPresence()"
+      "passes": false,
+      "notes": "Files: scenes/interactables/door.tscn, src/interactables/door.gd"
     },
     {
-      "id": "FW-013-13",
-      "title": "Handle join requests from friends list",
-      "description": "Process 'Join Game' requests",
+      "id": "FW-071-13",
+      "title": "Create LightSwitch interactable",
+      "description": "Light switches to toggle room lights",
       "acceptanceCriteria": [
-        "Connect to join_requested callback",
-        "Extract lobby ID from join request",
-        "Auto-join lobby when request received",
-        "Handle case when lobby is full",
-        "Handle case when game already in progress",
-        "gdlint src/ passes"
+        "Create scenes/interactables/light_switch.tscn",
+        "Toggle linked light fixture on interaction",
+        "Visual indicator of switch state",
+        "Sound effect on toggle",
+        "Network sync light state",
+        "gdlint src/ scenes/ passes"
       ],
       "priority": 13,
-      "passes": true,
-      "notes": "Friends click 'Join Game' in Steam overlay"
+      "passes": false,
+      "notes": "Files: scenes/interactables/light_switch.tscn, src/interactables/light_switch.gd"
     },
     {
-      "id": "FW-013-14",
-      "title": "Implement graceful Steam fallback",
-      "description": "Work without Steam for development/LAN",
+      "id": "FW-071-14",
+      "title": "Set up HidingSpot nodes",
+      "description": "Configure hiding spots in each room",
       "acceptanceCriteria": [
-        "Check Steam.isSteamRunning() on init",
-        "If Steam unavailable, use ENet-only mode",
-        "LobbyManager works with manual IP entry",
-        "Log warning about limited functionality",
-        "All game features work without Steam (except friends)",
-        "gdlint src/ passes"
+        "Add HidingSpot nodes at closet locations",
+        "Add HidingSpot nodes under beds",
+        "Add HidingSpot nodes behind large furniture",
+        "Configure each spot's capacity (1 player)",
+        "Configure detection difficulty per spot",
+        "gdlint scenes/ passes"
       ],
       "priority": 14,
-      "passes": true,
-      "notes": "Important for development and testing"
+      "passes": false,
+      "notes": "HidingSpot class exists in src/entity/hiding_spot.gd"
     },
     {
-      "id": "FW-013-15",
-      "title": "Write integration tests for Steam lobby",
-      "description": "Test Steam lobby functionality",
+      "id": "FW-071-15",
+      "title": "Create NavigationMesh for entity pathfinding",
+      "description": "Bake NavMesh for entity AI movement",
       "acceptanceCriteria": [
-        "Create tests/integration/test_steam_lobby.gd",
-        "Test lobby code generation and decoding",
-        "Test lobby data sync",
-        "Test fallback behavior when Steam unavailable",
-        "Mock Steam API for testing",
-        "All tests pass",
-        "gdlint tests/ passes"
+        "Configure NavigationRegion3D in map scene",
+        "Set agent radius appropriate for entity size",
+        "Bake navigation mesh covering all walkable areas",
+        "Exclude furniture, walls from walkable area",
+        "Doors create navigation links when open",
+        "Test pathfinding between rooms",
+        "gdlint scenes/ passes"
       ],
       "priority": 15,
-      "passes": true,
-      "notes": "File: tests/integration/test_steam_lobby.gd"
+      "passes": false,
+      "notes": "Entity uses NavigationAgent3D for movement"
     },
     {
-      "id": "FW-014-01",
-      "title": "Create VoiceManager autoload",
-      "description": "Central manager for voice chat",
+      "id": "FW-071-16",
+      "title": "Configure evidence spawn points",
+      "description": "Place markers for evidence spawning",
       "acceptanceCriteria": [
-        "Create src/voice/voice_manager.gd extending Node",
-        "Register as autoload VoiceManager in project.godot",
-        "Add is_voice_enabled: bool property",
-        "Add local_muted: bool property",
-        "Add voice_mode: VoiceMode enum (PUSH_TO_TALK, OPEN_MIC)",
-        "Emit voice_state_changed signal",
-        "$GODOT --headless --import succeeds",
-        "gdlint src/ passes"
+        "Create EvidenceSpawnPoint marker scene",
+        "Place 2-4 markers per room",
+        "Markers indicate valid evidence placement",
+        "Configure evidence type compatibility per point",
+        "Export spawn points for EntityManager access",
+        "gdlint src/ scenes/ passes"
       ],
       "priority": 16,
-      "passes": true,
-      "notes": "File: src/voice/voice_manager.gd"
+      "passes": false,
+      "notes": "EntityManager randomly selects spawn points"
     },
     {
-      "id": "FW-014-02",
-      "title": "Create VoiceMode and VoiceState enums",
-      "description": "Define voice chat modes and states",
+      "id": "FW-071-17",
+      "title": "Configure entity favorite room",
+      "description": "Designate room as entity's preferred location",
       "acceptanceCriteria": [
-        "Create src/voice/voice_enums.gd with class_name VoiceEnums",
-        "Add VoiceMode enum: PUSH_TO_TALK, OPEN_MIC, DISABLED",
-        "Add VoiceState enum: IDLE, TRANSMITTING, RECEIVING",
-        "Add default key binding for push-to-talk (V key)",
+        "Add 'favorite_room' property to map configuration",
+        "Export room list for random selection",
+        "Entity spawns and returns to favorite room",
+        "Evidence more likely in favorite room",
+        "UI can reference favorite room for clues",
         "gdlint src/ passes"
       ],
       "priority": 17,
-      "passes": true,
-      "notes": "File: src/voice/voice_enums.gd"
+      "passes": false,
+      "notes": "Random selection at match start"
     },
     {
-      "id": "FW-014-03",
-      "title": "Initialize Steam Voice API",
-      "description": "Set up Steam voice recording",
+      "id": "FW-071-18",
+      "title": "Add ambient lighting",
+      "description": "Base lighting for atmosphere",
       "acceptanceCriteria": [
-        "Call Steam.startVoiceRecording() when voice enabled",
-        "Call Steam.stopVoiceRecording() when disabled",
-        "Set voice sample rate to optimal value",
-        "Handle voice initialization errors",
-        "gdlint src/ passes"
+        "Add WorldEnvironment with dark ambient",
+        "Configure sky/environment for nighttime",
+        "Add subtle ambient occlusion",
+        "Test visibility with flashlight off",
+        "Atmosphere should feel creepy/dark",
+        "gdlint scenes/ passes"
       ],
       "priority": 18,
-      "passes": true,
-      "notes": "Uses GodotSteam voice functions. Runtime API check for compatibility."
+      "passes": false,
+      "notes": "Horror atmosphere; flashlight should feel necessary"
     },
     {
-      "id": "FW-014-04",
-      "title": "Implement microphone input capture",
-      "description": "Capture voice from local microphone",
+      "id": "FW-071-19",
+      "title": "Add room light fixtures",
+      "description": "Place light sources in each room",
       "acceptanceCriteria": [
-        "Poll Steam.getAvailableVoice() in _process",
-        "When voice available, call Steam.getVoice()",
-        "Store voice data in buffer",
-        "Emit voice_data_captured(data: PackedByteArray) signal",
-        "gdlint src/ passes"
+        "Add OmniLight3D or SpotLight3D per room",
+        "Lights toggleable via light switches",
+        "Configure light colors for warm indoor feel",
+        "Lights create shadows when enabled",
+        "Default state: some lights on, some off",
+        "gdlint scenes/ passes"
       ],
       "priority": 19,
-      "passes": true,
-      "notes": "Steam handles audio capture and compression"
+      "passes": false,
+      "notes": "Vertex lighting style for PS1/PS2 aesthetic"
     },
     {
-      "id": "FW-014-05",
-      "title": "Implement push-to-talk mode",
-      "description": "Voice transmits only when key held",
+      "id": "FW-071-20",
+      "title": "Add collision shapes to all geometry",
+      "description": "Physics collision for walls/floors/objects",
       "acceptanceCriteria": [
-        "Add 'voice_transmit' input action (default: V key)",
-        "Start voice recording when key pressed",
-        "Stop voice recording when key released",
-        "Show transmitting indicator in UI",
-        "gdlint src/ passes"
+        "All walls have collision shapes",
+        "All floors have collision shapes",
+        "Furniture has appropriate collision",
+        "Player cannot walk through geometry",
+        "Raycast interactions work correctly",
+        "gdlint scenes/ passes"
       ],
       "priority": 20,
-      "passes": true,
-      "notes": "Recommended default for horror games. UI indicator handled in HUD."
+      "passes": false,
+      "notes": "Layer 1 (World) for static geometry"
     },
     {
-      "id": "FW-014-06",
-      "title": "Implement open mic mode with voice activity detection",
-      "description": "Voice transmits automatically when speaking",
+      "id": "FW-071-21",
+      "title": "Create map loading system",
+      "description": "Load map scene for investigation",
       "acceptanceCriteria": [
-        "Monitor voice amplitude continuously",
-        "Start transmitting when amplitude exceeds threshold",
-        "Stop transmitting after silence period (300ms)",
-        "Configurable sensitivity threshold",
-        "Show voice activity indicator in UI",
+        "Add load_map(map_name: String) to GameManager",
+        "Map loads when transitioning to INVESTIGATION",
+        "Players spawned at map spawn points",
+        "Map resources loaded asynchronously",
+        "Loading screen during map load",
         "gdlint src/ passes"
       ],
       "priority": 21,
-      "passes": true,
-      "notes": "Alternative to push-to-talk for accessibility"
+      "passes": false,
+      "notes": "Only one map for now; future expansion"
     },
     {
-      "id": "FW-014-07",
-      "title": "Send voice data over network",
-      "description": "Transmit voice to other players",
+      "id": "FW-071-22",
+      "title": "Write integration tests for map functionality",
+      "description": "Test map systems work correctly",
       "acceptanceCriteria": [
-        "Package voice data with sender ID and timestamp",
-        "Send via unreliable channel (UDP-like) for low latency",
-        "Use Steam Networking Messages API",
-        "Broadcast to all peers in range",
-        "gdlint src/ passes"
-      ],
-      "priority": 22,
-      "passes": true,
-      "notes": "Voice data is lossy-tolerant; prefer low latency"
-    },
-    {
-      "id": "FW-014-08",
-      "title": "Receive and decode voice data",
-      "description": "Process incoming voice from other players",
-      "acceptanceCriteria": [
-        "Listen for incoming voice packets",
-        "Identify sender by Steam ID",
-        "Decompress voice data with Steam.decompressVoice()",
-        "Buffer decoded audio for playback",
-        "Handle out-of-order packets",
-        "gdlint src/ passes"
-      ],
-      "priority": 23,
-      "passes": true,
-      "notes": "Steam provides decompression"
-    },
-    {
-      "id": "FW-014-09",
-      "title": "Create VoicePlayer component for spatial audio",
-      "description": "3D audio playback per remote player",
-      "acceptanceCriteria": [
-        "Create src/voice/voice_player.gd extending AudioStreamPlayer3D",
-        "Attach to player Node3D",
-        "Stream voice data to AudioStreamGenerator",
-        "Position updates with player movement",
-        "Configure attenuation for proximity effect",
-        "gdlint src/ passes"
-      ],
-      "priority": 24,
-      "passes": true,
-      "notes": "File: src/voice/voice_player.gd"
-    },
-    {
-      "id": "FW-014-10",
-      "title": "Implement voice proximity falloff",
-      "description": "Voice fades with distance",
-      "acceptanceCriteria": [
-        "Configure AudioStreamPlayer3D max_distance (default: 15m)",
-        "Set attenuation_model to INVERSE_DISTANCE",
-        "Voice inaudible beyond max_distance",
-        "Configurable falloff curve",
-        "Test falloff feels natural",
-        "gdlint src/ passes"
-      ],
-      "priority": 25,
-      "passes": true,
-      "notes": "Core horror mechanic: nearby voices only"
-    },
-    {
-      "id": "FW-014-11",
-      "title": "Implement per-player mute",
-      "description": "Mute/unmute individual players",
-      "acceptanceCriteria": [
-        "Add mute_player(steam_id: int) method",
-        "Add unmute_player(steam_id: int) method",
-        "Add is_player_muted(steam_id: int) -> bool method",
-        "Muted players' audio not played locally",
-        "Store mute state persistently",
-        "gdlint src/ passes"
-      ],
-      "priority": 26,
-      "passes": true,
-      "notes": "Important for player comfort. Already implemented in VoiceManager."
-    },
-    {
-      "id": "FW-014-12",
-      "title": "Create voice volume indicator UI",
-      "description": "Visual feedback for voice activity",
-      "acceptanceCriteria": [
-        "Show microphone icon when transmitting (already in HUD)",
-        "Icon pulses/grows with voice amplitude",
-        "Show speaker icons near players who are talking",
-        "Speaker icon size indicates volume level",
-        "gdlint src/ passes"
-      ],
-      "priority": 27,
-      "passes": true,
-      "notes": "HUD connects to VoiceManager.voice_state_changed. Mic icon pulses with sine wave animation. PlayerNameLabel3D shows speaker icon above talking players via voice_activity signal."
-    },
-    {
-      "id": "FW-014-13",
-      "title": "Expose voice activity for entity detection",
-      "description": "Signal for entity AI to detect noisy players",
-      "acceptanceCriteria": [
-        "Add get_voice_amplitude() -> float method",
-        "Add is_transmitting() -> bool method",
-        "Emit voice_activity(player_id, amplitude) signal",
-        "Entity system can subscribe to detect loud players",
-        "gdlint src/ passes"
-      ],
-      "priority": 28,
-      "passes": true,
-      "notes": "Used by Listener entity and hunt mechanics. voice_activity signal implemented."
-    },
-    {
-      "id": "FW-014-14",
-      "title": "Implement voice latency optimization",
-      "description": "Minimize voice delay to <200ms",
-      "acceptanceCriteria": [
-        "Measure round-trip voice latency",
-        "Use jitter buffer for smooth playback",
-        "Adaptive buffer size based on network conditions",
-        "Target latency under 200ms",
-        "Log latency metrics for debugging",
-        "gdlint src/ passes"
-      ],
-      "priority": 29,
-      "passes": true,
-      "notes": "Jitter buffer with adaptive sizing (40-200ms range). Latency stats logged every 5s. RFC 3550-style jitter calculation."
-    },
-    {
-      "id": "FW-014-15",
-      "title": "Add voice settings to game settings",
-      "description": "User configuration for voice chat",
-      "acceptanceCriteria": [
-        "Add voice_mode setting (push-to-talk/open-mic/disabled)",
-        "Add voice_sensitivity setting for VAD threshold",
-        "Add voice_input_volume setting",
-        "Add voice_output_volume setting",
-        "Settings persist to config file",
-        "gdlint src/ passes"
-      ],
-      "priority": 30,
-      "passes": true,
-      "notes": "Settings stored in user://voice_settings.cfg. Includes voice_mode, input/output volume, sensitivity with load/save/reset_settings methods."
-    },
-    {
-      "id": "FW-014-16",
-      "title": "Write integration tests for voice system",
-      "description": "Test voice chat functionality",
-      "acceptanceCriteria": [
-        "Create tests/integration/test_voice_manager.gd",
-        "Test push-to-talk activation",
-        "Test voice activity detection",
-        "Test mute/unmute functionality",
-        "Test spatial audio positioning",
-        "Mock audio input for testing",
+        "Create tests/integration/test_abandoned_house.gd",
+        "Test spawn point validity",
+        "Test door interaction",
+        "Test light switch interaction",
+        "Test NavMesh connectivity",
+        "Test hiding spot accessibility",
         "All tests pass",
         "gdlint tests/ passes"
       ],
+      "priority": 22,
+      "passes": false,
+      "notes": "File: tests/integration/test_abandoned_house.gd"
+    },
+    {
+      "id": "FW-046-01",
+      "title": "Create Listener entity class",
+      "description": "Entity that reacts to player voice",
+      "acceptanceCriteria": [
+        "Create src/entity/entities/listener.gd extending Entity",
+        "Set entity_name = 'Listener'",
+        "Configure evidence types: FREEZING_TEMPERATURE, GHOST_WRITING, AURA_PATTERN",
+        "Add voice_sensitivity: float property",
+        "Override behavioral methods for voice reactivity",
+        "gdlint src/ passes"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": "File: src/entity/entities/listener.gd. Entity base class in src/entity/entity.gd"
+    },
+    {
+      "id": "FW-046-02",
+      "title": "Define Listener dormant phase",
+      "description": "State where Listener waits for voice trigger",
+      "acceptanceCriteria": [
+        "Add is_dormant: bool property",
+        "Listener alternates between dormant and active",
+        "Dormant duration: 30-60 seconds (random)",
+        "During dormant, Listener is stationary",
+        "Active duration: 60-120 seconds",
+        "gdlint src/ passes"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": "Dormant = listening for voice; active = normal behavior"
+    },
+    {
+      "id": "FW-046-03",
+      "title": "Implement voice detection trigger",
+      "description": "Listener hunts when players speak loudly during dormant",
+      "acceptanceCriteria": [
+        "Connect to VoiceManager.voice_activity signal",
+        "When dormant and voice_amplitude > threshold, trigger hunt",
+        "Threshold: above whisper volume",
+        "Voice-triggered hunt bypasses sanity requirement",
+        "Log voice trigger for debugging",
+        "gdlint src/ passes"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": "Core mechanic: silence is survival"
+    },
+    {
+      "id": "FW-046-04",
+      "title": "Implement instant hunt on voice trigger",
+      "description": "Voice-triggered hunt has no warning phase",
+      "acceptanceCriteria": [
+        "Voice-triggered hunt skips WARNING phase",
+        "Hunt begins immediately (ACTIVE phase)",
+        "Listener targets speaking player",
+        "Normal hunt cooldown applies after",
+        "gdlint src/ passes"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": "No warning = high danger"
+    },
+    {
+      "id": "FW-046-05",
+      "title": "Add dormant phase audio indicator",
+      "description": "Subtle sound when Listener is dormant",
+      "acceptanceCriteria": [
+        "Play faint static/hum sound when dormant",
+        "Sound audible within 10m of Listener",
+        "Spatial audio (louder when closer)",
+        "Sound stops when Listener becomes active",
+        "Players can learn to detect dormant state",
+        "gdlint src/ passes"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": "Teaches players when silence is critical"
+    },
+    {
+      "id": "FW-046-06",
+      "title": "Implement Listener normal behavior",
+      "description": "Behavior when not dormant or hunting",
+      "acceptanceCriteria": [
+        "During active phase, Listener roams slowly",
+        "Occasional manifestations and interactions",
+        "Responds to Ghost Writing Book in active phase",
+        "Creates FREEZING_TEMPERATURE zones in favorite room",
+        "gdlint src/ passes"
+      ],
+      "priority": 28,
+      "passes": false,
+      "notes": "Standard entity behavior between dormant phases"
+    },
+    {
+      "id": "FW-046-07",
+      "title": "Implement Listener hunt behavior",
+      "description": "How Listener hunts players",
+      "acceptanceCriteria": [
+        "Listener moves toward last heard voice location",
+        "Speed: moderate (not fastest, not slowest)",
+        "Continues hunting for standard duration",
+        "Can target other players if initial target escapes",
+        "Hunt ends normally when duration expires",
+        "gdlint src/ passes"
+      ],
+      "priority": 29,
+      "passes": false,
+      "notes": "Voice source is initial target"
+    },
+    {
+      "id": "FW-046-08",
+      "title": "Add Listener behavioral tell",
+      "description": "Observable behavior that identifies Listener",
+      "acceptanceCriteria": [
+        "Listener responds to voice more than other stimuli",
+        "During active phase, pauses when players talk",
+        "Turns toward voice source (tracking behavior)",
+        "Players can test for Listener by speaking",
+        "Tell is subtle but observable",
+        "gdlint src/ passes"
+      ],
+      "priority": 30,
+      "passes": false,
+      "notes": "Behavioral evidence: voice-reactive = likely Listener"
+    },
+    {
+      "id": "FW-046-09",
+      "title": "Implement counterplay: whisper mode awareness",
+      "description": "Help players know when to be quiet",
+      "acceptanceCriteria": [
+        "HUD indicator shows proximity to Listener (optional)",
+        "OR: rely on dormant audio cue only",
+        "Document whisper threshold in game hints",
+        "Push-to-talk users naturally safer",
+        "Open mic users need voice discipline",
+        "gdlint src/ passes"
+      ],
       "priority": 31,
-      "passes": true,
-      "notes": "40+ tests covering VoiceManager signals/methods, mute/unmute, settings, VoicePlayer jitter buffer, latency stats. GUT may need reimport to find new file."
+      "passes": false,
+      "notes": "Counterplay through awareness and caution"
+    },
+    {
+      "id": "FW-046-10",
+      "title": "Implement hunt cooldown for voice triggers",
+      "description": "Prevent repeated instant hunts",
+      "acceptanceCriteria": [
+        "After voice-triggered hunt, cooldown applies",
+        "Cooldown: 60 seconds (configurable)",
+        "During cooldown, voice doesn't trigger hunt",
+        "Normal hunts still possible during cooldown",
+        "gdlint src/ passes"
+      ],
+      "priority": 32,
+      "passes": false,
+      "notes": "Prevents infinite hunt loops"
+    },
+    {
+      "id": "FW-046-11",
+      "title": "Register Listener in EntityManager",
+      "description": "Add Listener to entity registry",
+      "acceptanceCriteria": [
+        "Add Listener to EntityManager.ENTITY_TYPES dictionary",
+        "Configure evidence type mapping",
+        "Listener selectable for match (random or configured)",
+        "Entity-evidence matrix includes Listener",
+        "gdlint src/ passes"
+      ],
+      "priority": 33,
+      "passes": false,
+      "notes": "EntityManager at src/entity/entity_manager.gd"
+    },
+    {
+      "id": "FW-046-12",
+      "title": "Create Listener 3D model placeholder",
+      "description": "Visual representation of Listener entity",
+      "acceptanceCriteria": [
+        "Create placeholder mesh for Listener",
+        "Distinct from other entity designs",
+        "Humanoid but unsettling appearance",
+        "Translucent/ghostly material",
+        "Visible during manifestation and hunt",
+        "gdlint scenes/ passes"
+      ],
+      "priority": 34,
+      "passes": false,
+      "notes": "Placeholder model; art pass later"
+    },
+    {
+      "id": "FW-046-13",
+      "title": "Add Listener-specific sounds",
+      "description": "Audio design for Listener",
+      "acceptanceCriteria": [
+        "Create/acquire dormant hum sound effect",
+        "Create/acquire voice-trigger reaction sound",
+        "Hunt approach sound (different from other entities)",
+        "Sounds added to AudioManager pools",
+        "gdlint src/ passes"
+      ],
+      "priority": 35,
+      "passes": false,
+      "notes": "Placeholder sounds; audio polish later"
+    },
+    {
+      "id": "FW-046-14",
+      "title": "Write unit tests for Listener",
+      "description": "Test Listener-specific mechanics",
+      "acceptanceCriteria": [
+        "Create tests/unit/test_listener_entity.gd",
+        "Test dormant/active phase cycling",
+        "Test voice detection threshold",
+        "Test voice-triggered hunt initiation",
+        "Test hunt cooldown behavior",
+        "All tests pass",
+        "gdlint tests/ passes"
+      ],
+      "priority": 36,
+      "passes": false,
+      "notes": "File: tests/unit/test_listener_entity.gd"
+    },
+    {
+      "id": "FW-046-15",
+      "title": "Write integration tests for Listener",
+      "description": "Test Listener in game context",
+      "acceptanceCriteria": [
+        "Create tests/integration/test_listener_integration.gd",
+        "Test voice activity triggering hunt",
+        "Test dormant audio cue audibility",
+        "Test behavioral tell observability",
+        "Test evidence generation",
+        "All tests pass",
+        "gdlint tests/ passes"
+      ],
+      "priority": 37,
+      "passes": false,
+      "notes": "File: tests/integration/test_listener_integration.gd"
     }
   ]
 }

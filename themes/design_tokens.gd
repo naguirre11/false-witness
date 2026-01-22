@@ -87,3 +87,37 @@ const FONT_SIZES: Dictionary = {
 	"xxl": 32,  # Double extra large - page titles
 	"display": 48,  # Display - hero text, win/loss announcements
 }
+
+# --- Animation Tokens ---
+
+## Animation timing values for UI transitions and effects.
+## All values are floats representing seconds.
+const ANIMATION: Dictionary = {
+	# Standard UI transitions
+	"duration_instant": 0.1,  # Near-instant feedback
+	"duration_fast": 0.15,  # Quick hover/focus states
+	"duration_normal": 0.25,  # Standard transitions
+	"duration_slow": 0.4,  # Deliberate, noticeable transitions
+
+	# Horror-specific timings
+	"duration_tension": 0.6,  # Building suspense
+	"duration_reveal": 0.8,  # Dramatic reveals
+	"duration_startle": 0.05,  # Jump scare snap
+}
+
+# --- Border Tokens ---
+
+## Border styling values for consistent visual hierarchy.
+const BORDERS: Dictionary = {
+	# Corner radii (pixels)
+	"radius_none": 0,  # Sharp corners
+	"radius_sm": 2,  # Subtle rounding
+	"radius_md": 4,  # Standard rounding
+	"radius_lg": 8,  # Pronounced rounding
+	"radius_full": 9999,  # Pill/circle shape
+
+	# Border widths (pixels)
+	"width_thin": 1,  # Subtle borders
+	"width_normal": 2,  # Standard borders
+	"width_thick": 4,  # Emphasized borders
+}

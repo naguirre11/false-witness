@@ -33,6 +33,15 @@ const MAX_INVESTIGATION_TIME: float = 900.0  # 15 minutes
 const MIN_DELIBERATION_TIME: float = 180.0  # 3 minutes
 const MAX_DELIBERATION_TIME: float = 300.0  # 5 minutes
 
+# --- Map Registry ---
+# Maps map identifiers to their scene paths.
+
+const MAP_REGISTRY: Dictionary = {
+	"abandoned_house": "res://scenes/maps/abandoned_house.tscn",
+}
+
+const DEFAULT_MAP: String = "abandoned_house"
+
 # --- Public State Variables ---
 
 var current_state: GameState = GameState.NONE
@@ -48,6 +57,14 @@ var _timer_paused: bool = false
 var _tick_accumulator: float = 0.0
 var _timed_states: Array[GameState] = [GameState.INVESTIGATION, GameState.DELIBERATION]
 
+# --- Map State Variables ---
+
+var _current_map: Node = null
+var _current_map_name: String = ""
+var _is_loading_map: bool = false
+var _loading_screen: Control = null
+var _map_load_thread_id: int = -1
+
 
 func _ready() -> void:
 	print("[GameManager] Initialized - State: %s" % _state_to_string(current_state))
@@ -56,6 +73,10 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if _timer_active and not _timer_paused:
 		_update_timer(delta)
+
+	# Check async map loading progress
+	if _is_loading_map:
+		_check_map_load_progress()
 
 
 # --- State Management ---
@@ -302,3 +323,204 @@ func _state_to_string(state: GameState) -> String:
 		GameState.RESULTS: "RESULTS",
 	}
 	return state_names.get(state, "UNKNOWN")
+
+
+# --- Map Loading ---
+
+
+## Loads a map by name. Shows loading screen and loads asynchronously.
+## Returns true if loading started, false if map not found or already loading.
+func load_map(map_name: String = DEFAULT_MAP) -> bool:
+	if _is_loading_map:
+		push_warning("[GameManager] Already loading a map")
+		return false
+
+	if not MAP_REGISTRY.has(map_name):
+		push_error("[GameManager] Unknown map: %s" % map_name)
+		EventBus.map_load_failed.emit(map_name, "Unknown map name")
+		return false
+
+	var scene_path: String = MAP_REGISTRY[map_name]
+	if not ResourceLoader.exists(scene_path):
+		push_error("[GameManager] Map scene not found: %s" % scene_path)
+		EventBus.map_load_failed.emit(map_name, "Scene file not found")
+		return false
+
+	print("[GameManager] Loading map: %s" % map_name)
+	_current_map_name = map_name
+	_is_loading_map = true
+
+	# Emit loading started signal
+	EventBus.map_loading_started.emit(map_name)
+
+	# Show loading screen
+	_show_loading_screen(map_name)
+
+	# Start async loading
+	var error := ResourceLoader.load_threaded_request(scene_path)
+	if error != OK:
+		push_error("[GameManager] Failed to start async load: %s" % error)
+		_is_loading_map = false
+		_hide_loading_screen()
+		EventBus.map_load_failed.emit(map_name, "Failed to start loading")
+		return false
+
+	return true
+
+
+## Returns the currently loaded map node, or null if no map loaded.
+func get_current_map() -> Node:
+	return _current_map
+
+
+## Returns the name of the currently loaded map.
+func get_current_map_name() -> String:
+	return _current_map_name
+
+
+## Returns true if a map is currently being loaded.
+func is_loading_map() -> bool:
+	return _is_loading_map
+
+
+## Unloads the current map and cleans up resources.
+func unload_map() -> void:
+	if _current_map != null:
+		print("[GameManager] Unloading map: %s" % _current_map_name)
+		_current_map.queue_free()
+		_current_map = null
+		_current_map_name = ""
+		EventBus.map_unloaded.emit()
+
+
+## Returns spawn positions from the current map.
+## Returns empty array if no map loaded or map doesn't have spawn points.
+func get_spawn_positions() -> Array[Vector3]:
+	if _current_map == null:
+		return []
+
+	if _current_map.has_method("get_spawn_positions"):
+		return _current_map.get_spawn_positions()
+
+	return []
+
+
+## Returns a specific spawn position by index.
+func get_spawn_position(index: int) -> Vector3:
+	if _current_map == null:
+		return Vector3.ZERO
+
+	if _current_map.has_method("get_spawn_point"):
+		return _current_map.get_spawn_point(index)
+
+	return Vector3.ZERO
+
+
+## Returns the number of spawn points in the current map.
+func get_spawn_count() -> int:
+	if _current_map == null:
+		return 0
+
+	if _current_map.has_method("get_spawn_count"):
+		return _current_map.get_spawn_count()
+
+	return 0
+
+
+# --- Internal Map Loading Methods ---
+
+
+func _check_map_load_progress() -> void:
+	var scene_path: String = MAP_REGISTRY.get(_current_map_name, "")
+	if scene_path.is_empty():
+		return
+
+	var progress_array: Array = []
+	var status := ResourceLoader.load_threaded_get_status(scene_path, progress_array)
+
+	match status:
+		ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			var progress: float = progress_array[0] if progress_array.size() > 0 else 0.0
+			EventBus.map_loading_progress.emit(progress, "Loading map resources...")
+			_update_loading_screen(progress, "Loading map resources...")
+
+		ResourceLoader.THREAD_LOAD_LOADED:
+			_on_map_load_complete(scene_path)
+
+		ResourceLoader.THREAD_LOAD_FAILED:
+			_on_map_load_failed("Resource loading failed")
+
+		ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
+			_on_map_load_failed("Invalid resource")
+
+
+func _on_map_load_complete(scene_path: String) -> void:
+	print("[GameManager] Map load complete: %s" % _current_map_name)
+	_is_loading_map = false
+
+	# Get the loaded resource
+	var map_scene := ResourceLoader.load_threaded_get(scene_path) as PackedScene
+	if map_scene == null:
+		_on_map_load_failed("Failed to get loaded scene")
+		return
+
+	# Update progress
+	EventBus.map_loading_progress.emit(0.9, "Instantiating map...")
+	_update_loading_screen(0.9, "Instantiating map...")
+
+	# Instantiate the map
+	_current_map = map_scene.instantiate()
+	if _current_map == null:
+		_on_map_load_failed("Failed to instantiate map scene")
+		return
+
+	# Add map to scene tree
+	get_tree().root.add_child(_current_map)
+
+	# Final progress update
+	EventBus.map_loading_progress.emit(1.0, "Map ready!")
+	_update_loading_screen(1.0, "Map ready!")
+
+	# Emit map loaded signal
+	EventBus.map_loaded.emit(_current_map)
+
+	# Hide loading screen with delay
+	call_deferred("_hide_loading_screen")
+
+
+func _on_map_load_failed(error: String) -> void:
+	push_error("[GameManager] Map load failed: %s" % error)
+	_is_loading_map = false
+	_hide_loading_screen()
+	EventBus.map_load_failed.emit(_current_map_name, error)
+
+
+func _show_loading_screen(map_name: String) -> void:
+	if _loading_screen != null:
+		return
+
+	var loading_scene := load("res://scenes/ui/loading_screen.tscn") as PackedScene
+	if loading_scene == null:
+		push_warning("[GameManager] Loading screen scene not found")
+		return
+
+	_loading_screen = loading_scene.instantiate() as Control
+	get_tree().root.add_child(_loading_screen)
+
+	if _loading_screen.has_method("show_loading"):
+		_loading_screen.show_loading(map_name)
+
+
+func _update_loading_screen(progress: float, status: String) -> void:
+	if _loading_screen != null and _loading_screen.has_method("set_progress"):
+		_loading_screen.set_progress(progress, status)
+
+
+func _hide_loading_screen() -> void:
+	if _loading_screen != null:
+		if _loading_screen.has_method("hide_loading"):
+			_loading_screen.hide_loading()
+			# Wait for fade out then cleanup
+			await get_tree().create_timer(0.6).timeout
+		_loading_screen.queue_free()
+		_loading_screen = null

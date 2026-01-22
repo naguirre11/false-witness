@@ -282,6 +282,26 @@ signal phase_timer_expired(state: int)
 ## Emitted when phase time is extended (e.g., by finding evidence).
 signal phase_timer_extended(additional_seconds: float)
 
+# --- Map Loading Signals ---
+
+## Emitted when map loading begins.
+## map_name is the identifier of the map being loaded (e.g., "abandoned_house").
+signal map_loading_started(map_name: String)
+
+## Emitted during map loading with progress updates.
+## progress is 0.0 to 1.0, status is a human-readable message.
+signal map_loading_progress(progress: float, status: String)
+
+## Emitted when map loading completes successfully.
+## map_node is the root Node of the loaded map.
+signal map_loaded(map_node: Node)
+
+## Emitted when map loading fails.
+signal map_load_failed(map_name: String, error: String)
+
+## Emitted when the current map is unloaded.
+signal map_unloaded
+
 
 func _ready() -> void:
 	print("[EventBus] Initialized - Global signal hub ready")

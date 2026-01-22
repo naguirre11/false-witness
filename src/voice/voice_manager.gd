@@ -25,12 +25,25 @@ const VAD_THRESHOLD_DEFAULT: float = 0.01  # Voice activity detection threshold
 const VAD_SILENCE_TIMEOUT: float = 0.3  # Seconds of silence before stopping transmission
 const VOICE_MAX_DISTANCE: float = 15.0  # Default proximity voice range in meters
 
+## Settings file path
+const VOICE_SETTINGS_PATH: String = "user://voice_settings.cfg"
+
+## Default volume levels (0.0 - 1.0)
+const DEFAULT_INPUT_VOLUME: float = 1.0
+const DEFAULT_OUTPUT_VOLUME: float = 1.0
+const DEFAULT_VAD_SENSITIVITY: float = 0.5  # Middle of range
+
 # --- State ---
 
 var is_voice_enabled: bool = true
 var local_muted: bool = false
 var voice_mode: VoiceEnums.VoiceMode = VoiceEnums.VoiceMode.PUSH_TO_TALK
 var voice_state: VoiceEnums.VoiceState = VoiceEnums.VoiceState.IDLE
+
+## Voice settings (persistent)
+var voice_input_volume: float = DEFAULT_INPUT_VOLUME  # Mic input level
+var voice_output_volume: float = DEFAULT_OUTPUT_VOLUME  # Speaker output level
+var voice_sensitivity: float = DEFAULT_VAD_SENSITIVITY  # VAD sensitivity
 
 # Voice activity detection
 var vad_threshold: float = VAD_THRESHOLD_DEFAULT
@@ -48,6 +61,9 @@ const VOICE_CHANNEL: int = 1  # Separate channel from game packets
 
 
 func _ready() -> void:
+	# Load persistent settings
+	load_settings()
+
 	# Set up push-to-talk input action if it doesn't exist
 	_setup_ptt_input_action()
 	print("[VoiceManager] Initialized - Mode: %s" % VoiceEnums.get_mode_name(voice_mode))
@@ -131,6 +147,135 @@ func get_voice_amplitude() -> float:
 	# Steam doesn't expose amplitude directly, but we can estimate from voice data
 	# For now return a simple indicator based on transmission state
 	return 1.0 if voice_state == VoiceEnums.VoiceState.TRANSMITTING else 0.0
+
+
+# =============================================================================
+# PUBLIC API - Voice Settings (FW-014-15)
+# =============================================================================
+
+
+## Set voice input volume (0.0 - 1.0).
+func set_input_volume(volume: float) -> void:
+	voice_input_volume = clampf(volume, 0.0, 1.0)
+	# Note: Steam voice doesn't support input volume directly
+	# This is for future integration or UI display
+	print("[VoiceManager] Input volume: %.0f%%" % (voice_input_volume * 100))
+
+
+## Get voice input volume.
+func get_input_volume() -> float:
+	return voice_input_volume
+
+
+## Set voice output volume (0.0 - 1.0).
+func set_output_volume(volume: float) -> void:
+	voice_output_volume = clampf(volume, 0.0, 1.0)
+
+	# Apply to all active voice players
+	for steam_id in _voice_players:
+		var player: VoicePlayer = _voice_players[steam_id]
+		player.volume_db = linear_to_db(voice_output_volume)
+
+	print("[VoiceManager] Output volume: %.0f%%" % (voice_output_volume * 100))
+
+
+## Get voice output volume.
+func get_output_volume() -> float:
+	return voice_output_volume
+
+
+## Set VAD sensitivity (0.0 - 1.0).
+## Higher values = more sensitive (picks up quieter sounds).
+func set_sensitivity(sensitivity: float) -> void:
+	voice_sensitivity = clampf(sensitivity, 0.0, 1.0)
+
+	# Map sensitivity to VAD threshold (inverse relationship)
+	# High sensitivity = low threshold
+	vad_threshold = lerpf(0.1, 0.001, sensitivity)
+
+	print("[VoiceManager] Sensitivity: %.0f%% (threshold: %.4f)" % [
+		voice_sensitivity * 100, vad_threshold
+	])
+
+
+## Get VAD sensitivity.
+func get_sensitivity() -> float:
+	return voice_sensitivity
+
+
+## Get all voice settings as a Dictionary.
+func get_settings() -> Dictionary:
+	return {
+		"voice_mode": voice_mode,
+		"voice_input_volume": voice_input_volume,
+		"voice_output_volume": voice_output_volume,
+		"voice_sensitivity": voice_sensitivity,
+		"is_voice_enabled": is_voice_enabled,
+		"local_muted": local_muted,
+	}
+
+
+## Save current settings to config file.
+func save_settings() -> void:
+	var config := ConfigFile.new()
+
+	config.set_value("voice", "mode", voice_mode)
+	config.set_value("voice", "input_volume", voice_input_volume)
+	config.set_value("voice", "output_volume", voice_output_volume)
+	config.set_value("voice", "sensitivity", voice_sensitivity)
+	config.set_value("voice", "enabled", is_voice_enabled)
+
+	var error := config.save(VOICE_SETTINGS_PATH)
+	if error == OK:
+		print("[VoiceManager] Settings saved to %s" % VOICE_SETTINGS_PATH)
+	else:
+		push_warning("[VoiceManager] Failed to save settings: %d" % error)
+
+
+## Load settings from config file.
+func load_settings() -> void:
+	var config := ConfigFile.new()
+	var error := config.load(VOICE_SETTINGS_PATH)
+
+	if error != OK:
+		# File doesn't exist or is invalid - use defaults
+		print("[VoiceManager] No settings file, using defaults")
+		return
+
+	# Load values with defaults
+	voice_mode = config.get_value("voice", "mode", VoiceEnums.VoiceMode.PUSH_TO_TALK)
+	voice_input_volume = config.get_value("voice", "input_volume", DEFAULT_INPUT_VOLUME)
+	voice_output_volume = config.get_value("voice", "output_volume", DEFAULT_OUTPUT_VOLUME)
+	voice_sensitivity = config.get_value("voice", "sensitivity", DEFAULT_VAD_SENSITIVITY)
+	is_voice_enabled = config.get_value("voice", "enabled", true)
+
+	# Apply sensitivity to VAD threshold
+	vad_threshold = lerpf(0.1, 0.001, voice_sensitivity)
+
+	print("[VoiceManager] Settings loaded - Mode: %s, Input: %.0f%%, Output: %.0f%%, Sensitivity: %.0f%%" % [
+		VoiceEnums.get_mode_name(voice_mode),
+		voice_input_volume * 100,
+		voice_output_volume * 100,
+		voice_sensitivity * 100
+	])
+
+
+## Reset all settings to defaults.
+func reset_settings() -> void:
+	voice_mode = VoiceEnums.VoiceMode.PUSH_TO_TALK
+	voice_input_volume = DEFAULT_INPUT_VOLUME
+	voice_output_volume = DEFAULT_OUTPUT_VOLUME
+	voice_sensitivity = DEFAULT_VAD_SENSITIVITY
+	vad_threshold = VAD_THRESHOLD_DEFAULT
+	is_voice_enabled = true
+	local_muted = false
+
+	# Apply output volume to voice players
+	for steam_id in _voice_players:
+		var player: VoicePlayer = _voice_players[steam_id]
+		player.volume_db = 0.0
+
+	print("[VoiceManager] Settings reset to defaults")
 
 
 # =============================================================================

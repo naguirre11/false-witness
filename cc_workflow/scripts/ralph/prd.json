@@ -482,8 +482,8 @@
         "gdlint src/ passes"
       ],
       "priority": 30,
-      "passes": false,
-      "notes": "Settings accessible from main menu"
+      "passes": true,
+      "notes": "Settings stored in user://voice_settings.cfg. Includes voice_mode, input/output volume, sensitivity with load/save/reset_settings methods."
     },
     {
       "id": "FW-014-16",

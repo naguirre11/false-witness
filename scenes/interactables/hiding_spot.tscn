@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://d2hiding_spot"]
+
+[ext_resource type="Script" path="res://src/entity/hiding_spot.gd" id="1_spot"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1"]
+size = Vector3(1.0, 2.0, 1.0)
+
+[node name="HidingSpot" type="Area3D"]
+script = ExtResource("1_spot")
+blocks_entity_entry = true
+search_duration = 5.0
+blocks_detection_when_closed = true
+initial_door_closed = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("BoxShape3D_1")

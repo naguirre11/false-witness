@@ -238,7 +238,7 @@
         "gdlint scenes/ passes"
       ],
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "notes": "HidingSpot class exists in src/entity/hiding_spot.gd"
     },
     {

@@ -52,7 +52,7 @@
         "gdlint scenes/ passes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Players spawn here at investigation start"
     },
     {

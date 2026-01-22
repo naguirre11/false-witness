@@ -121,7 +121,7 @@
         "gdlint scenes/ passes"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Potential entity favorite room"
     },
     {
@@ -138,7 +138,7 @@
         "gdlint scenes/ passes"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "Mirror can show writing manifestations"
     },
     {

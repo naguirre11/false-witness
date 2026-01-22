@@ -165,12 +165,16 @@ func receive_voice_data(sender_id: int, voice_data: PackedByteArray, timestamp: 
 	if is_player_muted(sender_id):
 		return
 
-	# Emit signal for playback system
+	# Get or create voice player for this sender
+	var voice_player := _get_or_create_voice_player(sender_id)
+	if voice_player:
+		voice_player.play_voice_data(voice_data)
+
+	# Emit signal for entity detection and UI
 	voice_activity.emit(sender_id, 1.0)
 
-	# TODO: Forward to VoicePlayer for spatial audio playback
-	# For now, just log that we received voice
-	var _unused := timestamp  # Will be used for jitter buffer
+	# Timestamp used for future jitter buffer implementation
+	var _unused := timestamp
 
 
 # =============================================================================
@@ -216,6 +220,47 @@ func _read_voice_packets() -> void:
 
 		# Check for more packets
 		packet_size = Steam.getAvailableP2PPacketSize(VOICE_CHANNEL)
+
+
+# =============================================================================
+# INTERNAL - Voice Player Management (FW-014-09)
+# =============================================================================
+
+const VoicePlayer = preload("res://src/voice/voice_player.gd")
+
+
+func _get_or_create_voice_player(steam_id: int) -> VoicePlayer:
+	# Return existing player if we have one
+	if _voice_players.has(steam_id):
+		return _voice_players[steam_id]
+
+	# Create new voice player
+	var voice_player := VoicePlayer.new()
+	voice_player.setup(steam_id)
+	add_child(voice_player)
+	_voice_players[steam_id] = voice_player
+
+	return voice_player
+
+
+## Remove voice player when a player disconnects.
+func remove_voice_player(steam_id: int) -> void:
+	if _voice_players.has(steam_id):
+		var player: VoicePlayer = _voice_players[steam_id]
+		player.queue_free()
+		_voice_players.erase(steam_id)
+
+
+## Update voice player position (call from player controller).
+func update_player_position(steam_id: int, position: Vector3) -> void:
+	if _voice_players.has(steam_id):
+		var player: VoicePlayer = _voice_players[steam_id]
+		player.update_position(position)
+
+
+## Get a voice player by Steam ID (for UI indicators).
+func get_voice_player(steam_id: int) -> VoicePlayer:
+	return _voice_players.get(steam_id, null)
 
 
 # =============================================================================

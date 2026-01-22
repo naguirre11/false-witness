@@ -168,13 +168,11 @@ func receive_voice_data(sender_id: int, voice_data: PackedByteArray, timestamp: 
 	# Get or create voice player for this sender
 	var voice_player := _get_or_create_voice_player(sender_id)
 	if voice_player:
-		voice_player.play_voice_data(voice_data)
+		# Pass timestamp for jitter buffer and latency measurement
+		voice_player.play_voice_data(voice_data, timestamp)
 
 	# Emit signal for entity detection and UI
 	voice_activity.emit(sender_id, 1.0)
-
-	# Timestamp used for future jitter buffer implementation
-	var _unused := timestamp
 
 
 # =============================================================================

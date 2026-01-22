@@ -466,8 +466,8 @@
         "gdlint src/ passes"
       ],
       "priority": 29,
-      "passes": false,
-      "notes": "Latency target per ticket: <200ms"
+      "passes": true,
+      "notes": "Jitter buffer with adaptive sizing (40-200ms range). Latency stats logged every 5s. RFC 3550-style jitter calculation."
     },
     {
       "id": "FW-014-15",

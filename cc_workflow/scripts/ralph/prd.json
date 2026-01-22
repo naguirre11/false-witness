@@ -86,7 +86,7 @@
         "gdlint scenes/ passes"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Cabinets can be opened for hiding spots"
     },
     {

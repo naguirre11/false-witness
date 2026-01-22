@@ -11,15 +11,6 @@ signal slot_pressed(evidence_type: EvidenceEnums.EvidenceType)
 
 const SLOT_SIZE := Vector2(120, 100)
 
-## Trust level border colors per ticket FW-035b
-const TRUST_COLORS: Dictionary = {
-	EvidenceEnums.TrustLevel.UNFALSIFIABLE: Color.GOLD,
-	EvidenceEnums.TrustLevel.HIGH: Color.GREEN,
-	EvidenceEnums.TrustLevel.VARIABLE: Color.YELLOW,
-	EvidenceEnums.TrustLevel.LOW: Color.ORANGE,
-	EvidenceEnums.TrustLevel.SABOTAGE_RISK: Color.RED,
-}
-
 ## Tooltip explanations for each trust level
 const TRUST_TOOLTIPS: Dictionary = {
 	EvidenceEnums.TrustLevel.UNFALSIFIABLE: "Cannot be fabricated - behavioral ground truth",
@@ -35,25 +26,6 @@ const VERIFICATION_ICONS: Dictionary = {
 	EvidenceEnums.VerificationState.VERIFIED: "\u2713\u2713",  # Double checkmark
 	EvidenceEnums.VerificationState.CONTESTED: "\u26A0",  # Warning/exclamation
 }
-
-## Verification state colors
-const VERIFICATION_COLORS: Dictionary = {
-	EvidenceEnums.VerificationState.UNVERIFIED: Color(0.7, 0.7, 0.7),  # Gray
-	EvidenceEnums.VerificationState.VERIFIED: Color.GREEN,
-	EvidenceEnums.VerificationState.CONTESTED: Color.ORANGE,
-}
-
-## Player colors for collector attribution (indexed by peer_id % 8)
-const PLAYER_COLORS: Array[Color] = [
-	Color.CYAN,
-	Color.MAGENTA,
-	Color.LIME,
-	Color.YELLOW,
-	Color.CORAL,
-	Color.DEEP_SKY_BLUE,
-	Color.HOT_PINK,
-	Color.SPRING_GREEN,
-]
 
 # --- Exported Properties ---
 
@@ -145,7 +117,8 @@ func _update_status_display() -> void:
 		_status_label.modulate = Color.WHITE
 	else:
 		_status_label.text = "---"
-		_status_label.modulate = Color(1.0, 1.0, 1.0, 0.5)
+		var muted := DesignTokens.COLORS.text_muted
+		_status_label.modulate = Color(muted.r, muted.g, muted.b, 0.5)
 
 
 func _update_icon() -> void:
@@ -176,7 +149,7 @@ func _update_verification_display() -> void:
 
 	var state := _evidence.verification_state
 	_verification_icon.text = VERIFICATION_ICONS.get(state, "")
-	_verification_icon.modulate = VERIFICATION_COLORS.get(state, Color.WHITE)
+	_verification_icon.modulate = _get_verification_color(state)
 
 	# Update visual styling for contested evidence
 	_update_contested_styling(state == EvidenceEnums.VerificationState.CONTESTED)
@@ -228,8 +201,8 @@ func _create_collector_indicator(peer_id: int) -> Control:
 
 func _get_player_color(peer_id: int) -> Color:
 	# Map peer_id to one of the predefined colors
-	var color_index: int = peer_id % PLAYER_COLORS.size()
-	return PLAYER_COLORS[color_index]
+	var color_index: int = peer_id % DesignTokens.PLAYER_COLORS.size()
+	return DesignTokens.PLAYER_COLORS[color_index]
 
 
 func _get_player_initial(peer_id: int) -> String:
@@ -294,13 +267,13 @@ func _format_location(location: Vector3) -> String:
 func _get_category_color(category: EvidenceEnums.EvidenceCategory) -> Color:
 	match category:
 		EvidenceEnums.EvidenceCategory.EQUIPMENT_DERIVED:
-			return Color.CORNFLOWER_BLUE
+			return DesignTokens.COLORS.evidence_equipment
 		EvidenceEnums.EvidenceCategory.READILY_APPARENT:
-			return Color.LIGHT_GREEN
+			return DesignTokens.COLORS.evidence_apparent
 		EvidenceEnums.EvidenceCategory.TRIGGERED_TEST:
-			return Color.GOLD
+			return DesignTokens.COLORS.evidence_triggered
 		EvidenceEnums.EvidenceCategory.BEHAVIOR_BASED:
-			return Color.INDIAN_RED
+			return DesignTokens.COLORS.evidence_behavior
 		_:
 			return Color.WHITE
 
@@ -314,15 +287,15 @@ func _setup_trust_styling() -> void:
 		return
 
 	var trust_level := EvidenceEnums.get_trust_level(evidence_type)
-	var trust_color: Color = TRUST_COLORS.get(trust_level, Color.WHITE)
+	var trust_color: Color = _get_trust_color(trust_level)
 
 	# Apply border color via StyleBox
 	if _border:
 		var style := StyleBoxFlat.new()
 		style.bg_color = Color.TRANSPARENT
 		style.border_color = trust_color
-		style.set_border_width_all(2)
-		style.set_corner_radius_all(4)
+		style.set_border_width_all(DesignTokens.BORDERS.width_normal)
+		style.set_corner_radius_all(DesignTokens.BORDERS.radius_md)
 		_border.add_theme_stylebox_override("panel", style)
 
 	# Update tooltip with trust info
@@ -341,16 +314,16 @@ func set_keyboard_focused(is_focused: bool) -> void:
 	if is_focused:
 		# Add a bright focus border
 		var style := StyleBoxFlat.new()
-		style.bg_color = Color(0.2, 0.3, 0.4, 0.8)
-		style.border_color = Color.CYAN
-		style.set_border_width_all(3)
-		style.set_corner_radius_all(4)
+		style.bg_color = DesignTokens.COLORS.ui_focus_bg
+		style.border_color = DesignTokens.COLORS.ui_focus_border
+		style.set_border_width_all(DesignTokens.BORDERS.width_thick)
+		style.set_corner_radius_all(DesignTokens.BORDERS.radius_md)
 		_background.add_theme_stylebox_override("panel", style)
 	else:
 		# Restore default background
 		var style := StyleBoxFlat.new()
-		style.bg_color = Color(0.15, 0.15, 0.15, 0.8)
-		style.set_corner_radius_all(4)
+		style.bg_color = DesignTokens.COLORS.bg_surface
+		style.set_corner_radius_all(DesignTokens.BORDERS.radius_md)
 		_background.add_theme_stylebox_override("panel", style)
 
 
@@ -362,14 +335,42 @@ func _update_contested_styling(is_contested: bool) -> void:
 	if is_contested:
 		# Contested evidence: yellow/orange pulsing background
 		var style := StyleBoxFlat.new()
-		style.bg_color = Color(0.6, 0.4, 0.1, 0.8)  # Orange-ish background
-		style.border_color = Color.ORANGE
-		style.set_border_width_all(2)
-		style.set_corner_radius_all(4)
+		style.bg_color = DesignTokens.COLORS.ui_contested_bg
+		style.border_color = DesignTokens.COLORS.verification_contested
+		style.set_border_width_all(DesignTokens.BORDERS.width_normal)
+		style.set_corner_radius_all(DesignTokens.BORDERS.radius_md)
 		_background.add_theme_stylebox_override("panel", style)
 	else:
 		# Normal background - only update if not keyboard focused
 		var style := StyleBoxFlat.new()
-		style.bg_color = Color(0.15, 0.15, 0.15, 0.8)
-		style.set_corner_radius_all(4)
+		style.bg_color = DesignTokens.COLORS.bg_surface
+		style.set_corner_radius_all(DesignTokens.BORDERS.radius_md)
 		_background.add_theme_stylebox_override("panel", style)
+
+
+func _get_trust_color(trust_level: EvidenceEnums.TrustLevel) -> Color:
+	match trust_level:
+		EvidenceEnums.TrustLevel.UNFALSIFIABLE:
+			return DesignTokens.COLORS.trust_unfalsifiable
+		EvidenceEnums.TrustLevel.HIGH:
+			return DesignTokens.COLORS.trust_high
+		EvidenceEnums.TrustLevel.VARIABLE:
+			return DesignTokens.COLORS.trust_variable
+		EvidenceEnums.TrustLevel.LOW:
+			return DesignTokens.COLORS.trust_low
+		EvidenceEnums.TrustLevel.SABOTAGE_RISK:
+			return DesignTokens.COLORS.trust_sabotage
+		_:
+			return Color.WHITE
+
+
+func _get_verification_color(state: EvidenceEnums.VerificationState) -> Color:
+	match state:
+		EvidenceEnums.VerificationState.UNVERIFIED:
+			return DesignTokens.COLORS.verification_unverified
+		EvidenceEnums.VerificationState.VERIFIED:
+			return DesignTokens.COLORS.verification_verified
+		EvidenceEnums.VerificationState.CONTESTED:
+			return DesignTokens.COLORS.verification_contested
+		_:
+			return Color.WHITE

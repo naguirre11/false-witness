@@ -54,6 +54,16 @@ const COLORS: Dictionary = {
 
 	# Results screen specific
 	"results_gold": Color(1.0, 0.85, 0.3),  # Award gold for superlatives
+
+	# Verification state colors
+	"verification_unverified": Color(0.7, 0.7, 0.7),  # Gray for unverified
+	"verification_verified": Color.GREEN,  # Green for verified
+	"verification_contested": Color.ORANGE,  # Orange for contested
+
+	# UI element colors
+	"ui_focus_border": Color.CYAN,  # Keyboard focus indicator
+	"ui_focus_bg": Color(0.2, 0.3, 0.4, 0.8),  # Focus background
+	"ui_contested_bg": Color(0.6, 0.4, 0.1, 0.8),  # Contested evidence background
 }
 
 ## Player attribution colors for evidence collector indicators.

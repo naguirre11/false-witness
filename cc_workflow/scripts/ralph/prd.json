@@ -104,7 +104,7 @@
         "gdlint scenes/ passes"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Primary hiding location for hunts"
     },
     {

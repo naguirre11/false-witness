@@ -296,6 +296,60 @@ func _process_hunting_behavior(delta: float) -> void:
 	if _voice_hunt_cooldown > 0:
 		_voice_hunt_cooldown -= delta
 
+	# Continue listening for voices during hunt (for target switching)
+	# But don't trigger new hunts - just update last known position
+
+
+## Selects hunt target from available players.
+## Listener prioritizes the voice-triggering speaker, then any visible player.
+func _select_hunt_target(players: Array) -> Node:
+	if players.is_empty():
+		return null
+
+	# If we have a last speaker, prioritize them
+	if _last_speaker_id != -1:
+		for player in players:
+			var pid := _get_player_id(player)
+			if pid == _last_speaker_id:
+				return player
+
+	# Otherwise, pick the nearest player
+	var nearest: Node = null
+	var nearest_distance := 999999.0
+
+	for player in players:
+		if player is Node3D:
+			var dist: float = global_position.distance_to((player as Node3D).global_position)
+			if dist < nearest_distance:
+				nearest_distance = dist
+				nearest = player
+
+	return nearest
+
+
+## Updates target position when voice is heard during hunt.
+## Allows Listener to track speaking players mid-hunt.
+func _update_voice_target_during_hunt(speaker_id: int, speaker_pos: Vector3) -> void:
+	# Only update if no current target or speaker is closer
+	if _hunt_target == null or not is_instance_valid(_hunt_target):
+		_target_last_position = speaker_pos
+		_last_speaker_id = speaker_id
+		_is_aware_of_target = true
+		return
+
+	# If current target, check if speaker is closer
+	if _hunt_target is Node3D:
+		var current_dist: float = global_position.distance_to(
+			(_hunt_target as Node3D).global_position
+		)
+		var speaker_dist := global_position.distance_to(speaker_pos)
+
+		# Switch to speaker if they're closer and speaking loudly
+		if speaker_dist < current_dist:
+			_target_last_position = speaker_pos
+			_last_speaker_id = speaker_id
+			# Note: actual target switch happens in next detection cycle
+
 
 # --- Voice Detection ---
 
@@ -329,6 +383,12 @@ func _on_voice_activity(player_id: int, amplitude: float) -> void:
 		if amplitude > threshold and _voice_hunt_cooldown <= 0:
 			_trigger_voice_hunt(player_id, player_pos)
 			return
+
+	# Hunting phase: update target based on voice
+	if _state == EntityState.HUNTING:
+		if amplitude > threshold:
+			_update_voice_target_during_hunt(player_id, player_pos)
+		return
 
 	# Active phase: react to voice (behavioral tell)
 	if _state == EntityState.ACTIVE and not _is_voice_reacting:

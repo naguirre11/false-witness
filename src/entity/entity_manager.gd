@@ -47,6 +47,20 @@ const HUNT_COOLDOWNS := {
 	AggressionPhase.FURIOUS: 25.0,  # 25 seconds
 }
 
+## Entity type registry - maps entity names to scene paths and evidence types
+const ENTITY_TYPES := {
+	"Listener": {
+		"scene": "res://src/entity/entities/listener.gd",
+		"evidence": [
+			EvidenceEnums.EvidenceType.FREEZING_TEMPERATURE,
+			EvidenceEnums.EvidenceType.GHOST_WRITING,
+			EvidenceEnums.EvidenceType.AURA_PATTERN,
+		],
+		"behavioral_tell": "voice_reactive",
+		"description": "Reacts strongly to player voice. Triggers instant hunts when players speak during dormant phase.",
+	},
+}
+
 ## Warning phase duration in seconds before hunt starts
 const WARNING_PHASE_DURATION := 3.0
 
@@ -262,6 +276,37 @@ func get_favorite_room() -> String:
 	return _favorite_room
 
 
+## Gets available entity type names.
+func get_entity_type_names() -> Array[String]:
+	var names: Array[String] = []
+	for key in ENTITY_TYPES.keys():
+		names.append(key)
+	return names
+
+
+## Gets entity info by type name.
+func get_entity_info(entity_type: String) -> Dictionary:
+	if ENTITY_TYPES.has(entity_type):
+		return ENTITY_TYPES[entity_type]
+	return {}
+
+
+## Gets evidence types for an entity type.
+func get_entity_evidence_types(entity_type: String) -> Array:
+	var info := get_entity_info(entity_type)
+	if info.has("evidence"):
+		return info.evidence
+	return []
+
+
+## Selects a random entity type for the match.
+func select_random_entity_type() -> String:
+	var types := get_entity_type_names()
+	if types.is_empty():
+		return ""
+	return types[randi() % types.size()]
+
+
 ## Attempts to start a hunt from the entity's current position.
 ## Returns true if warning phase started, false if cannot hunt.
 ## Note: Hunt doesn't start immediately - goes through warning phase first.
@@ -318,6 +363,59 @@ func get_warning_time_remaining() -> float:
 	if not _in_warning_phase:
 		return 0.0
 	return _warning_timer
+
+
+## Requests a voice-triggered hunt from the Listener entity.
+## Voice hunts skip the warning phase and start immediately.
+## speaker_id: The player ID who triggered the hunt
+func request_voice_triggered_hunt(entity: Node, speaker_id: int) -> bool:
+	if not _is_server:
+		return false
+
+	if _is_hunting or _in_warning_phase:
+		return false
+
+	if entity != _active_entity:
+		push_warning("[EntityManager] Voice hunt requested by non-active entity")
+		return false
+
+	# Voice hunts skip aggression phase check - can happen anytime
+	# Also skip cooldown check for voice-triggered hunts
+
+	var entity_position := Vector3.ZERO
+	if entity is Node3D:
+		entity_position = (entity as Node3D).global_position
+
+	# Emit hunt_starting for protection items
+	EventBus.hunt_starting.emit(entity_position, entity)
+
+	# Check if hunt was prevented
+	if _hunt_was_prevented:
+		_hunt_was_prevented = false
+		print("[EntityManager] Voice-triggered hunt prevented by protection item")
+		return false
+
+	# Start hunt immediately (no warning phase for voice triggers)
+	_start_hunt()
+
+	# Set the speaker as the initial target
+	if entity.has_method("set_hunt_target"):
+		var speaker := _find_player_by_id(speaker_id)
+		if speaker:
+			entity.set_hunt_target(speaker)
+
+	print("[EntityManager] Voice-triggered hunt started (speaker: %d)" % speaker_id)
+	return true
+
+
+## Finds a player node by their ID.
+func _find_player_by_id(player_id: int) -> Node:
+	var player_group := get_tree().get_nodes_in_group("players")
+	for player in player_group:
+		var pid := _get_player_id_from_node(player)
+		if pid == player_id:
+			return player
+	return null
 
 
 ## Ends the current hunt.
@@ -587,9 +685,9 @@ func _on_entity_manifestation_witnessed(witness_ids: Array, location: Vector3) -
 	# Use first witness as primary collector
 	var collector_id: int = witness_ids[0]
 
-	# Collect the evidence
+	# Collect the evidence (no equipment used for visual manifestations)
 	var evidence: Evidence = evidence_manager.collect_evidence(
-		EvidenceEnums.EvidenceType.VISUAL_MANIFESTATION, collector_id, location, quality, ""  # No equipment used
+		EvidenceEnums.EvidenceType.VISUAL_MANIFESTATION, collector_id, location, quality, ""
 	)
 
 	if evidence:

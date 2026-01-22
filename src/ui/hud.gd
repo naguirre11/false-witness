@@ -153,9 +153,9 @@ func set_timer(time_remaining: float, phase_name: String) -> void:
 
 	# Visual warning when time low
 	if time_remaining <= 60.0:
-		_timer_label.modulate = Color(1.0, 0.3, 0.3)
+		_timer_label.modulate = DesignTokens.COLORS.text_danger
 	elif time_remaining <= 120.0:
-		_timer_label.modulate = Color(1.0, 0.7, 0.3)
+		_timer_label.modulate = DesignTokens.COLORS.accent_warning
 	else:
 		_timer_label.modulate = Color.WHITE
 
@@ -177,7 +177,7 @@ func _on_game_state_changed(_old_state: int, new_state: int) -> void:
 		4:  # HUNT
 			visible = true
 			_phase_label.text = "HUNT!"
-			_timer_label.modulate = Color(1.0, 0.3, 0.3)
+			_timer_label.modulate = DesignTokens.COLORS.text_danger
 		5:  # DELIBERATION
 			visible = true
 			_phase_label.text = "Deliberation"
@@ -217,7 +217,7 @@ func _update_hotbar_highlight() -> void:
 	for i in range(slots.size()):
 		var slot_panel: PanelContainer = slots[i]
 		if i == _active_slot:
-			slot_panel.modulate = Color(1.2, 1.2, 0.8)  # Highlight
+			slot_panel.modulate = DesignTokens.COLORS.results_gold  # Highlight
 		else:
 			slot_panel.modulate = Color.WHITE
 

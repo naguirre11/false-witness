@@ -271,7 +271,7 @@
         "gdlint src/ scenes/ passes"
       ],
       "priority": 16,
-      "passes": false,
+      "passes": true,
       "notes": "EntityManager randomly selects spawn points"
     },
     {
@@ -287,7 +287,7 @@
         "gdlint src/ passes"
       ],
       "priority": 17,
-      "passes": false,
+      "passes": true,
       "notes": "Random selection at match start"
     },
     {

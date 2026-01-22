@@ -255,7 +255,7 @@
         "gdlint scenes/ passes"
       ],
       "priority": 15,
-      "passes": false,
+      "passes": true,
       "notes": "Entity uses NavigationAgent3D for movement"
     },
     {

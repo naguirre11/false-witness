@@ -103,6 +103,24 @@ func join_lobby_by_code(code: String) -> void:
 	# Lobby state will be initialized in _on_steam_lobby_joined callback
 
 
+## Joins a lobby by IP address (ENet fallback when Steam unavailable).
+func join_lobby_by_ip(address: String, port: int = NetworkManager.DEFAULT_PORT) -> void:
+	if is_in_lobby:
+		push_warning("[LobbyManager] Already in a lobby")
+		return
+
+	if SteamManager.is_steam_running:
+		push_warning("[LobbyManager] Steam available - use join_lobby_by_code() instead")
+
+	NetworkManager.join_game(address, port)
+	# Lobby state will be initialized when connected
+
+
+## Returns true if Steam is available for lobby codes.
+func is_steam_available() -> bool:
+	return SteamManager.is_steam_running
+
+
 ## Internal: Sets up local lobby state (called after network/Steam lobby is ready)
 func _setup_local_lobby() -> void:
 	_reset_lobby_state()

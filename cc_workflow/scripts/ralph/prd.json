@@ -303,7 +303,7 @@
         "gdlint scenes/ passes"
       ],
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "notes": "Horror atmosphere; flashlight should feel necessary"
     },
     {
@@ -319,7 +319,7 @@
         "gdlint scenes/ passes"
       ],
       "priority": 19,
-      "passes": false,
+      "passes": true,
       "notes": "Vertex lighting style for PS1/PS2 aesthetic"
     },
     {
@@ -335,7 +335,7 @@
         "gdlint scenes/ passes"
       ],
       "priority": 20,
-      "passes": false,
+      "passes": true,
       "notes": "Layer 1 (World) for static geometry"
     },
     {

@@ -131,7 +131,7 @@ func _update_collected_display() -> void:
 		var quality_name := EvidenceEnums.get_quality_name(_evidence.quality)
 		_quality_label.text = "Quality: %s" % quality_name
 		if _evidence.quality == EvidenceEnums.ReadingQuality.WEAK:
-			_quality_label.modulate = Color(1.0, 0.8, 0.4)  # Orange for weak
+			_quality_label.modulate = DesignTokens.COLORS.accent_warning
 		else:
 			_quality_label.modulate = Color.WHITE
 		_quality_label.show()
@@ -180,7 +180,7 @@ func _update_uncollected_display() -> void:
 
 	if _verification_label:
 		_verification_label.text = "Status: Not collected"
-		_verification_label.modulate = Color(0.5, 0.5, 0.5)
+		_verification_label.modulate = DesignTokens.COLORS.text_muted
 		_verification_label.show()
 
 	if _conflict_container:
@@ -236,15 +236,15 @@ func _get_verification_description(state: EvidenceEnums.VerificationState) -> St
 func _get_trust_color(trust: EvidenceEnums.TrustLevel) -> Color:
 	match trust:
 		EvidenceEnums.TrustLevel.UNFALSIFIABLE:
-			return Color.GOLD
+			return DesignTokens.COLORS.trust_unfalsifiable
 		EvidenceEnums.TrustLevel.HIGH:
-			return Color.GREEN
+			return DesignTokens.COLORS.trust_high
 		EvidenceEnums.TrustLevel.VARIABLE:
-			return Color.YELLOW
+			return DesignTokens.COLORS.trust_variable
 		EvidenceEnums.TrustLevel.LOW:
-			return Color.ORANGE
+			return DesignTokens.COLORS.trust_low
 		EvidenceEnums.TrustLevel.SABOTAGE_RISK:
-			return Color.RED
+			return DesignTokens.COLORS.trust_sabotage
 		_:
 			return Color.WHITE
 
@@ -252,11 +252,11 @@ func _get_trust_color(trust: EvidenceEnums.TrustLevel) -> Color:
 func _get_verification_color(state: EvidenceEnums.VerificationState) -> Color:
 	match state:
 		EvidenceEnums.VerificationState.UNVERIFIED:
-			return Color(0.7, 0.7, 0.7)
+			return DesignTokens.COLORS.verification_unverified
 		EvidenceEnums.VerificationState.VERIFIED:
-			return Color.GREEN
+			return DesignTokens.COLORS.verification_verified
 		EvidenceEnums.VerificationState.CONTESTED:
-			return Color.ORANGE
+			return DesignTokens.COLORS.verification_contested
 		_:
 			return Color.WHITE
 
@@ -328,8 +328,8 @@ func _create_verification_ui() -> void:
 	# Add requirement label
 	_verify_requirement_label = Label.new()
 	_verify_requirement_label.name = "RequirementLabel"
-	_verify_requirement_label.add_theme_font_size_override("font_size", 12)
-	_verify_requirement_label.add_theme_color_override("font_color", Color.LIGHT_GRAY)
+	_verify_requirement_label.add_theme_font_size_override("font_size", DesignTokens.FONT_SIZES.xs)
+	_verify_requirement_label.add_theme_color_override("font_color", DesignTokens.COLORS.text_secondary)
 	_verify_container.add_child(_verify_requirement_label)
 
 	# Add verify button
@@ -374,7 +374,7 @@ func _update_verification_ui() -> void:
 		# VerificationManager.StalenessLevel.VERY_STALE = 2
 		if staleness == 2:
 			_verify_requirement_label.text = "Too old to verify (>180s)"
-			_verify_requirement_label.modulate = Color.RED
+			_verify_requirement_label.modulate = DesignTokens.COLORS.text_danger
 			_verify_button.disabled = true
 			_verify_button.text = "Cannot Verify"
 			return

@@ -36,7 +36,7 @@
         "gdlint passes (no code changes)"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Design first, build second. Small house: living room, kitchen, 2 bedrooms, bathroom, basement, attic."
     },
     {

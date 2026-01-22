@@ -911,3 +911,391 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 6.5, -4)
 
 [node name="Attic_E3" type="Marker3D" parent="EvidencePoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5, -5.5)
+
+[node name="MainHallway" type="Node3D" parent="Rooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0, 0)
+
+[node name="Floor" type="CSGBox3D" parent="Rooms/MainHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(1.5, 0.1, 4)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallWest" type="CSGBox3D" parent="Rooms/MainHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 1.4, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.1, 2.8, 4)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallEastBottom" type="CSGBox3D" parent="Rooms/MainHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 1.4, 1.5)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.1, 2.8, 1)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallEastTop" type="CSGBox3D" parent="Rooms/MainHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 2.5, 0.5)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.1, 0.6, 3)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallNorth" type="CSGBox3D" parent="Rooms/MainHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -2.05)
+use_collision = true
+collision_layer = 1
+size = Vector3(1.5, 2.8, 0.1)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Ceiling" type="CSGBox3D" parent="Rooms/MainHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.85, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(1.5, 0.1, 4)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="DoorwayToEntryway" type="Marker3D" parent="Rooms/MainHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.75, 0, 0.5)
+
+[node name="DoorwayToKitchen" type="Marker3D" parent="Rooms/MainHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
+
+[node name="BasementStairsDown" type="Marker3D" parent="Rooms/MainHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.5)
+
+[node name="StairsUpPosition" type="Marker3D" parent="Rooms/MainHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, 0)
+
+[node name="LightFixturePosition" type="Marker3D" parent="Rooms/MainHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7, 0)
+
+[node name="Stairs" type="Node3D" parent="Rooms/MainHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="Step1" type="CSGBox3D" parent="Rooms/MainHallway/Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.1, -0.5)
+use_collision = true
+collision_layer = 1
+size = Vector3(1, 0.2, 0.3)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="Step2" type="CSGBox3D" parent="Rooms/MainHallway/Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.3, -0.8)
+use_collision = true
+collision_layer = 1
+size = Vector3(1, 0.2, 0.3)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="Step3" type="CSGBox3D" parent="Rooms/MainHallway/Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.5, -1.1)
+use_collision = true
+collision_layer = 1
+size = Vector3(1, 0.2, 0.3)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="Step4" type="CSGBox3D" parent="Rooms/MainHallway/Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.7, -1.4)
+use_collision = true
+collision_layer = 1
+size = Vector3(1, 0.2, 0.3)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="Step5" type="CSGBox3D" parent="Rooms/MainHallway/Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.9, -1.7)
+use_collision = true
+collision_layer = 1
+size = Vector3(1, 0.2, 0.3)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="Landing" type="CSGBox3D" parent="Rooms/MainHallway/Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 1.1, -2.2)
+use_collision = true
+collision_layer = 1
+size = Vector3(1, 0.1, 0.8)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="Step6" type="CSGBox3D" parent="Rooms/MainHallway/Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, 1.3, -2.2)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.8)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="Step7" type="CSGBox3D" parent="Rooms/MainHallway/Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 1.5, -2.2)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.8)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="Step8" type="CSGBox3D" parent="Rooms/MainHallway/Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 1.7, -2.2)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.8)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="Step9" type="CSGBox3D" parent="Rooms/MainHallway/Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0, 1.9, -2.2)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.8)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="Step10" type="CSGBox3D" parent="Rooms/MainHallway/Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.3, 2.1, -2.2)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.8)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="Step11" type="CSGBox3D" parent="Rooms/MainHallway/Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 2.3, -2.2)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.8)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="Step12" type="CSGBox3D" parent="Rooms/MainHallway/Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.9, 2.5, -2.2)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.8)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="Step13" type="CSGBox3D" parent="Rooms/MainHallway/Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 2.7, -2.2)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.8)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="Step14" type="CSGBox3D" parent="Rooms/MainHallway/Stairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 2.9, -2.2)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.8)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="UpperHallway" type="Node3D" parent="Rooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -2)
+
+[node name="Floor" type="CSGBox3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(8, 0.1, 1.5)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallNorthLeft" type="CSGBox3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1.4, -0.8)
+use_collision = true
+collision_layer = 1
+size = Vector3(2, 2.8, 0.1)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallNorthMidLeft" type="CSGBox3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.25, 2.5, -0.8)
+use_collision = true
+collision_layer = 1
+size = Vector3(1.5, 0.6, 0.1)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallNorthCenter" type="CSGBox3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 1.4, -0.8)
+use_collision = true
+collision_layer = 1
+size = Vector3(1, 2.8, 0.1)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallNorthMidRight" type="CSGBox3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.75, 2.5, -0.8)
+use_collision = true
+collision_layer = 1
+size = Vector3(1.5, 0.6, 0.1)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallNorthRight" type="CSGBox3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.4, -0.8)
+use_collision = true
+collision_layer = 1
+size = Vector3(2, 2.8, 0.1)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallSouth" type="CSGBox3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0.8)
+use_collision = true
+collision_layer = 1
+size = Vector3(8, 2.8, 0.1)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallWest" type="CSGBox3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.05, 1.4, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.1, 2.8, 1.5)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallEast" type="CSGBox3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.05, 1.4, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.1, 2.8, 1.5)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Ceiling" type="CSGBox3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.85, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(8, 0.1, 1.5)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="DoorwayToBathroom" type="Marker3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0, -0.75)
+
+[node name="DoorwayToMasterBedroom" type="Marker3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, -0.75)
+
+[node name="DoorwayToSecondBedroom" type="Marker3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, -0.75)
+
+[node name="StairsDownPosition" type="Marker3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+
+[node name="AtticAccessPosition" type="Marker3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+[node name="LightFixturePosition" type="Marker3D" parent="Rooms/UpperHallway"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7, 0)
+
+[node name="BasementStairs" type="Node3D" parent="Rooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0, 2)
+
+[node name="StairwellFloor" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(1.5, 0.1, 2)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallWest" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, -0.05, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.1, 2.9, 2)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallEast" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, -0.05, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.1, 2.9, 2)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="StepDown1" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, -0.8)
+use_collision = true
+collision_layer = 1
+size = Vector3(1.4, 0.2, 0.3)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="StepDown2" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, -0.5)
+use_collision = true
+collision_layer = 1
+size = Vector3(1.4, 0.2, 0.3)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="StepDown3" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -0.2)
+use_collision = true
+collision_layer = 1
+size = Vector3(1.4, 0.2, 0.3)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="StepDown4" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.7, 0.1)
+use_collision = true
+collision_layer = 1
+size = Vector3(1.4, 0.2, 0.3)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="StepDown5" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.9, 0.4)
+use_collision = true
+collision_layer = 1
+size = Vector3(1.4, 0.2, 0.3)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="StepDown6" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.1, 0.7)
+use_collision = true
+collision_layer = 1
+size = Vector3(1.4, 0.2, 0.3)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="LandingMid" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3, 1.1)
+use_collision = true
+collision_layer = 1
+size = Vector3(1.4, 0.1, 0.6)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="StepDown7" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, -1.5, 1.1)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.6)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="StepDown8" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, -1.7, 1.1)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.6)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="StepDown9" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1, -1.9, 1.1)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.6)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="StepDown10" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.4, -2.1, 1.1)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.6)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="StepDown11" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, -2.3, 1.1)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.6)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="StepDown12" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0, -2.5, 1.1)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.6)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="StepDown13" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.3, -2.7, 1.1)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.6)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="StepDown14" type="CSGBox3D" parent="Rooms/BasementStairs"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, -2.9, 1.1)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.3, 0.2, 0.6)
+material = SubResource("StandardMaterial3D_furniture")

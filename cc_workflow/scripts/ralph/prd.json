@@ -69,7 +69,7 @@
         "gdlint scenes/ passes"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Low-poly models; vertex colors or 256x256 textures"
     },
     {

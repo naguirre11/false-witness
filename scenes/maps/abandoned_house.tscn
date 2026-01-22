@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://d2map_abandoned_house"]
+[gd_scene load_steps=4 format=3 uid="uid://d2map_abandoned_house"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_1"]
 vertices = PackedVector3Array()
@@ -10,6 +10,9 @@ agent_max_slope = 45.0
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
 albedo_color = Color(0.6, 0.55, 0.5, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_furniture"]
+albedo_color = Color(0.35, 0.25, 0.2, 1)
 
 [node name="AbandonedHouse" type="Node3D"]
 
@@ -80,6 +83,123 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
 [node name="FrontDoorPosition" type="Marker3D" parent="Rooms/Entryway"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
 
+[node name="LivingRoom" type="Node3D" parent="Rooms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4.5)
+
+[node name="Floor" type="CSGBox3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(5, 0.1, 5)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallNorth" type="CSGBox3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -2.55)
+use_collision = true
+collision_layer = 1
+size = Vector3(5, 2.8, 0.1)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallEast" type="CSGBox3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.55, 1.4, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.1, 2.8, 5)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallWestTop" type="CSGBox3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.55, 2.5, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.1, 0.6, 5)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallWestBottom" type="CSGBox3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.55, 1.4, -1.5)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.1, 2.8, 2)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallWestDoorBottom" type="CSGBox3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.55, 1.4, 1.5)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.1, 2.8, 2)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallSouthLeft" type="CSGBox3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.75, 1.4, 2.55)
+use_collision = true
+collision_layer = 1
+size = Vector3(1.5, 2.8, 0.1)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallSouthRight" type="CSGBox3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.75, 1.4, 2.55)
+use_collision = true
+collision_layer = 1
+size = Vector3(1.5, 2.8, 0.1)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="WallSouthTop" type="CSGBox3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 2.55)
+use_collision = true
+collision_layer = 1
+size = Vector3(2, 0.6, 0.1)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Ceiling" type="CSGBox3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.85, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(5, 0.1, 5)
+material = SubResource("StandardMaterial3D_wall")
+
+[node name="Couch" type="CSGBox3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.35, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(1, 0.7, 2)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="CouchBack" type="CSGBox3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.95, 0.65, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.1, 0.6, 2)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="TVStand" type="CSGBox3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.35, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.5, 0.7, 1.5)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="TV" type="CSGBox3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 1.05, 0)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.1, 0.7, 1.2)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="Chair1" type="CSGBox3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 1.5)
+use_collision = true
+collision_layer = 1
+size = Vector3(0.7, 0.6, 0.7)
+material = SubResource("StandardMaterial3D_furniture")
+
+[node name="DoorwayToEntryway" type="Marker3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.5)
+
+[node name="DoorwayToKitchen" type="Marker3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, 0, 0)
+
+[node name="LightFixturePosition" type="Marker3D" parent="Rooms/LivingRoom"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7, 0)
+
 [node name="Spawns" type="Node3D" parent="."]
 
 [node name="Spawn0" type="Marker3D" parent="Spawns"]
@@ -106,3 +226,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0, -0.5)
 navigation_mesh = SubResource("NavigationMesh_1")
 
 [node name="EvidencePoints" type="Node3D" parent="."]
+
+[node name="LivingRoom_E1" type="Marker3D" parent="EvidencePoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.5, -4)
+
+[node name="LivingRoom_E2" type="Marker3D" parent="EvidencePoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.5, -5.5)
+
+[node name="LivingRoom_E3" type="Marker3D" parent="EvidencePoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.5, -6)

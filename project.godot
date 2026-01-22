@@ -36,6 +36,7 @@ ReadilyApparentManager="*res://src/evidence/readily_apparent_manager.gd"
 ConflictDetector="*res://src/evidence/conflict_detector.gd"
 CultistManager="*res://src/cultist/cultist_manager.gd"
 VoiceManager="*res://src/voice/voice_manager.gd"
+DesignTokens="*res://themes/design_tokens.gd"
 
 [display]
 

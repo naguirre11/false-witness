@@ -35,6 +35,7 @@ DeliberationManager="*res://src/deliberation/deliberation_manager.gd"
 ReadilyApparentManager="*res://src/evidence/readily_apparent_manager.gd"
 ConflictDetector="*res://src/evidence/conflict_detector.gd"
 CultistManager="*res://src/cultist/cultist_manager.gd"
+VoiceManager="*res://src/voice/voice_manager.gd"
 
 [display]
 

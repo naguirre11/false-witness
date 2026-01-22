@@ -401,8 +401,8 @@
         "gdlint src/ passes"
       ],
       "priority": 24,
-      "passes": false,
-      "notes": "Dormant = listening for voice; active = normal behavior"
+      "passes": true,
+      "notes": "Implemented in FW-046-01 - Dormant = listening for voice; active = normal behavior"
     },
     {
       "id": "FW-046-03",
@@ -417,8 +417,8 @@
         "gdlint src/ passes"
       ],
       "priority": 25,
-      "passes": false,
-      "notes": "Core mechanic: silence is survival"
+      "passes": true,
+      "notes": "Implemented in FW-046-01 - Core mechanic: silence is survival"
     },
     {
       "id": "FW-046-04",
@@ -432,8 +432,8 @@
         "gdlint src/ passes"
       ],
       "priority": 26,
-      "passes": false,
-      "notes": "No warning = high danger"
+      "passes": true,
+      "notes": "Implemented in FW-046-01 - No warning = high danger"
     },
     {
       "id": "FW-046-05",
@@ -448,8 +448,8 @@
         "gdlint src/ passes"
       ],
       "priority": 27,
-      "passes": false,
-      "notes": "Teaches players when silence is critical"
+      "passes": true,
+      "notes": "Audio methods in EntityAudioManager, sound assets still needed"
     },
     {
       "id": "FW-046-06",

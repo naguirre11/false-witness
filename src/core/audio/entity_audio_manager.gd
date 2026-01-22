@@ -83,6 +83,10 @@ var _silence_timer: float = 0.0
 var _current_aggression_phase: int = 0  # 0=dormant, 1=active, 2=aggressive, 3=furious
 var _aggression_ambient_modifier_db: float = 0.0
 
+## Listener dormant audio state
+var _listener_dormant_player: AudioStreamPlayer3D = null
+var _listener_dormant_entity: Node = null
+
 
 func _ready() -> void:
 	_find_audio_manager()
@@ -215,9 +219,8 @@ func _on_hunt_started() -> void:
 	# Play hunt start stinger
 	if _entity_config.hunt_start_sound and _entity:
 		var pos: Vector3 = _entity.global_position if _entity is Node3D else Vector3.ZERO
-		_play_sound_3d(
-			_entity_config.hunt_start_sound, pos, BUS_SFX, _entity_config.hunt_audio_volume_db + 3.0  # Louder for impact
-		)
+		var hunt_volume := _entity_config.hunt_audio_volume_db + 3.0  # Louder
+		_play_sound_3d(_entity_config.hunt_start_sound, pos, BUS_SFX, hunt_volume)
 
 	# Start hunt ambient loop
 	if _entity_config.hunt_ambient_loop and _entity:
@@ -646,3 +649,81 @@ func _stop_all_entity_audio() -> void:
 	_stop_ambient_player()
 	_stop_hunt_ambient()
 	_end_silence_cue()
+	_stop_listener_dormant_internal()
+
+
+# --- Listener Dormant Audio (FW-046-05) ---
+
+
+## Plays the Listener's dormant phase ambient sound.
+## Called by Listener entity when entering dormant (listening) phase.
+## Audio is spatial - audible within ~10m with position tracking.
+func play_listener_dormant(listener_entity: Node, volume_scale: float = 1.0) -> void:
+	if not _audio_manager:
+		return
+
+	# Stop any existing dormant audio
+	_stop_listener_dormant_internal()
+
+	if not listener_entity or not listener_entity is Node3D:
+		return
+
+	_listener_dormant_entity = listener_entity
+
+	# Get dormant sound from entity config or use default placeholder
+	var dormant_sound: AudioStream = null
+	if _entity_config and _entity_config.has_method("get_dormant_ambient_sound"):
+		dormant_sound = _entity_config.get_dormant_ambient_sound()
+
+	# Fallback: if no specific sound, try to get generic ambient
+	if not dormant_sound and _entity_config:
+		dormant_sound = _entity_config.get_random_ambient_vocalization()
+
+	if not dormant_sound:
+		# No audio available - just track the entity
+		print("[EntityAudioManager] No dormant sound configured for Listener")
+		return
+
+	# Calculate volume with scale
+	var volume_db: float = -12.0 + (volume_scale - 1.0) * 6.0  # Quiet base, scaled
+
+	# Use close-range spatial settings for subtle detection
+	var unit_size: float = 2.0  # 2m unit size for subtle falloff
+	var max_distance: float = 10.0  # Audible within 10m as specified
+
+	_listener_dormant_player = AudioStreamPlayer3D.new()
+	_listener_dormant_player.stream = dormant_sound
+	_listener_dormant_player.volume_db = volume_db
+	_listener_dormant_player.unit_size = unit_size
+	_listener_dormant_player.max_distance = max_distance
+	_listener_dormant_player.bus = BUS_AMBIENT
+	_listener_dormant_player.attenuation_model = AudioStreamPlayer3D.ATTENUATION_INVERSE_DISTANCE
+
+	# Attach to entity so it follows position
+	(listener_entity as Node3D).add_child(_listener_dormant_player)
+
+	# Enable looping if supported
+	if dormant_sound.has_method("set_loop"):
+		dormant_sound.set_loop(true)
+
+	_listener_dormant_player.play()
+	print("[EntityAudioManager] Listener dormant audio started")
+
+
+## Stops the Listener's dormant phase ambient sound.
+## Called by Listener entity when exiting dormant phase.
+func stop_listener_dormant(listener_entity: Node) -> void:
+	if _listener_dormant_entity != listener_entity:
+		return  # Not the entity we're tracking
+
+	_stop_listener_dormant_internal()
+
+
+## Internal method to stop dormant audio.
+func _stop_listener_dormant_internal() -> void:
+	if _listener_dormant_player and is_instance_valid(_listener_dormant_player):
+		_listener_dormant_player.stop()
+		_listener_dormant_player.queue_free()
+		_listener_dormant_player = null
+
+	_listener_dormant_entity = null

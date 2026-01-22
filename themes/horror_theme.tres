@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=6 format=3 uid="uid://c04fhkrvf0bnf"]
+[gd_resource type="Theme" load_steps=22 format=3 uid="uid://c04fhkrvf0bnf"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 bg_color = Color(0.15, 0.15, 0.18, 1)
@@ -35,6 +35,124 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_danger_normal"]
+bg_color = Color(0.8, 0.1, 0.1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_danger_hover"]
+bg_color = Color(1.0, 0.2, 0.2, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_danger_pressed"]
+bg_color = Color(0.6, 0.1, 0.1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ghost_normal"]
+bg_color = Color(0, 0, 0, 0)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ghost_hover"]
+bg_color = Color(0.3, 0.3, 0.3, 0.2)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ghost_pressed"]
+bg_color = Color(0.3, 0.3, 0.3, 0.3)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_corrupted_panel"]
+bg_color = Color(0.2, 0.1, 0.2, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6, 0.2, 0.6, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_optionbutton_normal"]
+bg_color = Color(0.1, 0.1, 0.12, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_optionbutton_hover"]
+bg_color = Color(0.15, 0.15, 0.18, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slider_bg"]
+bg_color = Color(0.1, 0.1, 0.12, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slider_fill"]
+bg_color = Color(0.3, 0.6, 0.9, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_checkbox_normal"]
+bg_color = Color(0.1, 0.1, 0.12, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.5, 0.5, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_checkbox_hover"]
+bg_color = Color(0.15, 0.15, 0.18, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.7, 0.7, 0.7, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_checkbox_pressed"]
+bg_color = Color(0.3, 0.6, 0.9, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.6, 0.9, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
 [resource]
 Panel/styles/panel = SubResource("StyleBoxFlat_panel")
 Button/colors/font_color = Color(0.9, 0.9, 0.9, 1)
@@ -50,3 +168,33 @@ LineEdit/colors/font_color = Color(0.9, 0.9, 0.9, 1)
 LineEdit/colors/caret_color = Color(0.9, 0.9, 0.9, 1)
 LineEdit/font_sizes/font_size = 16
 LineEdit/styles/normal = SubResource("StyleBoxFlat_lineedit")
+DangerButton/base_type = "Button"
+DangerButton/colors/font_color = Color(0.9, 0.9, 0.9, 1)
+DangerButton/colors/font_hover_color = Color(1, 1, 1, 1)
+DangerButton/colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
+DangerButton/font_sizes/font_size = 16
+DangerButton/styles/normal = SubResource("StyleBoxFlat_danger_normal")
+DangerButton/styles/hover = SubResource("StyleBoxFlat_danger_hover")
+DangerButton/styles/pressed = SubResource("StyleBoxFlat_danger_pressed")
+GhostButton/base_type = "Button"
+GhostButton/colors/font_color = Color(0.7, 0.7, 0.7, 1)
+GhostButton/colors/font_hover_color = Color(0.9, 0.9, 0.9, 1)
+GhostButton/colors/font_pressed_color = Color(0.6, 0.6, 0.6, 1)
+GhostButton/font_sizes/font_size = 16
+GhostButton/styles/normal = SubResource("StyleBoxFlat_ghost_normal")
+GhostButton/styles/hover = SubResource("StyleBoxFlat_ghost_hover")
+GhostButton/styles/pressed = SubResource("StyleBoxFlat_ghost_pressed")
+CorruptedPanel/base_type = "Panel"
+CorruptedPanel/styles/panel = SubResource("StyleBoxFlat_corrupted_panel")
+OptionButton/colors/font_color = Color(0.9, 0.9, 0.9, 1)
+OptionButton/colors/font_hover_color = Color(1, 1, 1, 1)
+OptionButton/font_sizes/font_size = 16
+OptionButton/styles/normal = SubResource("StyleBoxFlat_optionbutton_normal")
+OptionButton/styles/hover = SubResource("StyleBoxFlat_optionbutton_hover")
+HSlider/styles/slider = SubResource("StyleBoxFlat_slider_bg")
+HSlider/styles/grabber_area = SubResource("StyleBoxFlat_slider_fill")
+HSlider/styles/grabber_area_highlight = SubResource("StyleBoxFlat_slider_fill")
+CheckBox/colors/font_color = Color(0.9, 0.9, 0.9, 1)
+CheckBox/colors/font_hover_color = Color(1, 1, 1, 1)
+CheckBox/colors/font_pressed_color = Color(0.8, 0.8, 0.8, 1)
+CheckBox/font_sizes/font_size = 16

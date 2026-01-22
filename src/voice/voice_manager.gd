@@ -43,6 +43,9 @@ var _muted_players: Dictionary = {}  # steam_id -> true
 # Voice players for spatial audio
 var _voice_players: Dictionary = {}  # steam_id -> VoicePlayer
 
+# Network channel for voice data
+const VOICE_CHANNEL: int = 1  # Separate channel from game packets
+
 
 func _ready() -> void:
 	# Set up push-to-talk input action if it doesn't exist
@@ -51,6 +54,9 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	# Read incoming voice packets
+	_read_voice_packets()
+
 	if not is_voice_enabled or local_muted:
 		if voice_state != VoiceEnums.VoiceState.IDLE:
 			_set_voice_state(VoiceEnums.VoiceState.IDLE)
@@ -125,6 +131,91 @@ func get_voice_amplitude() -> float:
 	# Steam doesn't expose amplitude directly, but we can estimate from voice data
 	# For now return a simple indicator based on transmission state
 	return 1.0 if voice_state == VoiceEnums.VoiceState.TRANSMITTING else 0.0
+
+
+# =============================================================================
+# PUBLIC API - Network Voice Transmission (FW-014-07)
+# =============================================================================
+
+
+## Send voice data to all nearby players.
+## Call this from _capture_and_send_voice when data is captured.
+func broadcast_voice_data(voice_data: PackedByteArray) -> void:
+	if not SteamManager.is_steam_running:
+		return
+
+	if SteamManager.current_lobby_id == 0:
+		return  # Not in a lobby
+
+	# Package voice data with sender info and timestamp
+	var packet := {
+		"type": "voice",
+		"sender": SteamManager.steam_id,
+		"timestamp": Time.get_ticks_msec(),
+		"data": voice_data,
+	}
+
+	# Send to all lobby members using unreliable channel for low latency
+	_send_voice_packet_to_lobby(packet)
+
+
+## Process received voice packet from another player.
+func receive_voice_data(sender_id: int, voice_data: PackedByteArray, timestamp: int) -> void:
+	# Check if player is muted
+	if is_player_muted(sender_id):
+		return
+
+	# Emit signal for playback system
+	voice_activity.emit(sender_id, 1.0)
+
+	# TODO: Forward to VoicePlayer for spatial audio playback
+	# For now, just log that we received voice
+	var _unused := timestamp  # Will be used for jitter buffer
+
+
+# =============================================================================
+# INTERNAL - Voice Network
+# =============================================================================
+
+
+func _send_voice_packet_to_lobby(packet: Dictionary) -> void:
+	if not SteamManager.is_steam_running:
+		return
+
+	var packet_data: PackedByteArray = var_to_bytes(packet)
+
+	# Get lobby members and send to each (except self)
+	var members := SteamManager.get_lobby_members()
+	for member_id in members:
+		if member_id != SteamManager.steam_id:
+			# Use unreliable channel for voice (low latency, packet loss OK)
+			Steam.sendP2PPacket(
+				member_id,
+				packet_data,
+				Steam.P2P_SEND_UNRELIABLE,
+				VOICE_CHANNEL
+			)
+
+
+func _read_voice_packets() -> void:
+	if not SteamManager.is_steam_running:
+		return
+
+	# Read voice packets from channel 1 (separate from game data on channel 0)
+	var packet_size: int = Steam.getAvailableP2PPacketSize(VOICE_CHANNEL)
+	while packet_size > 0:
+		var packet: Dictionary = Steam.readP2PPacket(packet_size, VOICE_CHANNEL)
+
+		if packet.has("data") and packet.has("steam_id_remote"):
+			var data: Dictionary = bytes_to_var(packet.data)
+			if data.has("type") and data.type == "voice":
+				var sender_id: int = data.get("sender", packet.steam_id_remote)
+				var voice_data: PackedByteArray = data.get("data", PackedByteArray())
+				var timestamp: int = data.get("timestamp", 0)
+				receive_voice_data(sender_id, voice_data, timestamp)
+
+		# Check for more packets
+		packet_size = Steam.getAvailableP2PPacketSize(VOICE_CHANNEL)
 
 
 # =============================================================================
@@ -223,6 +314,9 @@ func _capture_and_send_voice() -> void:
 		var voice_data: PackedByteArray = voice_result.buffer
 		if voice_data.size() > 0:
 			voice_data_captured.emit(voice_data)
+
+			# Send voice data to other players
+			broadcast_voice_data(voice_data)
 
 			# Emit activity signal for entity detection
 			voice_activity.emit(SteamManager.steam_id, 1.0)

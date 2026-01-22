@@ -385,7 +385,7 @@
         "gdlint src/ passes"
       ],
       "priority": 23,
-      "passes": false,
+      "passes": true,
       "notes": "File: src/entity/entities/listener.gd. Entity base class in src/entity/entity.gd"
     },
     {

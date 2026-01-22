@@ -170,7 +170,7 @@ func _add_entity_row(entity_type: String) -> void:
 			cell.add_theme_color_override("font_color", Color.WHITE)
 		else:
 			cell.text = "·"
-			cell.add_theme_color_override("font_color", Color(0.3, 0.3, 0.3))
+			cell.add_theme_color_override("font_color", DesignTokens.COLORS.text_muted)
 		cell.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		cell.custom_minimum_size = Vector2(40, 24)
 		cell.name = "Cell_%s_%d" % [entity_type, evidence_type]
@@ -216,7 +216,7 @@ func _update_visual_state() -> void:
 		var name_button := _grid.get_node_or_null("Entity_%s" % entity_type)
 		if name_button is Button:
 			if is_eliminated:
-				name_button.modulate = Color(0.4, 0.4, 0.4)
+				name_button.modulate = DesignTokens.COLORS.text_muted
 				name_button.disabled = true
 			else:
 				name_button.modulate = Color.WHITE
@@ -227,12 +227,12 @@ func _update_visual_state() -> void:
 			var cell := _grid.get_node_or_null("Cell_%s_%d" % [entity_type, evidence_type])
 			if cell is Label:
 				if is_eliminated:
-					cell.modulate = Color(0.4, 0.4, 0.4)
+					cell.modulate = DesignTokens.COLORS.text_muted
 				elif evidence_type in _collected_evidence:
 					# Highlight collected evidence columns
 					var entity_evidence: Array = ENTITY_EVIDENCE_MAP.get(entity_type, [])
 					if evidence_type in entity_evidence:
-						cell.add_theme_color_override("font_color", Color.GREEN)
+						cell.add_theme_color_override("font_color", DesignTokens.COLORS.accent_success)
 					cell.modulate = Color.WHITE
 				else:
 					cell.modulate = Color.WHITE
@@ -248,12 +248,12 @@ func _update_remaining_label() -> void:
 		for entity_type in ALL_ENTITIES:
 			if entity_type not in _eliminated_entities:
 				_remaining_label.text = "Match: %s" % entity_type
-				_remaining_label.add_theme_color_override("font_color", Color.GREEN)
+				_remaining_label.add_theme_color_override("font_color", DesignTokens.COLORS.accent_success)
 				break
 	else:
 		_remaining_label.text = "%d possible entities" % remaining
 		if remaining <= 3:
-			_remaining_label.add_theme_color_override("font_color", Color.YELLOW)
+			_remaining_label.add_theme_color_override("font_color", DesignTokens.COLORS.trust_variable)
 		else:
 			_remaining_label.add_theme_color_override("font_color", Color.WHITE)
 

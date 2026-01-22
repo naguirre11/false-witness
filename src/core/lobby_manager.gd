@@ -24,6 +24,7 @@ signal host_changed(new_host_peer_id: int, new_host_username: String)
 signal game_starting
 signal lobby_state_updated(slots: Array)
 signal player_kicked(peer_id: int, reason: String)
+signal lobby_code_received(code: String)
 
 # --- Constants ---
 
@@ -44,11 +45,13 @@ var game_started: bool = false  # Late join prevention flag
 var _slots: Array[LobbySlot] = []
 var _next_join_order: int = 0
 var _sync_timer: float = 0.0
+var _steam_lobby_code: String = ""  # 6-character lobby code for Steam
 
 
 func _ready() -> void:
 	_initialize_slots()
 	_connect_network_signals()
+	_connect_steam_signals()
 	print("[LobbyManager] Initialized - %d slots available" % MAX_PLAYERS)
 
 
@@ -66,15 +69,42 @@ func _process(delta: float) -> void:
 
 
 ## Creates a new lobby. Caller becomes the host.
+## If Steam is running, creates a Steam lobby with a shareable code.
 func create_lobby() -> void:
 	if is_in_lobby:
 		push_warning("[LobbyManager] Already in a lobby")
 		return
 
+	# Use Steam lobby if available
+	if SteamManager.is_steam_running:
+		SteamManager.create_lobby(MAX_PLAYERS)
+		# Lobby state will be initialized in _on_steam_lobby_created callback
+		return
+
+	# Fallback: require network connection for ENet mode
 	if NetworkManager.get_connection_state() == NetworkManager.ConnectionState.DISCONNECTED:
 		push_error("[LobbyManager] Must connect to network first")
 		return
 
+	_setup_local_lobby()
+
+
+## Joins an existing lobby using a 6-character code (Steam only).
+func join_lobby_by_code(code: String) -> void:
+	if is_in_lobby:
+		push_warning("[LobbyManager] Already in a lobby")
+		return
+
+	if not SteamManager.is_steam_running:
+		push_error("[LobbyManager] Steam lobby codes require Steam to be running")
+		return
+
+	SteamManager.join_lobby(code)
+	# Lobby state will be initialized in _on_steam_lobby_joined callback
+
+
+## Internal: Sets up local lobby state (called after network/Steam lobby is ready)
+func _setup_local_lobby() -> void:
 	_reset_lobby_state()
 	is_in_lobby = true
 	is_lobby_host = true
@@ -126,6 +156,11 @@ func leave_lobby() -> void:
 		# Host leaving closes the lobby
 		_send_lobby_packet(0, {"action": "lobby_closed", "reason": "Host left"})
 
+	# Leave Steam lobby if using Steam
+	if SteamManager.is_steam_running and SteamManager.current_lobby_id != 0:
+		SteamManager.leave_lobby()
+
+	_steam_lobby_code = ""
 	_reset_lobby_state()
 	NetworkManager.leave_game()
 
@@ -296,6 +331,11 @@ func is_late_join_prevented() -> bool:
 	return game_started
 
 
+## Returns the Steam lobby code (empty if not using Steam or no lobby).
+func get_lobby_code() -> String:
+	return _steam_lobby_code
+
+
 # =============================================================================
 # INTERNAL - Slot Management
 # =============================================================================
@@ -441,6 +481,18 @@ func _connect_network_signals() -> void:
 	NetworkManager.connection_state_changed.connect(_on_connection_state_changed)
 	NetworkManager.packet_received.connect(_on_packet_received)
 	NetworkManager.lobby_joined.connect(_on_network_lobby_joined)
+
+
+func _connect_steam_signals() -> void:
+	if not SteamManager.is_steam_running:
+		return
+
+	SteamManager.lobby_created.connect(_on_steam_lobby_created)
+	SteamManager.lobby_create_failed.connect(_on_steam_lobby_create_failed)
+	SteamManager.lobby_joined.connect(_on_steam_lobby_joined)
+	SteamManager.lobby_join_failed.connect(_on_steam_lobby_join_failed)
+	SteamManager.lobby_member_joined.connect(_on_steam_member_joined)
+	SteamManager.lobby_member_left.connect(_on_steam_member_left)
 
 
 func _send_lobby_packet(target: int, data: Dictionary) -> void:
@@ -613,3 +665,109 @@ func _handle_join_rejected(data: Dictionary) -> void:
 	NetworkManager.leave_game()
 
 	GameManager.change_state(GameManager.GameState.NONE)
+
+
+# =============================================================================
+# STEAM LOBBY INTEGRATION (FW-013-08)
+# =============================================================================
+
+
+func _on_steam_lobby_created(steam_lobby_id: int, code: String) -> void:
+	_steam_lobby_code = code
+
+	# Now set up the lobby state
+	_reset_lobby_state()
+	is_in_lobby = true
+	is_lobby_host = true
+	game_started = false
+
+	# Host uses Steam ID as peer ID
+	var host_id: int = SteamManager.steam_id
+	var host_name: String = SteamManager.steam_username
+	NetworkManager.local_peer_id = host_id  # Sync with NetworkManager
+
+	_add_player_to_slot(host_id, host_name, true)
+	host_peer_id = host_id
+
+	# Also start NetworkManager with this Steam lobby
+	NetworkManager.host_game(MAX_PLAYERS, false)
+
+	# Transition game state
+	GameManager.change_state(GameManager.GameState.LOBBY)
+
+	print("[LobbyManager] Steam lobby created - Code: %s (ID: %d)" % [code, steam_lobby_id])
+	lobby_created.emit(true)
+	lobby_code_received.emit(code)
+	EventBus.lobby_state_changed.emit(true, true)
+
+
+func _on_steam_lobby_create_failed(reason: String) -> void:
+	print("[LobbyManager] Steam lobby creation failed: %s" % reason)
+	lobby_closed.emit(reason)
+
+
+func _on_steam_lobby_joined(steam_lobby_id: int) -> void:
+	_steam_lobby_code = SteamManager.current_lobby_code
+
+	# Set up local lobby state as non-host
+	_reset_lobby_state()
+	is_in_lobby = true
+	is_lobby_host = false
+	game_started = false
+
+	# Get lobby owner as host
+	var owner_id: int = Steam.getLobbyOwner(steam_lobby_id)
+
+	# Use Steam ID as peer ID
+	var local_id: int = SteamManager.steam_id
+	var local_name: String = SteamManager.steam_username
+	NetworkManager.local_peer_id = local_id  # Sync with NetworkManager
+
+	# Add ourselves to a slot
+	_add_player_to_slot(local_id, local_name, false)
+	host_peer_id = owner_id
+
+	# Also start NetworkManager connection
+	NetworkManager.join_game(steam_lobby_id)
+
+	# Transition game state
+	GameManager.change_state(GameManager.GameState.LOBBY)
+
+	print("[LobbyManager] Joined Steam lobby - Code: %s (ID: %d)" % [
+		_steam_lobby_code, steam_lobby_id
+	])
+	lobby_joined.emit(local_slot_index)
+	lobby_code_received.emit(_steam_lobby_code)
+	EventBus.lobby_state_changed.emit(true, false)
+
+
+func _on_steam_lobby_join_failed(reason: String) -> void:
+	print("[LobbyManager] Steam lobby join failed: %s" % reason)
+	lobby_closed.emit(reason)
+
+
+func _on_steam_member_joined(member_steam_id: int) -> void:
+	if not is_in_lobby:
+		return
+
+	# Don't add ourselves again
+	if member_steam_id == SteamManager.steam_id:
+		return
+
+	# Prevent late joins
+	if game_started:
+		return
+
+	var member_name: String = SteamManager.get_member_name(member_steam_id)
+	var slot_index: int = _add_player_to_slot(member_steam_id, member_name, false)
+
+	if slot_index >= 0:
+		print("[LobbyManager] Steam member joined: %s" % member_name)
+
+
+func _on_steam_member_left(member_steam_id: int) -> void:
+	if not is_in_lobby:
+		return
+
+	_remove_player_from_slot(member_steam_id)
+	print("[LobbyManager] Steam member left: %d" % member_steam_id)

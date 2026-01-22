@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://d2light_switch"]
+
+[ext_resource type="Script" path="res://src/interaction/light_switch.gd" id="1_switch"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_plate"]
+albedo_color = Color(0.9, 0.9, 0.85, 1)
+
+[node name="LightSwitch" type="Node3D"]
+script = ExtResource("1_switch")
+interaction_prompt = "Turn Off"
+interaction_range = 1.5
+starts_on = true
+
+[node name="Plate" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+use_collision = true
+collision_layer = 2
+size = Vector3(0.08, 0.12, 0.02)
+material = SubResource("StandardMaterial3D_plate")
+
+[node name="Toggle" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0.015)
+size = Vector3(0.03, 0.05, 0.02)
+material = SubResource("StandardMaterial3D_plate")

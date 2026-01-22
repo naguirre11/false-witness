@@ -222,7 +222,7 @@
         "gdlint src/ scenes/ passes"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "notes": "Files: scenes/interactables/light_switch.tscn, src/interactables/light_switch.gd"
     },
     {

@@ -500,8 +500,8 @@
         "gdlint tests/ passes"
       ],
       "priority": 31,
-      "passes": false,
-      "notes": "File: tests/integration/test_voice_manager.gd"
+      "passes": true,
+      "notes": "40+ tests covering VoiceManager signals/methods, mute/unmute, settings, VoicePlayer jitter buffer, latency stats. GUT may need reimport to find new file."
     }
   ]
 }

@@ -79,10 +79,10 @@ func update_votes(votes_for: int, votes_against: int) -> void:
 
 	# Check if majority reached
 	if _votes_for >= _votes_needed:
-		_show_result_and_close("APPROVED!", Color(0.3, 1.0, 0.3))
+		_show_result_and_close("APPROVED!", DesignTokens.COLORS.accent_success)
 	elif _votes_against > _total_voters - _votes_needed:
 		# If enough people voted against, rejection is guaranteed
-		_show_result_and_close("REJECTED", Color(1.0, 0.3, 0.3))
+		_show_result_and_close("REJECTED", DesignTokens.COLORS.text_danger)
 
 
 ## Sets whether the local player has already voted.
@@ -118,9 +118,9 @@ func _update_vote_display() -> void:
 
 	# Color coding
 	if _votes_for >= _votes_needed:
-		_vote_status.modulate = Color(0.3, 1.0, 0.3)
+		_vote_status.modulate = DesignTokens.COLORS.accent_success
 	elif _votes_against > _total_voters - _votes_needed:
-		_vote_status.modulate = Color(1.0, 0.3, 0.3)
+		_vote_status.modulate = DesignTokens.COLORS.text_danger
 	else:
 		_vote_status.modulate = Color.WHITE
 

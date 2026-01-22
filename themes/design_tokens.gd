@@ -33,4 +33,30 @@ const COLORS: Dictionary = {
 	"horror_blood": Color(0.8, 0.1, 0.1),  # Deep blood red
 	"horror_ethereal": Color(0.3, 0.8, 0.9),  # Ghostly cyan/teal
 	"horror_corruption": Color(0.6, 0.2, 0.6),  # Corrupted purple
+
+	# Trust level colors (evidence reliability indicators)
+	"trust_unfalsifiable": Color.GOLD,  # Cannot be fabricated - behavioral ground truth
+	"trust_high": Color.GREEN,  # Equipment-verified, difficult to fake
+	"trust_variable": Color.YELLOW,  # Requires cooperation, verify with second reading
+	"trust_low": Color.ORANGE,  # Easy to misreport, cross-reference recommended
+	"trust_sabotage": Color.RED,  # Cultist can directly contaminate
+
+	# Evidence category colors (for icons/visual distinction)
+	"evidence_equipment": Color.CORNFLOWER_BLUE,  # Equipment-derived readings
+	"evidence_apparent": Color.LIGHT_GREEN,  # Readily apparent phenomena
+	"evidence_triggered": Color.GOLD,  # Triggered test results
+	"evidence_behavior": Color.INDIAN_RED,  # Behavior-based observations
 }
+
+## Player attribution colors for evidence collector indicators.
+## Indexed by peer_id % 8 to cycle through colors.
+const PLAYER_COLORS: Array[Color] = [
+	Color.CYAN,
+	Color.MAGENTA,
+	Color.LIME,
+	Color.YELLOW,
+	Color.CORAL,
+	Color.DEEP_SKY_BLUE,
+	Color.HOT_PINK,
+	Color.SPRING_GREEN,
+]

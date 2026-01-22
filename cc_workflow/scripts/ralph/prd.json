@@ -369,7 +369,7 @@
         "gdlint tests/ passes"
       ],
       "priority": 22,
-      "passes": false,
+      "passes": true,
       "notes": "File: tests/integration/test_abandoned_house.gd"
     },
     {

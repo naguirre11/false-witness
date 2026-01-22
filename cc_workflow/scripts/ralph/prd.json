@@ -463,8 +463,8 @@
         "gdlint src/ passes"
       ],
       "priority": 28,
-      "passes": false,
-      "notes": "Standard entity behavior between dormant phases"
+      "passes": true,
+      "notes": "Implemented roaming, interactions, manifestations, temperature zones, ghost writing"
     },
     {
       "id": "FW-046-07",
@@ -479,8 +479,8 @@
         "gdlint src/ passes"
       ],
       "priority": 29,
-      "passes": false,
-      "notes": "Voice source is initial target"
+      "passes": true,
+      "notes": "Voice source is initial target. Implemented target switching via voice and _select_hunt_target override"
     },
     {
       "id": "FW-046-08",
@@ -495,8 +495,8 @@
         "gdlint src/ passes"
       ],
       "priority": 30,
-      "passes": false,
-      "notes": "Behavioral evidence: voice-reactive = likely Listener"
+      "passes": true,
+      "notes": "Already implemented in FW-046-01: voice_reaction with pause, turn, and behavioral_tell trigger"
     },
     {
       "id": "FW-046-09",
@@ -511,8 +511,8 @@
         "gdlint src/ passes"
       ],
       "priority": 31,
-      "passes": false,
-      "notes": "Counterplay through awareness and caution"
+      "passes": true,
+      "notes": "Uses dormant audio cue (FW-046-05) + voice_sensitivity threshold for whisper safety"
     },
     {
       "id": "FW-046-10",
@@ -526,8 +526,8 @@
         "gdlint src/ passes"
       ],
       "priority": 32,
-      "passes": false,
-      "notes": "Prevents infinite hunt loops"
+      "passes": true,
+      "notes": "Implemented in FW-046-01: VOICE_HUNT_COOLDOWN=60s, _voice_hunt_cooldown tracker"
     },
     {
       "id": "FW-046-11",
@@ -541,8 +541,8 @@
         "gdlint src/ passes"
       ],
       "priority": 33,
-      "passes": false,
-      "notes": "EntityManager at src/entity/entity_manager.gd"
+      "passes": true,
+      "notes": "Added ENTITY_TYPES registry, get_entity_type_names(), request_voice_triggered_hunt()"
     },
     {
       "id": "FW-046-12",
@@ -557,8 +557,8 @@
         "gdlint scenes/ passes"
       ],
       "priority": 34,
-      "passes": false,
-      "notes": "Placeholder model; art pass later"
+      "passes": true,
+      "notes": "scenes/entity/listener.tscn with ghostly capsule+sphere mesh and transparency"
     },
     {
       "id": "FW-046-13",
@@ -572,8 +572,8 @@
         "gdlint src/ passes"
       ],
       "priority": 35,
-      "passes": false,
-      "notes": "Placeholder sounds; audio polish later"
+      "passes": true,
+      "notes": "Audio infrastructure in EntityAudioManager: play_listener_dormant(), hunt audio via EntityAudioConfig. Sound assets pending."
     },
     {
       "id": "FW-046-14",
@@ -589,8 +589,8 @@
         "gdlint tests/ passes"
       ],
       "priority": 36,
-      "passes": false,
-      "notes": "File: tests/unit/test_listener_entity.gd"
+      "passes": true,
+      "notes": "44 tests covering phase cycling, voice detection, hunt cooldown, network state"
     },
     {
       "id": "FW-046-15",
@@ -606,8 +606,8 @@
         "gdlint tests/ passes"
       ],
       "priority": 37,
-      "passes": false,
-      "notes": "File: tests/integration/test_listener_integration.gd"
+      "passes": true,
+      "notes": "29 integration tests covering voice hunts, behavioral tells, evidence, phase cycling, network state"
     }
   ]
 }

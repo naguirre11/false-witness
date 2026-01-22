@@ -1,0 +1,59 @@
+[gd_scene load_steps=6 format=3 uid="uid://listener_entity_scene"]
+
+[ext_resource type="Script" path="res://src/entity/entities/listener.gd" id="1_listener"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
+radius = 0.35
+height = 1.6
+
+[sub_resource type="StandardMaterial3D" id="Material_ghost"]
+resource_name = "GhostMaterial"
+transparency = 1
+albedo_color = Color(0.6, 0.7, 0.9, 0.5)
+emission_enabled = true
+emission = Color(0.4, 0.5, 0.7, 1)
+emission_energy_multiplier = 0.3
+rim_enabled = true
+rim = 0.8
+rim_tint = 0.5
+depth_draw_mode = 1
+
+[sub_resource type="SphereMesh" id="SphereMesh_head"]
+radius = 0.2
+height = 0.4
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_collision"]
+radius = 0.4
+height = 1.8
+
+[node name="Listener" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_listener")
+entity_type = "Listener"
+base_speed = 1.2
+hunt_speed = 2.2
+hunt_aware_speed = 2.4
+hunt_unaware_speed = 1.5
+
+[node name="Body" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+visible = false
+mesh = SubResource("CapsuleMesh_body")
+surface_material_override/0 = SubResource("Material_ghost")
+
+[node name="Head" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+visible = false
+mesh = SubResource("SphereMesh_head")
+surface_material_override/0 = SubResource("Material_ghost")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape_collision")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.5
+target_desired_distance = 0.5
+avoidance_enabled = true
+radius = 0.4

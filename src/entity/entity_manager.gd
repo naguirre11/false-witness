@@ -50,14 +50,14 @@ const HUNT_COOLDOWNS := {
 ## Entity type registry - maps entity names to scene paths and evidence types
 const ENTITY_TYPES := {
 	"Listener": {
-		"scene": "res://src/entity/entities/listener.gd",
+		"scene": "res://scenes/entity/listener.tscn",
 		"evidence": [
 			EvidenceEnums.EvidenceType.FREEZING_TEMPERATURE,
 			EvidenceEnums.EvidenceType.GHOST_WRITING,
 			EvidenceEnums.EvidenceType.AURA_PATTERN,
 		],
 		"behavioral_tell": "voice_reactive",
-		"description": "Reacts strongly to player voice. Triggers instant hunts when players speak during dormant phase.",
+		"description": "Reacts to player voice. Instant hunts when speaking during dormant phase.",
 	},
 }
 

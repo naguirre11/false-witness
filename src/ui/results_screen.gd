@@ -7,13 +7,13 @@ extends Control
 ## Automatically shows when GameManager enters RESULTS state and receives
 ## MatchResult data from MatchManager.match_ended signal.
 
-# --- Constants ---
-
-const RESULTS_STATE: int = 6  # GameManager.GameState.RESULTS
-
 # --- Signals ---
 
 signal return_to_lobby_requested
+
+# --- Constants ---
+
+const RESULTS_STATE: int = 6  # GameManager.GameState.RESULTS
 
 # --- State Variables ---
 
@@ -91,10 +91,10 @@ func _setup_header(result: MatchResult) -> void:
 	# Win/Loss header
 	if result.did_investigators_win():
 		_win_loss_label.text = "INVESTIGATORS WIN!"
-		_win_loss_label.modulate = Color(0.3, 1.0, 0.3)
+		_win_loss_label.modulate = DesignTokens.COLORS.accent_success
 	else:
 		_win_loss_label.text = "CULTIST WINS!"
-		_win_loss_label.modulate = Color(1.0, 0.3, 0.3)
+		_win_loss_label.modulate = DesignTokens.COLORS.text_danger
 
 	_win_condition_label.text = result.get_win_condition_text()
 
@@ -117,10 +117,10 @@ func _setup_entity_reveal(result: MatchResult) -> void:
 
 		if evidence in result.evidence_collected_correctly:
 			label.text = "✓ " + evidence
-			label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+			label.add_theme_color_override("font_color", DesignTokens.COLORS.accent_success)
 		else:
 			label.text = "✗ " + evidence + " (missed)"
-			label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
+			label.add_theme_color_override("font_color", DesignTokens.COLORS.text_danger)
 
 		_evidence_list.add_child(label)
 
@@ -132,17 +132,17 @@ func _setup_cultist_reveal(result: MatchResult) -> void:
 	match result.win_condition:
 		MatchResult.WinCondition.CULTIST_VOTED_OUT:
 			_cultist_status.text = "Was discovered and voted out!"
-			_cultist_status.modulate = Color(0.3, 1.0, 0.3)
+			_cultist_status.modulate = DesignTokens.COLORS.accent_success
 		MatchResult.WinCondition.INNOCENT_VOTED_OUT:
 			_cultist_status.text = "Successfully framed an innocent!"
-			_cultist_status.modulate = Color(1.0, 0.5, 0.5)
+			_cultist_status.modulate = DesignTokens.COLORS.action_ability
 		_:
 			if result.did_cultist_win():
 				_cultist_status.text = "Successfully deceived the team!"
-				_cultist_status.modulate = Color(1.0, 0.7, 0.3)
+				_cultist_status.modulate = DesignTokens.COLORS.accent_warning
 			else:
 				_cultist_status.text = "Was not discovered during the match"
-				_cultist_status.modulate = Color(0.7, 0.7, 0.7)
+				_cultist_status.modulate = DesignTokens.COLORS.text_secondary
 
 
 func _setup_timeline(result: MatchResult) -> void:
@@ -153,14 +153,14 @@ func _setup_timeline(result: MatchResult) -> void:
 	if result.cultist_actions.is_empty():
 		var empty_label := Label.new()
 		empty_label.text = "No Cultist actions recorded"
-		empty_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
-		empty_label.add_theme_font_size_override("font_size", 12)
+		empty_label.add_theme_color_override("font_color", DesignTokens.COLORS.text_muted)
+		empty_label.add_theme_font_size_override("font_size", DesignTokens.FONT_SIZES.xs)
 		_timeline_list.add_child(empty_label)
 		return
 
 	for action in result.cultist_actions:
 		var label := Label.new()
-		label.add_theme_font_size_override("font_size", 12)
+		label.add_theme_font_size_override("font_size", DesignTokens.FONT_SIZES.xs)
 
 		var timestamp: float = action.get("timestamp", 0.0)
 		var action_type: String = action.get("type", "unknown")
@@ -174,13 +174,13 @@ func _setup_timeline(result: MatchResult) -> void:
 		# Color based on action type
 		match action_type:
 			"contamination":
-				label.add_theme_color_override("font_color", Color(1.0, 0.7, 0.3))
+				label.add_theme_color_override("font_color", DesignTokens.COLORS.action_contamination)
 			"ability":
-				label.add_theme_color_override("font_color", Color(1.0, 0.5, 0.5))
+				label.add_theme_color_override("font_color", DesignTokens.COLORS.action_ability)
 			"sabotage":
-				label.add_theme_color_override("font_color", Color(0.8, 0.3, 0.8))
+				label.add_theme_color_override("font_color", DesignTokens.COLORS.action_sabotage)
 			_:
-				label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+				label.add_theme_color_override("font_color", DesignTokens.COLORS.text_primary)
 
 		_timeline_list.add_child(label)
 
@@ -193,8 +193,8 @@ func _setup_contributions(result: MatchResult) -> void:
 	if result.player_stats.is_empty():
 		var empty_label := Label.new()
 		empty_label.text = "No player stats recorded"
-		empty_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
-		empty_label.add_theme_font_size_override("font_size", 12)
+		empty_label.add_theme_color_override("font_color", DesignTokens.COLORS.text_muted)
+		empty_label.add_theme_font_size_override("font_size", DesignTokens.FONT_SIZES.xs)
 		_contrib_list.add_child(empty_label)
 		return
 
@@ -212,7 +212,7 @@ func _setup_contributions(result: MatchResult) -> void:
 	for player_id in result.player_stats:
 		var stats: Dictionary = result.player_stats[player_id]
 		var label := Label.new()
-		label.add_theme_font_size_override("font_size", 12)
+		label.add_theme_font_size_override("font_size", DesignTokens.FONT_SIZES.xs)
 
 		var player_name: String = stats.get("username", "Player %s" % player_id)
 		var collected: int = stats.get("evidence_collected", 0)
@@ -227,7 +227,7 @@ func _setup_contributions(result: MatchResult) -> void:
 		]
 
 		if is_echo:
-			label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+			label.add_theme_color_override("font_color", DesignTokens.COLORS.text_muted)
 
 		_contrib_list.add_child(label)
 
@@ -246,14 +246,14 @@ func _setup_superlatives(result: MatchResult) -> void:
 		var title_label := Label.new()
 		title_label.text = "🏆 " + award.get("title", "Award")
 		title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		title_label.add_theme_font_size_override("font_size", 12)
-		title_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+		title_label.add_theme_font_size_override("font_size", DesignTokens.FONT_SIZES.xs)
+		title_label.add_theme_color_override("font_color", DesignTokens.COLORS.results_gold)
 		vbox.add_child(title_label)
 
 		var player_label := Label.new()
 		player_label.text = award.get("player", "Unknown")
 		player_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		player_label.add_theme_font_size_override("font_size", 14)
+		player_label.add_theme_font_size_override("font_size", DesignTokens.FONT_SIZES.sm)
 		vbox.add_child(player_label)
 
 		_superlatives.add_child(vbox)

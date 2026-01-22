@@ -46,6 +46,14 @@ const COLORS: Dictionary = {
 	"evidence_apparent": Color.LIGHT_GREEN,  # Readily apparent phenomena
 	"evidence_triggered": Color.GOLD,  # Triggered test results
 	"evidence_behavior": Color.INDIAN_RED,  # Behavior-based observations
+
+	# Timeline action colors (cultist action history)
+	"action_contamination": Color(1.0, 0.7, 0.3),  # Same as accent_warning
+	"action_ability": Color(1.0, 0.5, 0.5),  # Light red for ability usage
+	"action_sabotage": Color(0.8, 0.3, 0.8),  # Purple for sabotage
+
+	# Results screen specific
+	"results_gold": Color(1.0, 0.85, 0.3),  # Award gold for superlatives
 }
 
 ## Player attribution colors for evidence collector indicators.

@@ -60,3 +60,30 @@ const PLAYER_COLORS: Array[Color] = [
 	Color.HOT_PINK,
 	Color.SPRING_GREEN,
 ]
+
+# --- Spacing Tokens ---
+
+## Consistent spacing values for margins, padding, and gaps.
+## All values are integers representing pixels.
+const SPACING: Dictionary = {
+	"xs": 4,  # Extra small - tight spacing
+	"sm": 8,  # Small - compact elements
+	"md": 16,  # Medium - standard spacing (default)
+	"lg": 24,  # Large - section separation
+	"xl": 32,  # Extra large - major sections
+	"xxl": 48,  # Double extra large - page margins
+}
+
+# --- Typography Tokens ---
+
+## Font size values for consistent text hierarchy.
+## All values are integers representing pixels.
+const FONT_SIZES: Dictionary = {
+	"xs": 12,  # Extra small - fine print, timestamps
+	"sm": 14,  # Small - secondary text, captions
+	"md": 16,  # Medium - body text (default)
+	"lg": 20,  # Large - subheadings
+	"xl": 24,  # Extra large - section headings
+	"xxl": 32,  # Double extra large - page titles
+	"display": 48,  # Display - hero text, win/loss announcements
+}

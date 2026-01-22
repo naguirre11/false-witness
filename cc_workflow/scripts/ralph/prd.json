@@ -1,613 +1,235 @@
 {
   "project": "False Witness",
-  "branchName": "ralph/map-entity",
-  "description": "First playable map (Abandoned House) and voice-reactive Listener entity",
-  "tickets": ["FW-071", "FW-046"],
+  "branchName": "ralph/design-tokens",
+  "description": "Centralized design token system and UI refactor for consistent theming",
+  "tickets": ["FW-086", "FW-087"],
   "userStories": [
     {
-      "id": "FW-071-01",
-      "title": "Create map scene structure",
-      "description": "Set up abandoned house scene hierarchy",
+      "id": "FW-086-01",
+      "title": "Create DesignTokens autoload with color palette",
+      "description": "Create the design tokens singleton with color constants",
       "acceptanceCriteria": [
-        "Create scenes/maps/abandoned_house.tscn (Node3D root)",
-        "Add Rooms (Node3D) container for room geometry",
-        "Add Spawns (Node3D) for player spawn points",
-        "Add Lighting (Node3D) for light fixtures",
-        "Add Navigation (NavigationRegion3D) for entity pathfinding",
-        "Add EvidencePoints (Node3D) for evidence spawn markers",
-        "Scene loads without errors",
-        "gdlint scenes/ passes"
+        "Create themes/design_tokens.gd extending Node",
+        "Add const COLORS dictionary with all color tokens",
+        "Background colors: bg_primary, bg_secondary, bg_surface, bg_overlay",
+        "Text colors: text_primary, text_secondary, text_muted, text_danger",
+        "Accent colors: accent_primary, accent_secondary, accent_warning, accent_success",
+        "Horror colors: horror_blood, horror_ethereal, horror_corruption",
+        "Register as autoload 'DesignTokens' in project.godot",
+        "$GODOT --headless --import succeeds",
+        "gdlint themes/ passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "File: scenes/maps/abandoned_house.tscn"
+      "notes": "File: themes/design_tokens.gd. Colors extracted from existing UI files."
     },
     {
-      "id": "FW-071-02",
-      "title": "Design floor plan layout",
-      "description": "Create 8-12 room layout document",
+      "id": "FW-086-02",
+      "title": "Add trust level and evidence category colors",
+      "description": "Add game-specific color tokens for evidence system",
       "acceptanceCriteria": [
-        "Create docs/maps/abandoned_house_layout.md",
-        "Document room names and purposes",
-        "Include floor plan sketch (ASCII or image)",
-        "Mark entry points, connecting hallways",
-        "Mark hiding spot locations",
-        "Mark evidence spawn areas per room",
-        "gdlint passes (no code changes)"
+        "Add trust level colors to COLORS dictionary:",
+        "  trust_unfalsifiable (gold), trust_high (green), trust_variable (yellow)",
+        "  trust_low (orange), trust_sabotage (red)",
+        "Add evidence category colors:",
+        "  evidence_equipment, evidence_apparent, evidence_triggered, evidence_behavior",
+        "Add PLAYER_COLORS array with 8 distinct colors for player attribution",
+        "Colors match existing values in evidence_slot.gd",
+        "gdlint themes/ passes"
       ],
       "priority": 2,
       "passes": true,
-      "notes": "Design first, build second. Small house: living room, kitchen, 2 bedrooms, bathroom, basement, attic."
+      "notes": "Trust colors: gold (unfalsifiable), green (high), yellow (variable), orange (low), red (sabotage)"
     },
     {
-      "id": "FW-071-03",
-      "title": "Create entrance/spawn area",
-      "description": "Build starting area where players spawn",
+      "id": "FW-086-03",
+      "title": "Add spacing and font size constants",
+      "description": "Add spacing and typography tokens",
       "acceptanceCriteria": [
-        "Create entryway room with door to outside",
-        "Add 4-6 spawn points (Position3D markers)",
-        "Spawn points spaced to avoid overlap",
-        "Clear sightlines for initial team gathering",
-        "Door to rest of house clearly visible",
-        "gdlint scenes/ passes"
+        "Add const SPACING dictionary with: xs (4), sm (8), md (16), lg (24), xl (32), xxl (48)",
+        "Add const FONT_SIZES dictionary with: xs (12), sm (14), md (16), lg (20), xl (24), xxl (32), display (48)",
+        "All values are integers for pixel measurements",
+        "gdlint themes/ passes"
       ],
       "priority": 3,
       "passes": true,
-      "notes": "Players spawn here at investigation start"
+      "notes": "File: themes/design_tokens.gd"
     },
     {
-      "id": "FW-071-04",
-      "title": "Build living room",
-      "description": "Main gathering room of house",
+      "id": "FW-086-04",
+      "title": "Add animation timing and border constants",
+      "description": "Add motion and border styling tokens",
       "acceptanceCriteria": [
-        "Create living room with CSG or imported mesh",
-        "PS1/PS2 aesthetic: low-poly, simple textures",
-        "Add placeholder furniture: couch, chairs, TV stand",
-        "Connect to entryway and kitchen",
-        "Add light fixture with switch",
-        "Add 2-3 evidence spawn points",
-        "gdlint scenes/ passes"
+        "Add const ANIMATION dictionary with:",
+        "  Standard: duration_instant (0.1), duration_fast (0.15), duration_normal (0.25), duration_slow (0.4)",
+        "  Horror: duration_tension (0.6), duration_reveal (0.8), duration_startle (0.05)",
+        "Add const BORDERS dictionary with:",
+        "  Radii: radius_none (0), radius_sm (2), radius_md (4), radius_lg (8), radius_full (9999)",
+        "  Widths: width_thin (1), width_normal (2), width_thick (4)",
+        "gdlint themes/ passes"
       ],
       "priority": 4,
       "passes": true,
-      "notes": "Low-poly models; vertex colors or 256x256 textures"
+      "notes": "File: themes/design_tokens.gd"
     },
     {
-      "id": "FW-071-05",
-      "title": "Build kitchen",
-      "description": "Kitchen with interactable elements",
+      "id": "FW-086-05",
+      "title": "Create horror_theme.tres base styles",
+      "description": "Create Theme resource with base Control styles",
       "acceptanceCriteria": [
-        "Create kitchen room geometry",
-        "Add placeholder furniture: cabinets, table, chairs",
-        "Add interactable drawers/cabinets (open/close)",
-        "Connect to living room and hallway",
-        "Add light fixture with switch",
-        "Add 2-3 evidence spawn points",
-        "gdlint scenes/ passes"
+        "Create themes/horror_theme.tres Theme resource",
+        "Style Panel with bg_surface color and radius_md corners",
+        "Style Button with accent_primary color, hover/pressed states",
+        "Style Label with text_primary color, md font size",
+        "Style LineEdit with bg_secondary color, text_primary text",
+        "Theme file loads without errors in editor",
+        "gdlint themes/ passes"
       ],
       "priority": 5,
       "passes": true,
-      "notes": "Cabinets can be opened for hiding spots"
+      "notes": "File: themes/horror_theme.tres. Create StyleBoxFlat resources programmatically if needed."
     },
     {
-      "id": "FW-071-06",
-      "title": "Build master bedroom",
-      "description": "Large bedroom with hiding spots",
+      "id": "FW-086-06",
+      "title": "Add theme type variations",
+      "description": "Create specialized button and panel variations",
       "acceptanceCriteria": [
-        "Create bedroom room geometry",
-        "Add placeholder furniture: bed, dresser, nightstands",
-        "Add closet with interactable door (hiding spot)",
-        "Add under-bed hiding spot",
-        "Connect to upstairs hallway",
-        "Add light fixture with switch",
-        "Add 2-3 evidence spawn points",
-        "gdlint scenes/ passes"
+        "Add DangerButton type variation with accent_warning/horror_blood colors",
+        "Add GhostButton type variation with transparent background, text_secondary color",
+        "Add CorruptedPanel type variation with horror_corruption tint",
+        "Style OptionButton, HSlider, CheckBox base types",
+        "Theme variations accessible via type_variation property",
+        "gdlint themes/ passes"
       ],
       "priority": 6,
       "passes": true,
-      "notes": "Primary hiding location for hunts"
+      "notes": "File: themes/horror_theme.tres"
     },
     {
-      "id": "FW-071-07",
-      "title": "Build second bedroom",
-      "description": "Smaller bedroom",
+      "id": "FW-086-07",
+      "title": "Write unit tests for DesignTokens",
+      "description": "Verify token accessibility and values",
       "acceptanceCriteria": [
-        "Create smaller bedroom geometry",
-        "Add placeholder furniture: bed, desk",
-        "Add closet hiding spot",
-        "Connect to upstairs hallway",
-        "Add light fixture with switch",
-        "Add 2 evidence spawn points",
-        "gdlint scenes/ passes"
+        "Create tests/unit/test_design_tokens.gd",
+        "Test DesignTokens autoload is accessible",
+        "Test COLORS dictionary contains all required keys",
+        "Test SPACING values are positive integers",
+        "Test ANIMATION values are positive floats",
+        "Test PLAYER_COLORS array has 8 entries",
+        "All tests pass",
+        "gdlint tests/ passes"
       ],
       "priority": 7,
       "passes": true,
-      "notes": "Potential entity favorite room"
+      "notes": "File: tests/unit/test_design_tokens.gd"
     },
     {
-      "id": "FW-071-08",
-      "title": "Build bathroom",
-      "description": "Bathroom with mirror interactions",
+      "id": "FW-087-01",
+      "title": "Refactor results_screen.gd to use tokens",
+      "description": "Replace hardcoded colors in results screen",
       "acceptanceCriteria": [
-        "Create bathroom room geometry",
-        "Add placeholder fixtures: toilet, sink, bathtub/shower",
-        "Add mirror (potential manifestation surface)",
-        "Add light fixture with switch",
-        "Connect to upstairs hallway",
-        "Add 2 evidence spawn points",
-        "gdlint scenes/ passes"
+        "Replace all Color() constructors with DesignTokens.COLORS.*",
+        "Replace timing literals with DesignTokens.ANIMATION.*",
+        "Apply horror_theme.tres to scene root (if applicable)",
+        "No Color() constructors with numeric literals remain",
+        "Visual appearance unchanged",
+        "gdlint src/ui/ passes"
       ],
       "priority": 8,
       "passes": true,
-      "notes": "Mirror can show writing manifestations"
+      "notes": "File: src/ui/results_screen.gd (16 colors, 6 modulates)"
     },
     {
-      "id": "FW-071-09",
-      "title": "Build basement",
-      "description": "Dark basement area",
+      "id": "FW-087-02",
+      "title": "Refactor evidence_slot.gd to use tokens",
+      "description": "Replace hardcoded colors in evidence slot",
       "acceptanceCriteria": [
-        "Create basement room geometry",
-        "Stairs from main floor",
-        "Darker lighting than rest of house",
-        "Add storage items, shelving",
-        "Add 1-2 hiding spots behind shelves",
-        "Add light fixture with switch (dim)",
-        "Add 3-4 evidence spawn points",
-        "gdlint scenes/ passes"
+        "Replace trust level colors with DesignTokens.COLORS.trust_*",
+        "Replace evidence category colors with DesignTokens.COLORS.evidence_*",
+        "Replace player attribution colors with DesignTokens.PLAYER_COLORS array",
+        "No Color() constructors with numeric literals remain",
+        "Visual appearance unchanged",
+        "gdlint src/ui/ passes"
       ],
       "priority": 9,
       "passes": true,
-      "notes": "High tension area; common entity spawn"
+      "notes": "File: src/ui/evidence_slot.gd (7 colors, 6 modulates)"
     },
     {
-      "id": "FW-071-10",
-      "title": "Build attic",
-      "description": "Cramped attic space",
+      "id": "FW-087-03",
+      "title": "Refactor evidence_detail_popup.gd to use tokens",
+      "description": "Replace hardcoded colors in evidence detail popup",
       "acceptanceCriteria": [
-        "Create attic room geometry with sloped ceiling",
-        "Access via pull-down ladder or stairs",
-        "Cramped, limited visibility",
-        "Add storage boxes, old furniture",
-        "No light fixture (flashlight required)",
-        "Add 2-3 evidence spawn points",
-        "gdlint scenes/ passes"
+        "Replace all hardcoded colors with token references",
+        "Apply consistent styling with evidence_slot.gd",
+        "No Color() constructors with numeric literals remain",
+        "Visual appearance unchanged",
+        "gdlint src/ui/ passes"
       ],
       "priority": 10,
       "passes": true,
-      "notes": "Scary location; limited escape routes"
+      "notes": "File: src/ui/evidence_detail_popup.gd (3 colors, 8 modulates)"
     },
     {
-      "id": "FW-071-11",
-      "title": "Build connecting hallways",
-      "description": "Hallways connecting rooms",
+      "id": "FW-087-04",
+      "title": "Refactor hud.gd to use tokens",
+      "description": "Replace hardcoded colors in HUD",
       "acceptanceCriteria": [
-        "Create main floor hallway connecting rooms",
-        "Create upstairs hallway connecting bedrooms/bathroom",
-        "Add staircase between floors",
-        "Hallways narrow for tension",
-        "Add light fixtures in hallways",
-        "gdlint scenes/ passes"
+        "Replace timer warning colors (red <60s, orange <2min) with tokens",
+        "Replace equipment highlight color with token",
+        "Replace death overlay color with token",
+        "No Color() constructors with numeric literals remain",
+        "Visual appearance unchanged",
+        "gdlint src/ui/ passes"
       ],
       "priority": 11,
       "passes": true,
-      "notes": "Tight corridors per GDD guidance"
+      "notes": "File: src/ui/hud.gd (4 colors, 6 modulates)"
     },
     {
-      "id": "FW-071-12",
-      "title": "Create Door interactable",
-      "description": "Doors that open/close",
+      "id": "FW-087-05",
+      "title": "Refactor entity_matrix.gd to use tokens",
+      "description": "Replace hardcoded colors in entity matrix",
       "acceptanceCriteria": [
-        "Create scenes/interactables/door.tscn extending Interactable",
-        "Add open/close animation (rotate on hinge)",
-        "Toggle state on interaction",
-        "Door blocks line of sight when closed",
-        "Sound effect on open/close",
-        "Network sync door state",
-        "gdlint src/ scenes/ passes"
+        "Replace eliminated entity styling with tokens",
+        "Replace remaining count coloring with tokens",
+        "No Color() constructors with numeric literals remain",
+        "Visual appearance unchanged",
+        "gdlint src/ui/ passes"
       ],
       "priority": 12,
       "passes": true,
-      "notes": "Files: scenes/interactables/door.tscn, src/interactables/door.gd"
+      "notes": "File: src/ui/entity_matrix.gd (3 colors, 5 modulates)"
     },
     {
-      "id": "FW-071-13",
-      "title": "Create LightSwitch interactable",
-      "description": "Light switches to toggle room lights",
+      "id": "FW-087-06",
+      "title": "Refactor voting_ui.gd to use tokens",
+      "description": "Replace hardcoded colors in voting UI",
       "acceptanceCriteria": [
-        "Create scenes/interactables/light_switch.tscn",
-        "Toggle linked light fixture on interaction",
-        "Visual indicator of switch state",
-        "Sound effect on toggle",
-        "Network sync light state",
-        "gdlint src/ scenes/ passes"
+        "Replace vote status colors with tokens",
+        "Replace button state colors with tokens",
+        "No Color() constructors with numeric literals remain",
+        "Visual appearance unchanged",
+        "gdlint src/ui/ passes"
       ],
       "priority": 13,
       "passes": true,
-      "notes": "Files: scenes/interactables/light_switch.tscn, src/interactables/light_switch.gd"
+      "notes": "File: src/ui/voting_ui.gd (4 colors, 4 modulates)"
     },
     {
-      "id": "FW-071-14",
-      "title": "Set up HidingSpot nodes",
-      "description": "Configure hiding spots in each room",
+      "id": "FW-087-07",
+      "title": "Verify refactored files and run smoke tests",
+      "description": "Final verification of token refactoring",
       "acceptanceCriteria": [
-        "Add HidingSpot nodes at closet locations",
-        "Add HidingSpot nodes under beds",
-        "Add HidingSpot nodes behind large furniture",
-        "Configure each spot's capacity (1 player)",
-        "Configure detection difficulty per spot",
-        "gdlint scenes/ passes"
+        "All 6 refactored files compile without errors",
+        "Run grep to verify no Color() with numeric literals in refactored files",
+        "Smoke tests pass: ./cc_workflow/scripts/run-tests.ps1 -Mode smoke",
+        "Visual comparison shows no regressions",
+        "gdlint src/ui/ passes"
       ],
       "priority": 14,
       "passes": true,
-      "notes": "HidingSpot class exists in src/entity/hiding_spot.gd"
-    },
-    {
-      "id": "FW-071-15",
-      "title": "Create NavigationMesh for entity pathfinding",
-      "description": "Bake NavMesh for entity AI movement",
-      "acceptanceCriteria": [
-        "Configure NavigationRegion3D in map scene",
-        "Set agent radius appropriate for entity size",
-        "Bake navigation mesh covering all walkable areas",
-        "Exclude furniture, walls from walkable area",
-        "Doors create navigation links when open",
-        "Test pathfinding between rooms",
-        "gdlint scenes/ passes"
-      ],
-      "priority": 15,
-      "passes": true,
-      "notes": "Entity uses NavigationAgent3D for movement"
-    },
-    {
-      "id": "FW-071-16",
-      "title": "Configure evidence spawn points",
-      "description": "Place markers for evidence spawning",
-      "acceptanceCriteria": [
-        "Create EvidenceSpawnPoint marker scene",
-        "Place 2-4 markers per room",
-        "Markers indicate valid evidence placement",
-        "Configure evidence type compatibility per point",
-        "Export spawn points for EntityManager access",
-        "gdlint src/ scenes/ passes"
-      ],
-      "priority": 16,
-      "passes": true,
-      "notes": "EntityManager randomly selects spawn points"
-    },
-    {
-      "id": "FW-071-17",
-      "title": "Configure entity favorite room",
-      "description": "Designate room as entity's preferred location",
-      "acceptanceCriteria": [
-        "Add 'favorite_room' property to map configuration",
-        "Export room list for random selection",
-        "Entity spawns and returns to favorite room",
-        "Evidence more likely in favorite room",
-        "UI can reference favorite room for clues",
-        "gdlint src/ passes"
-      ],
-      "priority": 17,
-      "passes": true,
-      "notes": "Random selection at match start"
-    },
-    {
-      "id": "FW-071-18",
-      "title": "Add ambient lighting",
-      "description": "Base lighting for atmosphere",
-      "acceptanceCriteria": [
-        "Add WorldEnvironment with dark ambient",
-        "Configure sky/environment for nighttime",
-        "Add subtle ambient occlusion",
-        "Test visibility with flashlight off",
-        "Atmosphere should feel creepy/dark",
-        "gdlint scenes/ passes"
-      ],
-      "priority": 18,
-      "passes": true,
-      "notes": "Horror atmosphere; flashlight should feel necessary"
-    },
-    {
-      "id": "FW-071-19",
-      "title": "Add room light fixtures",
-      "description": "Place light sources in each room",
-      "acceptanceCriteria": [
-        "Add OmniLight3D or SpotLight3D per room",
-        "Lights toggleable via light switches",
-        "Configure light colors for warm indoor feel",
-        "Lights create shadows when enabled",
-        "Default state: some lights on, some off",
-        "gdlint scenes/ passes"
-      ],
-      "priority": 19,
-      "passes": true,
-      "notes": "Vertex lighting style for PS1/PS2 aesthetic"
-    },
-    {
-      "id": "FW-071-20",
-      "title": "Add collision shapes to all geometry",
-      "description": "Physics collision for walls/floors/objects",
-      "acceptanceCriteria": [
-        "All walls have collision shapes",
-        "All floors have collision shapes",
-        "Furniture has appropriate collision",
-        "Player cannot walk through geometry",
-        "Raycast interactions work correctly",
-        "gdlint scenes/ passes"
-      ],
-      "priority": 20,
-      "passes": true,
-      "notes": "Layer 1 (World) for static geometry"
-    },
-    {
-      "id": "FW-071-21",
-      "title": "Create map loading system",
-      "description": "Load map scene for investigation",
-      "acceptanceCriteria": [
-        "Add load_map(map_name: String) to GameManager",
-        "Map loads when transitioning to INVESTIGATION",
-        "Players spawned at map spawn points",
-        "Map resources loaded asynchronously",
-        "Loading screen during map load",
-        "gdlint src/ passes"
-      ],
-      "priority": 21,
-      "passes": true,
-      "notes": "Only one map for now; future expansion"
-    },
-    {
-      "id": "FW-071-22",
-      "title": "Write integration tests for map functionality",
-      "description": "Test map systems work correctly",
-      "acceptanceCriteria": [
-        "Create tests/integration/test_abandoned_house.gd",
-        "Test spawn point validity",
-        "Test door interaction",
-        "Test light switch interaction",
-        "Test NavMesh connectivity",
-        "Test hiding spot accessibility",
-        "All tests pass",
-        "gdlint tests/ passes"
-      ],
-      "priority": 22,
-      "passes": true,
-      "notes": "File: tests/integration/test_abandoned_house.gd"
-    },
-    {
-      "id": "FW-046-01",
-      "title": "Create Listener entity class",
-      "description": "Entity that reacts to player voice",
-      "acceptanceCriteria": [
-        "Create src/entity/entities/listener.gd extending Entity",
-        "Set entity_name = 'Listener'",
-        "Configure evidence types: FREEZING_TEMPERATURE, GHOST_WRITING, AURA_PATTERN",
-        "Add voice_sensitivity: float property",
-        "Override behavioral methods for voice reactivity",
-        "gdlint src/ passes"
-      ],
-      "priority": 23,
-      "passes": true,
-      "notes": "File: src/entity/entities/listener.gd. Entity base class in src/entity/entity.gd"
-    },
-    {
-      "id": "FW-046-02",
-      "title": "Define Listener dormant phase",
-      "description": "State where Listener waits for voice trigger",
-      "acceptanceCriteria": [
-        "Add is_dormant: bool property",
-        "Listener alternates between dormant and active",
-        "Dormant duration: 30-60 seconds (random)",
-        "During dormant, Listener is stationary",
-        "Active duration: 60-120 seconds",
-        "gdlint src/ passes"
-      ],
-      "priority": 24,
-      "passes": true,
-      "notes": "Implemented in FW-046-01 - Dormant = listening for voice; active = normal behavior"
-    },
-    {
-      "id": "FW-046-03",
-      "title": "Implement voice detection trigger",
-      "description": "Listener hunts when players speak loudly during dormant",
-      "acceptanceCriteria": [
-        "Connect to VoiceManager.voice_activity signal",
-        "When dormant and voice_amplitude > threshold, trigger hunt",
-        "Threshold: above whisper volume",
-        "Voice-triggered hunt bypasses sanity requirement",
-        "Log voice trigger for debugging",
-        "gdlint src/ passes"
-      ],
-      "priority": 25,
-      "passes": true,
-      "notes": "Implemented in FW-046-01 - Core mechanic: silence is survival"
-    },
-    {
-      "id": "FW-046-04",
-      "title": "Implement instant hunt on voice trigger",
-      "description": "Voice-triggered hunt has no warning phase",
-      "acceptanceCriteria": [
-        "Voice-triggered hunt skips WARNING phase",
-        "Hunt begins immediately (ACTIVE phase)",
-        "Listener targets speaking player",
-        "Normal hunt cooldown applies after",
-        "gdlint src/ passes"
-      ],
-      "priority": 26,
-      "passes": true,
-      "notes": "Implemented in FW-046-01 - No warning = high danger"
-    },
-    {
-      "id": "FW-046-05",
-      "title": "Add dormant phase audio indicator",
-      "description": "Subtle sound when Listener is dormant",
-      "acceptanceCriteria": [
-        "Play faint static/hum sound when dormant",
-        "Sound audible within 10m of Listener",
-        "Spatial audio (louder when closer)",
-        "Sound stops when Listener becomes active",
-        "Players can learn to detect dormant state",
-        "gdlint src/ passes"
-      ],
-      "priority": 27,
-      "passes": true,
-      "notes": "Audio methods in EntityAudioManager, sound assets still needed"
-    },
-    {
-      "id": "FW-046-06",
-      "title": "Implement Listener normal behavior",
-      "description": "Behavior when not dormant or hunting",
-      "acceptanceCriteria": [
-        "During active phase, Listener roams slowly",
-        "Occasional manifestations and interactions",
-        "Responds to Ghost Writing Book in active phase",
-        "Creates FREEZING_TEMPERATURE zones in favorite room",
-        "gdlint src/ passes"
-      ],
-      "priority": 28,
-      "passes": true,
-      "notes": "Implemented roaming, interactions, manifestations, temperature zones, ghost writing"
-    },
-    {
-      "id": "FW-046-07",
-      "title": "Implement Listener hunt behavior",
-      "description": "How Listener hunts players",
-      "acceptanceCriteria": [
-        "Listener moves toward last heard voice location",
-        "Speed: moderate (not fastest, not slowest)",
-        "Continues hunting for standard duration",
-        "Can target other players if initial target escapes",
-        "Hunt ends normally when duration expires",
-        "gdlint src/ passes"
-      ],
-      "priority": 29,
-      "passes": true,
-      "notes": "Voice source is initial target. Implemented target switching via voice and _select_hunt_target override"
-    },
-    {
-      "id": "FW-046-08",
-      "title": "Add Listener behavioral tell",
-      "description": "Observable behavior that identifies Listener",
-      "acceptanceCriteria": [
-        "Listener responds to voice more than other stimuli",
-        "During active phase, pauses when players talk",
-        "Turns toward voice source (tracking behavior)",
-        "Players can test for Listener by speaking",
-        "Tell is subtle but observable",
-        "gdlint src/ passes"
-      ],
-      "priority": 30,
-      "passes": true,
-      "notes": "Already implemented in FW-046-01: voice_reaction with pause, turn, and behavioral_tell trigger"
-    },
-    {
-      "id": "FW-046-09",
-      "title": "Implement counterplay: whisper mode awareness",
-      "description": "Help players know when to be quiet",
-      "acceptanceCriteria": [
-        "HUD indicator shows proximity to Listener (optional)",
-        "OR: rely on dormant audio cue only",
-        "Document whisper threshold in game hints",
-        "Push-to-talk users naturally safer",
-        "Open mic users need voice discipline",
-        "gdlint src/ passes"
-      ],
-      "priority": 31,
-      "passes": true,
-      "notes": "Uses dormant audio cue (FW-046-05) + voice_sensitivity threshold for whisper safety"
-    },
-    {
-      "id": "FW-046-10",
-      "title": "Implement hunt cooldown for voice triggers",
-      "description": "Prevent repeated instant hunts",
-      "acceptanceCriteria": [
-        "After voice-triggered hunt, cooldown applies",
-        "Cooldown: 60 seconds (configurable)",
-        "During cooldown, voice doesn't trigger hunt",
-        "Normal hunts still possible during cooldown",
-        "gdlint src/ passes"
-      ],
-      "priority": 32,
-      "passes": true,
-      "notes": "Implemented in FW-046-01: VOICE_HUNT_COOLDOWN=60s, _voice_hunt_cooldown tracker"
-    },
-    {
-      "id": "FW-046-11",
-      "title": "Register Listener in EntityManager",
-      "description": "Add Listener to entity registry",
-      "acceptanceCriteria": [
-        "Add Listener to EntityManager.ENTITY_TYPES dictionary",
-        "Configure evidence type mapping",
-        "Listener selectable for match (random or configured)",
-        "Entity-evidence matrix includes Listener",
-        "gdlint src/ passes"
-      ],
-      "priority": 33,
-      "passes": true,
-      "notes": "Added ENTITY_TYPES registry, get_entity_type_names(), request_voice_triggered_hunt()"
-    },
-    {
-      "id": "FW-046-12",
-      "title": "Create Listener 3D model placeholder",
-      "description": "Visual representation of Listener entity",
-      "acceptanceCriteria": [
-        "Create placeholder mesh for Listener",
-        "Distinct from other entity designs",
-        "Humanoid but unsettling appearance",
-        "Translucent/ghostly material",
-        "Visible during manifestation and hunt",
-        "gdlint scenes/ passes"
-      ],
-      "priority": 34,
-      "passes": true,
-      "notes": "scenes/entity/listener.tscn with ghostly capsule+sphere mesh and transparency"
-    },
-    {
-      "id": "FW-046-13",
-      "title": "Add Listener-specific sounds",
-      "description": "Audio design for Listener",
-      "acceptanceCriteria": [
-        "Create/acquire dormant hum sound effect",
-        "Create/acquire voice-trigger reaction sound",
-        "Hunt approach sound (different from other entities)",
-        "Sounds added to AudioManager pools",
-        "gdlint src/ passes"
-      ],
-      "priority": 35,
-      "passes": true,
-      "notes": "Audio infrastructure in EntityAudioManager: play_listener_dormant(), hunt audio via EntityAudioConfig. Sound assets pending."
-    },
-    {
-      "id": "FW-046-14",
-      "title": "Write unit tests for Listener",
-      "description": "Test Listener-specific mechanics",
-      "acceptanceCriteria": [
-        "Create tests/unit/test_listener_entity.gd",
-        "Test dormant/active phase cycling",
-        "Test voice detection threshold",
-        "Test voice-triggered hunt initiation",
-        "Test hunt cooldown behavior",
-        "All tests pass",
-        "gdlint tests/ passes"
-      ],
-      "priority": 36,
-      "passes": true,
-      "notes": "44 tests covering phase cycling, voice detection, hunt cooldown, network state"
-    },
-    {
-      "id": "FW-046-15",
-      "title": "Write integration tests for Listener",
-      "description": "Test Listener in game context",
-      "acceptanceCriteria": [
-        "Create tests/integration/test_listener_integration.gd",
-        "Test voice activity triggering hunt",
-        "Test dormant audio cue audibility",
-        "Test behavioral tell observability",
-        "Test evidence generation",
-        "All tests pass",
-        "gdlint tests/ passes"
-      ],
-      "priority": 37,
-      "passes": true,
-      "notes": "29 integration tests covering voice hunts, behavioral tells, evidence, phase cycling, network state"
+      "notes": "Search pattern: grep -n 'Color([0-9]' src/ui/results_screen.gd src/ui/evidence_slot.gd ..."
     }
   ]
 }

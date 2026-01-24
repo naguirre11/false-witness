@@ -6,6 +6,29 @@ The main Claude session acts as **Orchestrator**, spawning OMC subagents to exec
 
 ---
 
+## CRITICAL: Continuous Loop
+
+**Autonomous mode is a CONTINUOUS LOOP across MULTIPLE TICKETS.**
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  DO NOT STOP after completing one ticket!               │
+│  After each ticket → Check for next ready ticket        │
+│  Only stop when: queue empty OR unrecoverable blocker   │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Stop conditions (the ONLY reasons to stop):**
+- No more tickets in `tickets/ready/`
+- Unrecoverable blocker (3+ failed attempts, needs human input)
+- User explicitly requests stop
+
+**NOT a stop condition:**
+- Completing a ticket (immediately pick up the next one)
+- Optional/deferred acceptance criteria (move on)
+
+---
+
 ## Overview
 
 ```
@@ -14,8 +37,18 @@ The main Claude session acts as **Orchestrator**, spawning OMC subagents to exec
 │  - Reads tickets, creates fine-grained tasks                    │
 │  - Spawns agents, monitors progress                             │
 │  - Catches errors, adjusts course                               │
-│  - Runs until completion or blocker                             │
+│  - LOOPS through ALL tickets until queue empty or blocker       │
 └─────────────────────────────────────────────────────────────────┘
+         │
+         ▼
+   ┌─────────────────────────────────────────────────────────────┐
+   │  FOR EACH TICKET in ready queue:                            │
+   │    1. Move to dev_in_progress                               │
+   │    2. Break into tasks                                      │
+   │    3. Execute tasks with agents                             │
+   │    4. Verify, commit, move to for_review                    │
+   │    5. LOOP BACK for next ticket                             │
+   └─────────────────────────────────────────────────────────────┘
          │                    │                    │
          ▼                    ▼                    ▼
    ┌───────────┐        ┌───────────┐        ┌───────────┐
@@ -537,17 +570,15 @@ When all tasks are completed:
 
 3. Create final commit with all changes
 
-4. Output completion summary:
+4. Output ticket completion summary (NOT a stopping point):
    ```
-   ## Autonomous Run Complete
+   ## Ticket Complete: FW-XXX - [title]
 
-   **Ticket**: FW-XXX - [title]
    **Tasks completed**: 4/4
    **Acceptance criteria**: 33/33 verified
-   **Commits**: 4
    **Test status**: All passing
 
-   Ticket moved to for_review.
+   Ticket moved to for_review. Checking for next ticket...
    ```
 
 ### Step 17: Capture learnings
@@ -576,6 +607,26 @@ Append an entry to `cc_workflow/autonomous/learnings.md`:
 
 ### Agent Notes
 - [which agents performed well/poorly for which task types]
+```
+
+### Step 18: Loop to next ticket (MANDATORY)
+
+**DO NOT STOP HERE.** Immediately continue to the next ticket:
+
+1. Check `tickets/ready/` for available tickets
+2. **IF tickets exist**:
+   - Pick the next prioritized ticket (check STATUS.md for NEXT, or use PRIORITIZATION_ROADMAP.md)
+   - **Go back to Phase 1, Step 3** (move ticket to dev_in_progress)
+   - Continue the loop
+3. **IF no tickets remain**:
+   - Output: "Autonomous run complete - no more tickets in ready queue"
+   - **This is the ONLY normal stopping point**
+
+```
+┌────────────────────────────────────────────────────────┐
+│  LOOP: Step 18 → Step 3 → ... → Step 17 → Step 18     │
+│  Until: ready/ is empty OR unrecoverable blocker      │
+└────────────────────────────────────────────────────────┘
 ```
 
 ---

@@ -112,3 +112,37 @@ This ticket depends on FW-041 (Entity AI) to trigger the actual manifestation an
 - Entity AI behavior that triggers these events (FW-041)
 - Specific entity manifestation visuals (part of entity design)
 - Camera equipment implementation (separate ticket if needed)
+
+---
+
+## Implementation Notes (Ralph PRD - 2026-01-21)
+
+### Files Created
+- `src/evidence/readily_apparent_manager.gd` - Core witness tracking, phenomenon registration, omission tracking
+- `src/evidence/manifestation_enums.gd` - ManifestationType, InteractionType enums, visibility/audibility ranges
+- `src/interaction/throwable_object.gd` - Entity-throwable objects with ThrowPattern (GENTLE/VIOLENT/ERRATIC)
+- `src/interaction/interactable_door.gd` - Door interactions (slam, slow open/close) for entities
+- `src/interaction/flickering_light.gd` - Light flicker/break patterns (SUBTLE, RHYTHMIC, CHAOTIC, etc.)
+- `src/interaction/surface_manifestation.gd` - Writing, handprints, scratches on surfaces
+- `src/ui/phenomenon_report_ui.gd` - Player UI for reporting witnessed phenomena
+- `tests/integration/test_readily_apparent.gd` - 51 tests for witness tracking, reporting, omissions
+
+### Key Implementation Details
+1. **Witness tracking**: `get_witnesses_in_area()` returns players within range; `get_definite_witnesses()` adds facing check
+2. **Omission tracking**: `get_omissions_for_player()` returns phenomena player witnessed but didn't report (for post-game reveal)
+3. **Report window**: 120 seconds to report a phenomenon
+4. **EventBus signals**: Added `object_thrown`, `object_landed`, `door_manipulated`, `light_flickered`, `light_broken`, `surface_manifestation_created`, `phenomenon_reported`
+5. **Network sync**: All interaction classes emit EventBus signals for server-authoritative sync
+
+### Integration Gap
+⚠️ **ReadilyApparentManager is NOT registered as an autoload in project.godot**
+The class is complete and tested but needs to be added to autoloads for runtime use.
+
+### Test Results
+- All 15 user stories complete (FW-040-01 through FW-040-15)
+- test_readily_apparent.gd: 51 tests pass
+
+### Verification Commands
+```bash
+$GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=test_readily_apparent.gd -gdir=res://tests/integration/ -gexit
+```

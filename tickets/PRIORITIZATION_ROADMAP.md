@@ -2,6 +2,21 @@
 
 Detailed planning and dependency information. For quick status checks, see `STATUS.md`.
 
+## Current Progress (2026-01-23)
+
+**Phase 0 & 1 largely complete.** Most tickets through FW-092 are in `for_review`.
+
+| Status | Count | Notes |
+|--------|-------|-------|
+| for_review | 61 | Awaiting human review |
+| ready | 2 | FW-040c (Photo Evidence), FW-035e (UI Polish) |
+| draft | 8 | Post-MVP and deferred items |
+| dev_in_progress | 0 | - |
+
+**Remaining ready work:**
+- FW-040c: Photo Evidence System (camera equipment)
+- FW-035e: Evidence Board Polish (DesignTokens cleanup, animations)
+
 ---
 
 ## Epic Overview
@@ -117,6 +132,8 @@ Based on competitive analysis (Phasmophobia, R.E.P.O., Demonologist):
 | 1 | FW-071 | Create first map: Abandoned House | FW-021, FW-041 |
 | 2 | FW-082 | Create equipment selection UI | FW-023, FW-003 |
 | 2 | FW-083 | Implement in-game HUD | FW-021, FW-023 |
+| 3 | FW-086 | Implement design token system | - |
+| 3 | FW-087 | Refactor UI to use design tokens | FW-086 |
 
 ### Voice & Steam (Priority 3 - can ship without)
 
@@ -180,6 +197,8 @@ FW-001 (Project Init)
 │           ├── FW-013 (Steam)
 │           │   └── FW-014 (Voice Chat)
 │           └── FW-081 (Menu UI)
+│               └── FW-086 (Design Tokens)
+│                   └── FW-087 (UI Token Refactor)
 ├── FW-021 (FPS Controller)
 │   ├── FW-022 (Interaction)
 │   │   ├── FW-023 (Equipment)

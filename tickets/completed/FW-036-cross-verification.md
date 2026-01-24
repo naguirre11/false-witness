@@ -22,9 +22,9 @@ Create the cross-verification system where evidence can be confirmed by multiple
 
 | Ticket | Title | Status | Scope |
 |--------|-------|--------|-------|
-| FW-036a | Verification Rules Engine | draft | Trust-level verification rules, witness tracking |
-| FW-036b | Behavioral Conflict Detection | draft | "Gotcha" system, equipment vs behavior mismatch |
-| FW-036c | Verification Timing | draft | Evidence staleness, freshness windows |
+| FW-036a | Verification Rules Engine | for_review | Trust-level verification rules, witness tracking |
+| FW-036b | Behavioral Conflict Detection | for_review | "Gotcha" system, equipment vs behavior mismatch |
+| FW-036c | Verification Timing | for_review | Evidence staleness, freshness windows |
 
 ## Original Acceptance Criteria (Distributed to Sub-Tickets)
 
@@ -36,40 +36,40 @@ Create the cross-verification system where evidence can be confirmed by multiple
 ### Verification Rules by Trust Level → FW-036a
 
 #### UNFALSIFIABLE (Hunt Behavior)
-- [ ] Automatically verified when multiple players witness same behavior
-- [ ] Cannot be contested (entity behavior is ground truth)
-- [ ] Single-witness behavior still recorded but marked as such
+- [x] Automatically verified when multiple players witness same behavior
+- [x] Cannot be contested (entity behavior is ground truth)
+- [x] Single-witness behavior still recorded but marked as such
 
 #### HIGH Trust (EMF, Thermometer, Visual, Physical)
-- [ ] Verified when 2+ players observe same reading/phenomenon
-- [ ] Shared displays make independent confirmation easy
-- [ ] Readily-apparent evidence (breath, objects moving) naturally multi-witness
+- [x] Verified when 2+ players observe same reading/phenomenon
+- [x] Shared displays make independent confirmation easy
+- [x] Readily-apparent evidence (breath, objects moving) naturally multi-witness
 
 #### VARIABLE Trust (Aura Pattern - Dowsing/Imager)
-- [ ] Only Imager role can lie; Dowser is neutralized
-- [ ] Verification requires third player watching Imager's screen
-- [ ] OR cross-reference with behavioral evidence
+- [x] Only Imager role can lie; Dowser is neutralized
+- [x] Verification requires third player watching Imager's screen
+- [x] OR cross-reference with behavioral evidence
 
 #### LOW Trust (Prism Reading)
-- [ ] Both Calibrator and Lens Reader can lie
-- [ ] Verification requires repeating with different operators
-- [ ] OR cross-reference with behavioral evidence
+- [x] Both Calibrator and Lens Reader can lie
+- [x] Verification requires repeating with different operators
+- [x] OR cross-reference with behavioral evidence
 
 #### SABOTAGE_RISK (Ghost Writing)
-- [ ] Verification requires witness to setup AND result
-- [ ] Buddy system: one places, one watches
-- [ ] Sabotage detection: book moved, wrong room, broken setup
+- [x] Verification requires witness to setup AND result
+- [x] Buddy system: one places, one watches
+- [x] Sabotage detection: book moved, wrong room, broken setup
 
 ### Behavioral Cross-Reference (The "Gotcha" Moment) → FW-036b
-- [ ] System detects when equipment evidence conflicts with observed behavior
-- [ ] Example: Prism shows "aggressive-red" but entity moves slowly during hunts
-- [ ] Conflict triggers CONTESTED state with explanation
-- [ ] This is the primary mechanism for catching Cultist lies
+- [x] System detects when equipment evidence conflicts with observed behavior
+- [x] Example: Prism shows "aggressive-red" but entity moves slowly during hunts
+- [x] Conflict triggers CONTESTED state with explanation
+- [x] This is the primary mechanism for catching Cultist lies
 
 ### Verification Timing → FW-036c
-- [ ] Verification must happen within time window (evidence can "go stale")
-- [ ] Fresh evidence easier to verify than old claims
-- [ ] Prevents retroactive verification of made-up evidence
+- [x] Verification must happen within time window (evidence can "go stale")
+- [x] Fresh evidence easier to verify than old claims
+- [x] Prevents retroactive verification of made-up evidence
 
 ### Evidence Board Integration (Already in FW-035c)
 - [x] Verification state icon next to each evidence
@@ -79,7 +79,7 @@ Create the cross-verification system where evidence can be confirmed by multiple
 ### Signals (Distributed)
 - [x] `evidence_verified` - emitted when evidence confirmed by second player (FW-031)
 - [x] `evidence_contested` - emitted when conflicting reports detected (FW-031)
-- [ ] `behavioral_conflict` - emitted when equipment vs behavior mismatch (FW-036b)
+- [x] `behavioral_conflict` - emitted when equipment vs behavior mismatch (FW-036b)
 
 ## Technical Notes
 
@@ -105,3 +105,21 @@ This creates satisfying deduction moments.
 - Cultist contamination abilities (FW-052)
 - Voting on evidence validity
 - Evidence removal/retraction
+
+## Implementation Notes
+
+All sub-tickets completed. Core implementation:
+
+### Files Created
+- `src/evidence/verification_manager.gd` - Trust-level verification rules autoload
+- `src/evidence/conflict_detector.gd` - Behavioral conflict detection autoload
+
+### Autoloads Registered (project.godot)
+- VerificationManager - Trust-level verification rules
+- ConflictDetector - Behavioral conflict detection
+
+### Test Coverage
+- `tests/unit/test_verification_rules.gd` - 17 tests
+- `tests/unit/test_conflict_detector.gd` - 15 tests
+
+All 372 tests pass including smoke tests.

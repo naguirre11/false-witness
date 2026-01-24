@@ -105,3 +105,37 @@ The Prism Rig works by refracting spectral energy through precisely-aligned chro
 
 - Entity-specific signature definitions (part of entity design)
 - Cultist-specific abilities to corrupt readings (FW-052)
+
+---
+
+## Implementation Notes (Ralph PRD - 2026-01-21)
+
+### Files Created
+- `src/equipment/spectral_prism/prism_enums.gd` - PrismPattern, PrismColor, EntityCategory enums + mappings
+- `src/equipment/spectral_prism/calibrator.gd` - Calibrator equipment with filter rotation, alignment detection
+- `src/equipment/spectral_prism/lens_reader.gd` - Lens Reader with reading mechanics, quality tracking
+- `scenes/ui/prism_calibrator_view.tscn` - Calibrator viewfinder UI with blob visualization
+- `scenes/ui/prism_lens_view.tscn` - Lens Reader eyepiece UI with pattern rendering
+- `scenes/equipment/spectral_calibrator.tscn` - 3D sextant-like placeholder mesh
+- `scenes/equipment/spectral_lens_reader.tscn` - 3D monocle-like placeholder mesh
+- `tests/unit/test_prism_enums.gd` - Enum mapping tests
+- `tests/integration/test_calibrator.gd` - Calibrator mechanics tests
+- `tests/integration/test_lens_reader.gd` - Lens Reader mechanics tests
+
+### Key Implementation Details
+1. **CooperativeEquipment base class** provides all partner linking (pairing) functionality
+2. **Calibration flow**: IDLE → VIEWING → ALIGNING → LOCKED
+3. **Lying capability**: No enforcement - Calibrator can lock at any position, Lens Reader can report any pattern
+4. **Evidence generation**: Calls `EvidenceManager.collect_cooperative_evidence()` with PRISM_READING type
+5. **Line-of-sight**: Implemented via raycast in `_has_line_of_sight_to()`
+
+### Test Results
+- All 15 user stories complete (FW-037-01 through FW-037-15)
+- Unit tests: test_prism_enums.gd passes
+- Integration tests: test_calibrator.gd, test_lens_reader.gd pass
+
+### Verification Commands
+```bash
+$GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=test_calibrator.gd -gdir=res://tests/integration/ -gexit
+$GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=test_prism_enums.gd -gdir=res://tests/unit/ -gexit
+```

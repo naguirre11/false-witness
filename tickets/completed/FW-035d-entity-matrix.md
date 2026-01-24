@@ -45,3 +45,38 @@ Matrix updates live as evidence is collected. Use signals from EvidenceManager.
 - Entity definitions (FW-041)
 - Voting/identification submission
 - Confidence scoring
+
+---
+
+## Implementation Notes (Ralph PRD - 2026-01-21)
+
+**Completed by Ralph in cross-verification PRD (stories FW-035-08, FW-035-09)**
+
+### Files Created/Modified
+- `src/ui/entity_matrix.gd` (313 lines) - EntityMatrix component
+- `scenes/ui/entity_matrix.tscn` - Scene file
+- `src/evidence/evidence_manager.gd` - Entity elimination logic added
+
+### What Was Implemented
+- EntityMatrix UI component showing entities vs evidence types grid
+- Checkmarks for evidence types each entity produces
+- Eliminated entities grayed out based on collected evidence
+- Remaining possibilities highlighted
+- Updates from `EvidenceManager.eliminations_changed` signal
+- 8 entities defined: Phantom, Banshee, Revenant, Shade, Poltergeist, Wraith, Mare, Demon
+- `ENTITY_EVIDENCE_MAP` with 3 evidence types per entity
+
+### Acceptance Criteria Status
+- [x] Shows all possible entities as rows
+- [x] Columns for each evidence type
+- [x] Checkmarks for evidence types each entity can produce
+- [x] Entities visually eliminated as evidence rules them out
+- [x] Remaining possibilities highlighted
+- [x] Clear "possible" vs "eliminated" distinction
+
+### Testing
+- Integration tests in `tests/integration/test_evidence_board_integration.gd` (27 tests)
+
+### Related Commits
+- 90b29c3: FW-035-08 - Create entity possibility matrix
+- 6c3b885: FW-035-09 - Implement entity elimination logic in EvidenceManager

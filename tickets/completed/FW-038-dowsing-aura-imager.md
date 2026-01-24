@@ -101,3 +101,37 @@ The Dowser faces the anchor point with their back to the Imager. Turning around 
 
 - Solo operation mode (always requires two players)
 - Cultist-specific abilities (FW-052)
+
+---
+
+## Implementation Notes (Ralph PRD - 2026-01-21)
+
+### Files Created
+- `src/equipment/aura/aura_enums.gd` - AuraColor, AuraForm, EntityTemperament enums + mappings
+- `src/equipment/aura/spatial_constraints.gd` - Position validation (behind check, facing check, distance)
+- `src/equipment/aura/dowsing_rods.gd` - Dowser equipment with rod angles, behavior, anchor detection
+- `src/equipment/aura/aura_imager.gd` - Imager equipment with resolution system, positioning validation
+- `scenes/ui/aura_imager_view.tscn` - Camera screen UI with aura visualization, resolution thresholds
+- `scenes/equipment/dowsing_rods.tscn` - 3D L-rod copper rod placeholder (independent left/right animation)
+- `scenes/equipment/aura_imager.tscn` - 3D camera with crystal lens placeholder
+- `tests/unit/test_aura_enums.gd` - Enum mapping tests
+- `tests/unit/test_spatial_constraints.gd` - Position validation tests
+- `tests/integration/test_dowsing_rods.gd` - Dowser mechanics tests
+- `tests/integration/test_aura_imager.gd` - Imager mechanics tests
+
+### Key Implementation Details
+1. **Asymmetric trust**: Dowser state exposed via `get_observable_state()` - visible to all. Imager screen is private.
+2. **Spatial validation**: `spatial_constraints.gd` enforces behind-check, distance validation
+3. **Resolution thresholds**: 30% for color, 50% for form, 70% for full reading
+4. **Direction commands**: DirectionCommand enum with verbal relay mechanic
+5. **Third-party verification**: `can_observer_see_screen()` allows shoulder-watching
+
+### Test Results
+- All 15 user stories complete (FW-038-01 through FW-038-15)
+- Full test suite passes
+
+### Verification Commands
+```bash
+$GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=test_aura_imager.gd -gdir=res://tests/integration/ -gexit
+$GODOT --headless -s addons/gut/gut_cmdln.gd -gtest=test_spatial_constraints.gd -gdir=res://tests/unit/ -gexit
+```

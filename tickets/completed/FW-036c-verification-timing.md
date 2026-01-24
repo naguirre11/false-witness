@@ -67,3 +67,52 @@ Staleness logic can live in VerificationManager (from FW-036a) as an additional 
 - Test verification blocking for stale evidence
 - Test that recent evidence allows verification with flag
 - Test staleness calculation edge cases (exactly at boundary)
+
+---
+
+## Implementation Notes (Ralph PRD - 2026-01-21)
+
+**Completed by Ralph in cross-verification PRD (stories FW-036-14, FW-036-15)**
+
+### Files Created/Modified
+- `src/evidence/verification_manager.gd` (+90 lines) - Staleness logic
+- `src/evidence/evidence.gd` (+55 lines) - Verification timestamp tracking
+- `src/ui/evidence_detail_popup.gd` - Staleness display
+
+### What Was Implemented
+
+**Staleness System (VerificationManager):**
+- `StalenessLevel` enum: FRESH (<60s), STALE (60-180s), VERY_STALE (>180s)
+- `get_evidence_staleness()` - Calculates current staleness level
+- `get_staleness_description()` - Human-readable staleness text
+- `get_staleness_color()` - Color coding for staleness display
+- Very stale evidence cannot be newly verified
+- Late verification flagged in metadata
+
+**Verification Timestamp Tracking (Evidence):**
+- `verification_timestamp` - When evidence was verified
+- `verification_history` - Array of all verification records
+- `record_verification(verifier_id, timestamp)` - Records verification event
+- `get_verification_history()` - Returns all verifications
+
+**UI Integration:**
+- Staleness displayed with color in evidence detail popup
+- "Verified by [Player] at [Time]" shown for verified evidence
+- Verify button disabled for very stale evidence
+
+### Acceptance Criteria Status
+- [x] Evidence tracks `timestamp` (already existed)
+- [x] Staleness calculated from current time vs timestamp
+- [x] Configurable thresholds (60s, 180s)
+- [x] Fresh evidence: Normal verification
+- [x] Stale evidence: Late verification flag
+- [x] Very stale evidence: Cannot verify
+- [x] Visual indicator for staleness in UI
+- [x] Timestamp/verifier display
+
+### Testing
+- Unit tests in `tests/unit/test_verification_rules.gd` cover staleness validation
+
+### Related Commits
+- 8196037: FW-036-14 - Implement evidence staleness (freshness windows)
+- d0f430a: FW-036-15 - Add verification timestamp tracking

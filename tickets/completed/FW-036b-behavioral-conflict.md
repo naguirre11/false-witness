@@ -85,3 +85,56 @@ This system needs entity behavior data from FW-041. If entity system isn't ready
 - Test each conflict rule type
 - Test that conflicts properly trigger CONTESTED state
 - Test conflict explanation generation
+
+---
+
+## Implementation Notes (Ralph PRD - 2026-01-21)
+
+**Completed by Ralph in cross-verification PRD (stories FW-036-08 through FW-036-13)**
+
+### Files Created/Modified
+- `src/evidence/conflict_detector.gd` (658 lines) - ConflictDetector class
+- `src/ui/evidence_slot.gd` - Contested evidence styling
+- `src/ui/evidence_detail_popup.gd` - Conflict display
+
+### What Was Implemented
+
+**ConflictDetector Class:**
+- `BehaviorCategory` enum: PASSIVE, AGGRESSIVE, TERRITORIAL, MOBILE
+- `ENTITY_BEHAVIOR_MAP`, `PRISM_SHAPE_BEHAVIOR_MAP`, `AURA_COLOR_BEHAVIOR_MAP`
+- Hunt observation tracking with `start_hunt_tracking()`, `record_observation()`, `end_hunt_tracking()`
+- Behavior categorization based on speed, aggression, targeting
+- Automatic conflict detection when evidence collected
+- `behavioral_conflict` signal when conflict detected
+- Marks evidence as CONTESTED via `EvidenceManager.contest_evidence()`
+
+**UI Updates:**
+- Contested evidence shows orange highlight/border
+- Exclamation mark icon on contested slots
+- Conflict description displayed in evidence detail popup
+
+### Acceptance Criteria Status
+- [x] `ConflictDetector` class created (extends Node)
+- [x] System compares equipment evidence against behavioral observations
+- [x] Conflicts trigger CONTESTED state with detailed explanation
+- [x] Hunt behavior evidence records behavioral traits
+- [x] Multiple witnesses' observations are aggregated
+- [x] Prism conflict rules implemented
+- [x] Aura conflict rules implemented
+- [x] Conflict explanation stored in evidence metadata
+- [x] `behavioral_conflict` signal implemented
+- [x] EventBus signals for conflict events
+
+### Known Integration Gap
+**IMPORTANT:** ConflictDetector is NOT registered as an autoload. The class is complete
+but needs to be either added as an autoload or instantiated by a level/scene to function
+at runtime. Consider adding to project.godot autoloads.
+
+### Testing
+- Unit tests in `tests/unit/test_conflict_detector.gd` (15 tests)
+
+### Related Commits
+- 539f07a: FW-036-08/09 - Create behavioral conflict detection system with behavior categories
+- 7d351ae: FW-036-10 - Implement hunt behavior observation tracking
+- c9b53dc: FW-036-11 - Implement conflict detection for Prism readings
+- b863a22: FW-036-13 - Display contested evidence in board

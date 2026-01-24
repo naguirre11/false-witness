@@ -7,6 +7,7 @@ extends CanvasLayer
 # --- Constants ---
 
 const SLOT_COUNT := 3
+const CameraViewfinderScene := preload("res://scenes/ui/camera_viewfinder.tscn")
 
 ## Base scale for voice icon when transmitting.
 const VOICE_ICON_BASE_SCALE := 1.0
@@ -23,6 +24,8 @@ var _is_voice_active: bool = false
 var _current_phase: String = "Investigation"
 var _active_slot: int = 0
 var _voice_pulse_time: float = 0.0
+var _camera_viewfinder: Node = null
+var _current_camera: Node = null
 
 # --- Node References ---
 
@@ -62,6 +65,12 @@ func _setup_signals() -> void:
 
 		if voice_manager.has_signal("voice_state_changed"):
 			voice_manager.voice_state_changed.connect(_on_voice_state_changed)
+
+	# Connect to EquipmentManager for camera integration
+	var equipment_manager := _get_equipment_manager()
+	if equipment_manager:
+		if equipment_manager.has_signal("active_slot_changed"):
+			equipment_manager.active_slot_changed.connect(_on_active_slot_changed)
 
 	# TODO: Connect to InteractionManager for prompts
 
@@ -202,6 +211,10 @@ func _on_voice_state_changed(state: int) -> void:
 	_set_voice_active(is_transmitting)
 
 
+func _on_active_slot_changed(_old_slot: int, _new_slot: int) -> void:
+	_update_camera_binding()
+
+
 # --- Internal Methods ---
 
 
@@ -297,3 +310,63 @@ func _get_equipment_icon(equip_type: int) -> String:
 		15: "🧂",  # Salt
 	}
 	return icons.get(equip_type, "📦")
+
+
+func _get_equipment_manager() -> Node:
+	# Try to find via local player
+	var local_player := _get_local_player()
+	if local_player and local_player.has_node("EquipmentManager"):
+		return local_player.get_node("EquipmentManager")
+
+	# Try autoload (if exists)
+	if has_node("/root/EquipmentManager"):
+		return get_node("/root/EquipmentManager")
+
+	return null
+
+
+func _get_local_player() -> Node:
+	# Try GameManager
+	if has_node("/root/GameManager"):
+		var game_manager := get_node("/root/GameManager")
+		if game_manager.has_method("get_local_player"):
+			return game_manager.get_local_player()
+
+	# Fallback: find in scene tree
+	var players := get_tree().get_nodes_in_group("players")
+	for player in players:
+		if player.is_multiplayer_authority():
+			return player
+
+	return null
+
+
+func _update_camera_binding() -> void:
+	# Unbind previous camera
+	if _current_camera and _camera_viewfinder:
+		_camera_viewfinder.unbind_camera()
+		_current_camera = null
+
+	# Get active equipment from EquipmentManager
+	var equipment_manager := _get_equipment_manager()
+	if not equipment_manager:
+		return
+
+	var active_equipment: Node = null
+	if equipment_manager.has_method("get_active_equipment"):
+		active_equipment = equipment_manager.get_active_equipment()
+
+	# Check if it's a VideoCamera with is_using_camera method
+	if active_equipment and active_equipment.has_method("is_using_camera"):
+		_current_camera = active_equipment
+
+		# Create viewfinder if needed
+		if not _camera_viewfinder:
+			_camera_viewfinder = CameraViewfinderScene.instantiate()
+			add_child(_camera_viewfinder)
+
+		_camera_viewfinder.bind_camera(_current_camera)
+	else:
+		# Hide viewfinder when not using camera
+		if _camera_viewfinder:
+			_camera_viewfinder.visible = false

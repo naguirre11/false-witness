@@ -21,6 +21,8 @@ This project uses custom Claude commands defined in `COMMANDS.md`:
 | `%eval` | `%e` | Update PROJECT_STRUCTURE.md with session changes |
 | `%describe` | `%d` | Update PROJECT_STATE.md with current project analysis |
 | `%flowchart` | `%f` | Follow FLOWCHART.md decision tree for systematic workflow |
+| `%tasks` | `%tk` | Manage persistent tasks - see TASKS_WORKFLOW.md |
+| `%autonomous` | `%a` | Autonomous agent orchestration - coordinate OMC agents via task list |
 
 Shorthand markers (from `SHORTHAND.md`):
 - `^future` / `^f`: Document something for future Claude instances
@@ -42,6 +44,148 @@ Status tracking:
 To move tickets, use the PowerShell script:
 ```powershell
 cc_workflow/scripts/ticket-move.ps1 FW-024 for_review
+```
+
+## Persistent Task Management
+
+This project uses Claude Code's persistent Task system for cross-session work tracking. Tasks are stored in `~/.claude/tasks/false-witness/` and persist across sessions.
+
+**Quick start**: Run `%tasks` or `%tk` to follow the task workflow decision tree.
+
+### Configuration
+
+The `CLAUDE_CODE_TASK_LIST_ID` environment variable is set in `.claude/settings.json`:
+```json
+"env": {
+  "CLAUDE_CODE_TASK_LIST_ID": "false-witness"
+}
+```
+
+### How It Works
+
+- **Tasks persist**: When you create tasks with `TaskCreate`, they're saved to the filesystem
+- **Cross-session**: New sessions see all existing tasks automatically
+- **Multi-agent**: Subagents and parallel sessions can collaborate on the same task list
+- **Dependencies**: Tasks support `blockedBy` relationships for complex workflows
+
+### When to Use Tasks vs Tickets
+
+| Use Tasks For | Use Tickets For |
+|---------------|-----------------|
+| Within-session work breakdown | Feature-level planning |
+| Multi-step implementation tracking | Human review workflow |
+| Subagent coordination | Cross-branch work items |
+| Temporary work items | Documented requirements |
+
+**Typical flow**: Pick a ticket from `tickets/ready/`, break it into Tasks for implementation, complete the ticket when all tasks resolve.
+
+### Task Commands
+
+```
+TaskCreate   - Create a new task with subject, description, activeForm
+TaskList     - See all tasks and their status
+TaskGet      - Get full details of a specific task
+TaskUpdate   - Update status, add dependencies, mark complete
+```
+
+### Workflow Reference
+
+See [`TASKS_WORKFLOW.md`](./TASKS_WORKFLOW.md) for the complete decision tree covering:
+- Discovering and resuming tasks from previous sessions
+- Breaking tickets into tasks
+- Working through tasks systematically
+- Coordinating with subagents
+- Multi-session handoff patterns
+
+## OMC Agent Orchestration
+
+This project uses [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) (OMC) for multi-agent orchestration. The OMC plugin has been patched to give executor agents access to Task tools.
+
+### How It Works
+
+The main session can spawn OMC subagents that share the same task list:
+
+```
+Main Session (Orchestrator)
+    │
+    ├─→ TaskCreate (define work)
+    │
+    ├─→ Spawn executor agent
+    │       │
+    │       ├─→ TaskList (see work)
+    │       ├─→ TaskUpdate (mark in_progress)
+    │       ├─→ [do work]
+    │       └─→ TaskUpdate (mark completed)
+    │
+    └─→ TaskList (monitor progress)
+```
+
+### Available Agents (with Task Tools)
+
+| Agent | Model | Use For |
+|-------|-------|---------|
+| `oh-my-claudecode:executor-low` | haiku | Simple, single-file tasks |
+| `oh-my-claudecode:executor` | sonnet | Standard implementation |
+| `oh-my-claudecode:executor-high` | opus | Complex, multi-file tasks |
+| `oh-my-claudecode:build-fixer` | sonnet | Fix test/build failures |
+| `oh-my-claudecode:tdd-guide` | sonnet | Test-driven development |
+
+### Spawning Agents
+
+```
+Task:
+  subagent_type: "oh-my-claudecode:executor"
+  model: "sonnet"
+  prompt: |
+    Work on task #X. Use TaskGet to read details,
+    TaskUpdate to mark progress, complete when done.
+```
+
+### Autonomous Mode
+
+Run `%autonomous` or `%a` to activate full autonomous orchestration where the main session coordinates agents through the entire ticket workflow. See `AUTONOMOUS_WORKFLOW.md`.
+
+### Patch Maintenance
+
+The OMC plugin patch adds Task tools to agent definitions. If the plugin is updated, re-apply with:
+
+```powershell
+./cc_workflow/scripts/patch-omc-task-tools.ps1
+```
+
+See `cc_workflow/OMC_TASK_TOOLS_PATCH.md` for full documentation.
+
+## Godot API Documentation (MCP Server)
+
+This project has a local MCP server providing offline Godot 4 API documentation. Use these tools when you need to look up Godot classes, methods, signals, or properties.
+
+### Available Tools
+
+| Tool | Purpose | Example |
+|------|---------|---------|
+| `godot_search` | Search across all docs | `godot_search("pressed signal")` |
+| `godot_get_class` | Get full class info (methods, properties, signals) | `godot_get_class("Control")` |
+| `godot_get_symbol` | Get specific member details | `godot_get_symbol("Button.pressed")` |
+| `godot_list_classes` | List classes by prefix | `godot_list_classes("Animation")` |
+
+### When to Use
+
+- **Before using unfamiliar Godot APIs** - Check method signatures, return types, available signals
+- **When implementing UI** - Look up Control node properties, theme overrides, signals
+- **For networking code** - Verify MultiplayerPeer, RPC, and synchronization APIs
+- **When debugging** - Confirm expected behavior of Godot methods
+
+### Examples
+
+```
+# Find what signals Button emits
+godot_get_class("Button")
+
+# Check parameters for a specific method
+godot_get_symbol("Node.add_child")
+
+# Search for animation-related APIs
+godot_search("tween property")
 ```
 
 ## Godot 4.4 Technical Requirements

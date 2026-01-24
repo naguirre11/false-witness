@@ -42,7 +42,25 @@
       "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=test_temperature_zone.gd -gtest=test_thermometer.gd -gexit)",
       "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gprefix=test_temperature -gsuffix=.gd -gexit)",
       "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/test_calibrator.gd -gexit)",
-      "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=test_echo_controller.gd -gexit)"
+      "Bash(../tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=test_echo_controller.gd -gexit)",
+      "Bash(git mv:*)",
+      "Bash(./cc_workflow/scripts/run-tests.ps1 -Mode full)",
+      "Bash(\"C:/Users/vinco/Projects/tooling/Godot_v4.4.1-stable_win64_console.exe\" --headless -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json -gexit)",
+      "Bash(powershell.exe -File \"./cc_workflow/scripts/ticket-move.ps1\" FW-082 for_review)",
+      "Bash(C:/Users/vinco/Projects/tooling/Godot_v4.4.1-stable_win64_console.exe --headless -s addons/gut/gut_cmdln.gd -gtest=test_evidence_board_integration.gd -gdir=res://tests/integration/ -gexit)",
+      "Bash(./cc_workflow/scripts/run-tests.ps1 -Mode smoke)",
+      "WebFetch(domain:mcpmarket.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:claude-plugins.dev)",
+      "Skill(oh-my-claudecode:hud)",
+      "Bash(C:/Users/vinco/Projects/tooling/Godot_v4.4.1-stable_win64.exe:*)",
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File \"C:/Users/vinco/Projects/false_witness/cc_workflow/scripts/run-tests.ps1\" -Mode full)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "context7",
+    "exa",
+    "filesystem",
+    "github"
+  ]
 }

@@ -59,3 +59,102 @@ These are custom commands to be used whenever a particular function starting wit
    4. Implementation, testing, completion, and handoff procedures
 
    Use this command at the start of a session to ensure systematic, foolproof workflow. 
+
+## %tasks / %tk
+
+   Read and follow the decision tree in `./TASKS_WORKFLOW.md`. This guides you through:
+   1. Checking for existing persistent tasks from previous sessions
+   2. Breaking tickets into trackable tasks
+   3. Working through tasks systematically
+   4. Coordinating with subagents via the shared task list
+
+   Use this command when:
+   - Starting a session and want to see outstanding work
+   - Breaking a ticket into implementation steps
+   - Coordinating parallel work across subagents
+   - Resuming multi-session work
+
+   Key tools: `TaskList`, `TaskCreate`, `TaskGet`, `TaskUpdate`
+
+## %orchestrate / %o [options]
+
+   Run the autonomous task orchestrator to complete work with minimal human intervention.
+   Uses a two-Claude architecture: an Orchestrator Claude directs an Agent Claude through tasks.
+
+   **Options:**
+   - `--ticket FW-XXX` or `-t FW-XXX`: Work on a specific ticket
+   - `--max-iterations N` or `-n N`: Limit iterations (default: 20)
+   - `--dry-run`: Show plan without executing
+   - `--verbose` or `-v`: Verbose output
+
+   **Usage:**
+   ```bash
+   # Run orchestrator (picks next ticket from queue)
+   python -m cc_workflow.orchestrator.main
+
+   # Work on specific ticket
+   python -m cc_workflow.orchestrator.main --ticket FW-061
+
+   # Dry run to see current state
+   python -m cc_workflow.orchestrator.main --dry-run
+   ```
+
+   **How it works:**
+   1. Orchestrator Claude analyzes current state (tasks, tickets, git)
+   2. Orchestrator decides what Agent Claude should do
+   3. Agent Claude executes the task (code, tests, commits)
+   4. Orchestrator evaluates results and repeats until done/blocked
+
+   **Files:**
+   - `cc_workflow/orchestrator/` - Python orchestrator package
+   - `cc_workflow/orchestrator/patterns.txt` - Learned codebase patterns
+   - `cc_workflow/orchestrator/prompts/` - System prompts for both Claudes
+
+## %autonomous / %a
+
+   Activate autonomous agent orchestration mode. The main session becomes an orchestrator that:
+   1. Reads the current/next ticket
+   2. Breaks it into atomic tasks
+   3. Spawns OMC executor agents to complete each task
+   4. Monitors progress, handles errors, retries failures
+   5. Continues until all tasks complete or a blocker is hit
+
+   **How it works:**
+   - Reads learnings from previous runs (`cc_workflow/autonomous/learnings.md`)
+   - Main session creates Tasks via `TaskCreate`
+   - Spawns `oh-my-claudecode:executor` agents to work on tasks
+   - Agents can read/update the shared task list
+   - Main session monitors `TaskList` and handles results
+   - Checkpoints every 3 tasks (smoke tests, commit)
+   - Final verification before marking ticket complete
+   - Captures learnings (what worked, failures, patterns) for future runs
+
+   **Key differences from other commands:**
+   - `%tasks` - You do the work, tasks track progress
+   - `%orchestrate` - External Python script manages two Claude instances
+   - `%autonomous` - You coordinate OMC agents via task list (this command)
+
+   **When to use:**
+   - For tickets that can be broken into independent pieces
+   - When you want minimal interaction during execution
+   - For standard implementation work (not exploratory/research)
+
+   **Workflow document:** See `AUTONOMOUS_WORKFLOW.md` for the full decision tree.
+
+   **Prerequisites:**
+   - OMC plugin installed with Task tools patch (see `cc_workflow/OMC_TASK_TOOLS_PATCH.md`)
+   - No other active orchestration running
+
+## %ralph / %r (-r)
+
+   This command is used to collaborate with Ralph (./cc_workflow/scripts/ralph/). A reference for working with Ralph exists at ./cc_workflow/scripts/RALPH_REFERNCE.md.
+
+   If the option -r is used:
+      Review the most recent work completed by Ralph.
+         If Ralph raised any issues, verify the issue exists.
+            If you are able to ameliorate that issue on your own, do so.
+         If you have any concerns about Ralph's code quality, raise them and ticket them.
+      Create a handoff document for the review.
+      Move completed tickets.
+
+   Review ready tickets. If already preparded PRDs exist in ./cc_workflow/scripts/ralph/prd_drafts, begin with one of those, editing as needed, replacing Ralph's current PRD. Otherwise, determine an appropriate workload for Ralph based on tickets, and create the PRD. 

@@ -69,7 +69,7 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-035b-trust-visualization | Trust Level Visualization | completed |
 | FW-035c-collector-attribution | Collector Attribution & Verification | completed |
 | FW-035d-entity-matrix | Entity Possibility Matrix | completed |
-| FW-035e-evidence-board-polish | Evidence Board Polish & Cleanup | ready |
+| FW-035e-evidence-board-polish | Evidence Board Polish & Cleanup | for_review |
 | FW-036-cross-verification | Cross-Verification System (Epic) | completed |
 | FW-036a-verification-rules | Verification Rules Engine | completed |
 | FW-036b-behavioral-conflict | Behavioral Conflict Detection | completed |

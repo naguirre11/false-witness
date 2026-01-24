@@ -36,6 +36,7 @@ const VERIFICATION_ICONS: Dictionary = {
 var _collected: bool = false
 var _quality: EvidenceEnums.ReadingQuality = EvidenceEnums.ReadingQuality.STRONG
 var _evidence: Evidence = null  ## Full evidence data for attribution
+var _hover_tween: Tween = null  ## Tracks active hover animation
 
 # --- Nodes ---
 
@@ -51,10 +52,13 @@ var _evidence: Evidence = null  ## Full evidence data for attribution
 
 func _ready() -> void:
 	custom_minimum_size = SLOT_SIZE
+	pivot_offset = size / 2
 	_update_display()
 	_setup_trust_styling()
 	if _button:
 		_button.pressed.connect(_on_button_pressed)
+		_button.mouse_entered.connect(_on_mouse_entered)
+		_button.mouse_exited.connect(_on_mouse_exited)
 
 
 func setup(type: EvidenceEnums.EvidenceType) -> void:
@@ -280,6 +284,30 @@ func _get_category_color(category: EvidenceEnums.EvidenceCategory) -> Color:
 
 func _on_button_pressed() -> void:
 	slot_pressed.emit(evidence_type)
+
+
+func _on_mouse_entered() -> void:
+	# Cancel previous tween if still running
+	if _hover_tween:
+		_hover_tween.kill()
+
+	# Animate scale to 1.05x using fast animation timing
+	_hover_tween = create_tween()
+	_hover_tween.tween_property(
+		self, "scale", Vector2(1.05, 1.05), DesignTokens.ANIMATION.duration_fast
+	)
+
+
+func _on_mouse_exited() -> void:
+	# Cancel previous tween if still running
+	if _hover_tween:
+		_hover_tween.kill()
+
+	# Animate scale back to 1.0 using fast animation timing
+	_hover_tween = create_tween()
+	_hover_tween.tween_property(
+		self, "scale", Vector2(1.0, 1.0), DesignTokens.ANIMATION.duration_fast
+	)
 
 
 func _setup_trust_styling() -> void:

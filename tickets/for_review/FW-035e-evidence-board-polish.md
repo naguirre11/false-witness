@@ -16,13 +16,13 @@ Polish and cleanup items remaining from the Evidence Board UI epic (FW-035). The
 ## Acceptance Criteria
 
 ### DesignTokens Cleanup in evidence_board.gd
-- [ ] Replace hardcoded `font_size: 14` with `DesignTokens.FONT_SIZES.sm` (line ~144)
-- [ ] Replace hardcoded `Color(0.7, 0.7, 0.7)` with `DesignTokens.COLORS.text_secondary` (line ~145)
-- [ ] Replace hardcoded `separation: 8` with `DesignTokens.SPACING.sm` (lines ~150, ~163)
+- [x] Replace hardcoded `font_size: 14` with `DesignTokens.FONT_SIZES.sm` (line ~148)
+- [x] Replace hardcoded `Color(0.7, 0.7, 0.7)` with `DesignTokens.COLORS.text_secondary` (line ~149)
+- [x] Replace hardcoded `separation: 8` with `DesignTokens.SPACING.sm` (lines ~154, ~167)
 
 ### Animations
-- [ ] Add fade-in animation when board opens
-- [ ] Add hover animations on evidence slots
+- [x] Add fade-in animation when board opens
+- [x] Add hover animations on evidence slots
 
 ### Integration (Optional/Deferred)
 - [ ] Verify network sync works correctly in multiplayer (board subscribes to EvidenceManager signals)
@@ -46,3 +46,24 @@ func show_board() -> void:
 - New features
 - Layout changes
 - Accessibility improvements beyond current implementation
+
+## Implementation Notes (2026-01-24)
+
+### Changes Made
+
+**evidence_board.gd:**
+- Added `DesignTokens` import via preload
+- Replaced 4 hardcoded values with design tokens (font size, color, 2x separation)
+- Added fade-in animation in `show_board()` using `modulate.a` and Tween
+
+**evidence_slot.gd:**
+- Added `_hover_tween` class variable to track active hover animations
+- Set `pivot_offset = size / 2` for center-based scaling
+- Connected `mouse_entered` and `mouse_exited` signals to `_button`
+- Implemented subtle 1.05x scale animation on hover (0.15s duration)
+- Properly kills previous tweens before starting new ones
+
+### Verification
+- gdlint passes on both files
+- Smoke tests pass (17/17)
+- Integration items deferred (network sync and quality-based elimination are optional)

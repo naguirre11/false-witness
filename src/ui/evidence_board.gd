@@ -11,6 +11,10 @@ extends Control
 ## - Collector attribution (FW-035c)
 ## - Entity possibility matrix (FW-035d)
 
+# --- Imports ---
+
+const DesignTokens := preload("res://themes/design_tokens.gd")
+
 # --- Constants ---
 
 const EVIDENCE_SLOT_SCENE := "res://scenes/ui/evidence_slot.tscn"
@@ -141,13 +145,13 @@ func _create_category_row(
 	# Category header
 	var header := Label.new()
 	header.text = EvidenceEnums.get_category_name(category)
-	header.add_theme_font_size_override("font_size", 14)
-	header.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+	header.add_theme_font_size_override("font_size", DesignTokens.FONT_SIZES.sm)
+	header.add_theme_color_override("font_color", DesignTokens.COLORS.text_secondary)
 	row.add_child(header)
 
 	# Slots container
 	var slots_container := HBoxContainer.new()
-	slots_container.add_theme_constant_override("separation", 8)
+	slots_container.add_theme_constant_override("separation", DesignTokens.SPACING.sm)
 	row.add_child(slots_container)
 
 	# Create slots for each evidence type
@@ -160,7 +164,7 @@ func _create_category_row(
 
 	# Separator
 	var separator := HSeparator.new()
-	separator.add_theme_constant_override("separation", 8)
+	separator.add_theme_constant_override("separation", DesignTokens.SPACING.sm)
 	row.add_child(separator)
 
 	return row
@@ -199,8 +203,11 @@ func toggle_visibility() -> void:
 
 
 func show_board() -> void:
+	modulate.a = 0.0
 	_is_visible = true
 	show()
+	var tween := create_tween()
+	tween.tween_property(self, "modulate:a", 1.0, DesignTokens.ANIMATION.duration_normal)
 	_reset_focus()
 
 

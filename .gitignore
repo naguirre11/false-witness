@@ -59,3 +59,4 @@ gut_results.xml
 # Temporary test output
 test_output.txt
 .last_full_test.json
+.mcp.json

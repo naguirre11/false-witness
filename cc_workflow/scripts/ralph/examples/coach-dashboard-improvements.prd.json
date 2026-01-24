@@ -1,0 +1,94 @@
+{
+  "project": "Coach Dashboard Quick Actions",
+  "branchName": "ralph/coach-quick-actions",
+  "description": "Add quick action buttons to coach dashboard for common tasks",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Add Quick Actions button group component",
+      "description": "As a coach, I want quick access to common actions without navigating through menus.",
+      "acceptanceCriteria": [
+        "Create QuickActions component in coach dashboard folder",
+        "Component renders 4 action buttons in a grid",
+        "Buttons: 'New Assessment', 'Record Voice Note', 'Log Injury', 'Add Goal'",
+        "Responsive: 2x2 grid on mobile, 4 columns on desktop",
+        "Type checking passes: npm run check-types",
+        "Linting passes: npm run check"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Use shadcn Button component, Lucide icons"
+    },
+    {
+      "id": "US-002",
+      "title": "Wire up New Assessment quick action",
+      "description": "As a coach, clicking 'New Assessment' should take me to the assessment page.",
+      "acceptanceCriteria": [
+        "Button navigates to /orgs/[orgId]/coach/assess",
+        "Uses Next.js Link component for navigation",
+        "Button shows ClipboardList icon",
+        "Type checking passes: npm run check-types"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Simple navigation, no state needed"
+    },
+    {
+      "id": "US-003",
+      "title": "Wire up Record Voice Note quick action",
+      "description": "As a coach, clicking 'Record Voice Note' should take me to voice notes page.",
+      "acceptanceCriteria": [
+        "Button navigates to /orgs/[orgId]/coach/voice-notes",
+        "Uses Next.js Link component for navigation",
+        "Button shows Mic icon",
+        "Type checking passes: npm run check-types"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Simple navigation, no state needed"
+    },
+    {
+      "id": "US-004",
+      "title": "Wire up Log Injury quick action",
+      "description": "As a coach, clicking 'Log Injury' should take me to injuries page.",
+      "acceptanceCriteria": [
+        "Button navigates to /orgs/[orgId]/coach/injuries",
+        "Uses Next.js Link component for navigation",
+        "Button shows AlertCircle icon",
+        "Type checking passes: npm run check-types"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Simple navigation, no state needed"
+    },
+    {
+      "id": "US-005",
+      "title": "Wire up Add Goal quick action",
+      "description": "As a coach, clicking 'Add Goal' should take me to goals page.",
+      "acceptanceCriteria": [
+        "Button navigates to /orgs/[orgId]/coach/goals",
+        "Uses Next.js Link component for navigation",
+        "Button shows Target icon",
+        "Type checking passes: npm run check-types"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Simple navigation, no state needed"
+    },
+    {
+      "id": "US-006",
+      "title": "Add QuickActions to coach dashboard",
+      "description": "As a coach, I want to see quick actions prominently on my dashboard.",
+      "acceptanceCriteria": [
+        "QuickActions component appears above player list",
+        "Has 'Quick Actions' heading with Zap icon",
+        "Maintains existing dashboard layout and functionality",
+        "Type checking passes: npm run check-types",
+        "Verify in browser: dashboard shows quick actions"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "File: apps/web/src/app/orgs/[orgId]/coach/page.tsx"
+    }
+  ]
+}

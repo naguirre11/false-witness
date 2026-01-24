@@ -1,0 +1,522 @@
+{
+  "project": "False Witness",
+  "branchName": "ralph/cross-verification",
+  "description": "Evidence board enhancements and cross-verification system for catching Cultist lies",
+  "tickets": ["FW-035", "FW-036"],
+  "userStories": [
+    {
+      "id": "FW-035-01",
+      "title": "Enhance evidence board with 8 evidence type display",
+      "description": "Update evidence board to show all 8 evidence types",
+      "acceptanceCriteria": [
+        "Evidence board displays all 8 evidence types from EvidenceEnums",
+        "Organized by category: Equipment-Derived, Readily-Apparent, Triggered Test, Behavior-Based",
+        "Each type shows icon, name, and collection status",
+        "Uncollected types shown grayed out",
+        "Collected types highlighted",
+        "Update scenes/ui/evidence_board.tscn",
+        "gdlint src/ scenes/ passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "IMPLEMENTED: Evidence board exists with full 8-type display"
+    },
+    {
+      "id": "FW-035-02",
+      "title": "Add trust level color coding",
+      "description": "Visual indicators for evidence trust levels",
+      "acceptanceCriteria": [
+        "UNFALSIFIABLE (HUNT_BEHAVIOR): Gold border",
+        "HIGH trust (EMF, Thermometer, Visual, Physical): Green indicator",
+        "VARIABLE trust (AURA_PATTERN): Yellow indicator",
+        "LOW trust (PRISM_READING): Orange indicator",
+        "SABOTAGE_RISK (GHOST_WRITING): Red outline",
+        "Colors applied to evidence slots",
+        "gdlint src/ passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "IMPLEMENTED: Trust colors in evidence_slot.gd"
+    },
+    {
+      "id": "FW-035-03",
+      "title": "Add trust level tooltips",
+      "description": "Explain trust implications on hover",
+      "acceptanceCriteria": [
+        "Hovering evidence slot shows tooltip",
+        "Tooltip explains trust level meaning",
+        "UNFALSIFIABLE: 'All players can verify - cannot be faked'",
+        "HIGH: 'Shared display - difficult to lie about'",
+        "VARIABLE: 'One party can lie - verify with third player'",
+        "LOW: 'Both operators can lie - cross-reference with behavior'",
+        "SABOTAGE_RISK: 'Can be tampered with - buddy system recommended'",
+        "gdlint src/ passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "IMPLEMENTED: Tooltips in evidence_slot.gd"
+    },
+    {
+      "id": "FW-035-04",
+      "title": "Display reading quality indicators",
+      "description": "Show strong vs weak evidence readings",
+      "acceptanceCriteria": [
+        "STRONG readings shown with solid icon",
+        "WEAK readings shown with faded/dashed icon",
+        "Quality affects visual prominence",
+        "Tooltip shows quality level",
+        "Quality retrieved from Evidence.reading_quality",
+        "gdlint src/ passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "IMPLEMENTED: Quality display in evidence_slot.gd"
+    },
+    {
+      "id": "FW-035-05",
+      "title": "Add collector attribution display",
+      "description": "Show who collected each evidence",
+      "acceptanceCriteria": [
+        "Evidence slot shows collector name(s)",
+        "Single collector: 'Collected by: [Player]'",
+        "Cooperative evidence: 'Collected by: [Player1] + [Player2]'",
+        "Names clickable to highlight player in game",
+        "gdlint src/ passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "IMPLEMENTED: Collector attribution in evidence_slot.gd"
+    },
+    {
+      "id": "FW-035-06",
+      "title": "Add evidence detail popup on click",
+      "description": "Detailed view when clicking evidence",
+      "acceptanceCriteria": [
+        "Clicking evidence slot opens detail popup",
+        "Shows: type, collector(s), timestamp, location",
+        "Shows: reading quality, trust level",
+        "Shows: verification state with explanation",
+        "Shows: any conflicts or contested status",
+        "Close button returns to board",
+        "gdlint src/ passes"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "IMPLEMENTED: evidence_detail_popup.gd"
+    },
+    {
+      "id": "FW-035-07",
+      "title": "Display verification state icons",
+      "description": "Show unverified/verified/contested status",
+      "acceptanceCriteria": [
+        "UNVERIFIED: Single checkmark icon",
+        "VERIFIED: Double checkmark icon (green)",
+        "CONTESTED: Exclamation mark icon (yellow/red)",
+        "Icons displayed next to evidence slot",
+        "Tooltip explains verification meaning",
+        "gdlint src/ passes"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "IMPLEMENTED: Verification icons in evidence_slot.gd"
+    },
+    {
+      "id": "FW-035-08",
+      "title": "Create entity possibility matrix",
+      "description": "Grid showing possible entities based on evidence",
+      "acceptanceCriteria": [
+        "Create EntityMatrix component in evidence board",
+        "Rows: All possible entity types",
+        "Columns: All 8 evidence types",
+        "Checkmarks where entity produces evidence type",
+        "Entities eliminated by evidence grayed out",
+        "Remaining possibilities highlighted",
+        "gdlint src/ passes"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "IMPLEMENTED: entity_matrix.gd"
+    },
+    {
+      "id": "FW-035-09",
+      "title": "Implement entity elimination logic",
+      "description": "Remove entities that don't match evidence",
+      "acceptanceCriteria": [
+        "When evidence collected, check entity compatibility",
+        "Entities that don't produce that evidence type = eliminated",
+        "Elimination stored in EvidenceManager",
+        "Matrix updates when evidence changes",
+        "Elimination reversible if evidence contested",
+        "gdlint src/ passes"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "IMPLEMENTED: Elimination logic in entity_matrix.gd"
+    },
+    {
+      "id": "FW-035-10",
+      "title": "Add keyboard navigation to evidence board",
+      "description": "Navigate board without mouse",
+      "acceptanceCriteria": [
+        "Arrow keys move between evidence slots",
+        "Enter/Space selects focused slot",
+        "Escape closes detail popup",
+        "Tab cycles between board sections",
+        "Visual focus indicator on selected slot",
+        "gdlint src/ passes"
+      ],
+      "priority": 10,
+      "passes": true,
+      "notes": "IMPLEMENTED: Arrow keys, Enter, Tab navigation in evidence_board.gd"
+    },
+    {
+      "id": "FW-035-11",
+      "title": "Sync evidence board state across network",
+      "description": "All players see same board state",
+      "acceptanceCriteria": [
+        "Evidence board data from EvidenceManager (already synced)",
+        "Board UI updates on evidence_collected signal",
+        "Board UI updates on evidence_verification_changed signal",
+        "Board UI updates on evidence_contested signal",
+        "All clients show identical board state",
+        "gdlint src/ passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "PARTIAL: UI complete, network sync pending (needs NetworkManager integration)"
+    },
+    {
+      "id": "FW-035-12",
+      "title": "Make evidence board always visible in deliberation",
+      "description": "Board prominently displayed during deliberation",
+      "acceptanceCriteria": [
+        "During DELIBERATION state, board auto-opens",
+        "Board positioned prominently in deliberation UI",
+        "Cannot be minimized during deliberation",
+        "Board updates in real-time during discussion",
+        "gdlint src/ passes"
+      ],
+      "priority": 12,
+      "passes": true,
+      "notes": "IMPLEMENTED: Force visible during DELIBERATION in evidence_board.gd"
+    },
+    {
+      "id": "FW-036-01",
+      "title": "Create VerificationManager autoload",
+      "description": "Central manager for verification logic",
+      "acceptanceCriteria": [
+        "Create src/evidence/verification_manager.gd extending Node",
+        "Register as autoload VerificationManager in project.godot",
+        "Manage verification rules per trust level",
+        "Track witness data for evidence",
+        "Emit verification_updated signal",
+        "$GODOT --headless --import succeeds",
+        "gdlint src/ passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": "File: src/evidence/verification_manager.gd"
+    },
+    {
+      "id": "FW-036-02",
+      "title": "Implement UNFALSIFIABLE verification (hunt behavior)",
+      "description": "Auto-verify when multiple witnesses",
+      "acceptanceCriteria": [
+        "Hunt behavior evidence auto-collects for all witnesses",
+        "Multiple witnesses = auto VERIFIED state",
+        "Single witness = UNVERIFIED but still valid",
+        "Cannot be contested (ground truth)",
+        "gdlint src/ passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": "Hunt behavior is observable by all present"
+    },
+    {
+      "id": "FW-036-03",
+      "title": "Implement HIGH trust verification (EMF, Thermo, Visual, Physical)",
+      "description": "Verify with 2+ independent observations",
+      "acceptanceCriteria": [
+        "Add verify_high_trust(evidence_uid, verifier_id) method",
+        "Second player observing same reading -> VERIFIED",
+        "Shared display equipment naturally multi-witness",
+        "Readily-apparent evidence (visual/physical) naturally multi-witness",
+        "Update Evidence.verification_state",
+        "gdlint src/ passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": "Easy to verify with buddy system"
+    },
+    {
+      "id": "FW-036-04",
+      "title": "Implement VARIABLE trust verification (Aura Pattern)",
+      "description": "Verify by watching Imager screen",
+      "acceptanceCriteria": [
+        "Dowser role cannot lie (visible to all)",
+        "Imager role can lie (private screen)",
+        "Third player watching Imager's screen = verification opportunity",
+        "OR cross-reference with behavioral evidence",
+        "Track who was positioned to verify",
+        "gdlint src/ passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": "Asymmetric verification - watch the Imager"
+    },
+    {
+      "id": "FW-036-05",
+      "title": "Implement LOW trust verification (Prism Reading)",
+      "description": "Verify by repeat with different operators",
+      "acceptanceCriteria": [
+        "Both Calibrator and Lens Reader can lie",
+        "Verification requires: repeat reading with different operator(s)",
+        "OR cross-reference with behavioral evidence",
+        "Flag repeated readings with same operators as unverified",
+        "gdlint src/ passes"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": "Symmetric distrust - both can lie"
+    },
+    {
+      "id": "FW-036-06",
+      "title": "Implement SABOTAGE_RISK verification (Ghost Writing)",
+      "description": "Verify with witness to setup AND result",
+      "acceptanceCriteria": [
+        "Witness must observe book placement",
+        "Witness must observe writing result",
+        "Both conditions = VERIFIED",
+        "Only one condition = UNVERIFIED",
+        "Detect sabotage: book moved, wrong room",
+        "gdlint src/ passes"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": "Buddy system: one places, one watches"
+    },
+    {
+      "id": "FW-036-07",
+      "title": "Track evidence witnesses",
+      "description": "Record who was present for evidence collection",
+      "acceptanceCriteria": [
+        "EvidenceManager tracks witnesses for each evidence",
+        "Witness = player in range when evidence collected",
+        "Store witness list with Evidence resource",
+        "Query witnesses: evidence.get_witnesses()",
+        "gdlint src/ passes"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": "Foundation for verification system"
+    },
+    {
+      "id": "FW-036-08",
+      "title": "Create behavioral conflict detection system",
+      "description": "Detect equipment vs behavior mismatches",
+      "acceptanceCriteria": [
+        "Create src/evidence/conflict_detector.gd",
+        "Track equipment evidence claims (aggressive/passive/etc.)",
+        "Track observed hunt behavior",
+        "Detect conflicts: 'aggressive reading but passive behavior'",
+        "Emit behavioral_conflict(evidence_uid, conflict_description) signal",
+        "gdlint src/ passes"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": "The 'gotcha' moment for catching Cultist lies"
+    },
+    {
+      "id": "FW-036-09",
+      "title": "Define entity behavior categories",
+      "description": "Categories observable during hunts",
+      "acceptanceCriteria": [
+        "Define BehaviorCategory enum: PASSIVE, AGGRESSIVE, TERRITORIAL, MOBILE",
+        "Map entity types to behavior categories",
+        "Map Prism shapes to expected behaviors",
+        "Map Aura colors to expected behaviors",
+        "Document mapping in code comments",
+        "gdlint src/ passes"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": "Links equipment readings to observable behavior"
+    },
+    {
+      "id": "FW-036-10",
+      "title": "Implement hunt behavior observation tracking",
+      "description": "Record what players observe during hunts",
+      "acceptanceCriteria": [
+        "Track entity behavior during hunts",
+        "Measure: movement speed, aggression, targeting",
+        "Categorize observed behavior",
+        "Store as HUNT_BEHAVIOR evidence",
+        "Multiple observers strengthen evidence",
+        "gdlint src/ passes"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": "Behavioral ground truth for cross-reference"
+    },
+    {
+      "id": "FW-036-11",
+      "title": "Implement conflict detection for Prism readings",
+      "description": "Compare Prism shape to observed behavior",
+      "acceptanceCriteria": [
+        "Prism shows CIRCLE (aggressive) but entity moves slowly -> conflict",
+        "Prism shows TRIANGLE (passive) but entity targets aggressively -> conflict",
+        "Conflict triggers CONTESTED state on Prism evidence",
+        "Conflict description explains mismatch",
+        "gdlint src/ passes"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": "Example: 'Prism showed aggressive-red, but observed passive behavior'"
+    },
+    {
+      "id": "FW-036-12",
+      "title": "Implement conflict detection for Aura readings",
+      "description": "Compare Aura color to observed behavior",
+      "acceptanceCriteria": [
+        "Aura shows HOT_RED (aggressive) but entity avoids players -> conflict",
+        "Aura shows COLD_BLUE (passive) but entity hunts frequently -> conflict",
+        "Conflict triggers CONTESTED state on Aura evidence",
+        "Conflict description explains mismatch",
+        "gdlint src/ passes"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": "Cross-reference Aura with hunt patterns"
+    },
+    {
+      "id": "FW-036-13",
+      "title": "Display contested evidence in board",
+      "description": "UI for conflicting evidence",
+      "acceptanceCriteria": [
+        "Contested evidence highlighted in yellow/orange",
+        "Exclamation mark icon on contested slots",
+        "Click shows conflict details popup",
+        "Popup lists: original evidence, conflicting evidence, explanation",
+        "Players can discuss and re-evaluate",
+        "gdlint src/ passes"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": "Conflict is discussion catalyst"
+    },
+    {
+      "id": "FW-036-14",
+      "title": "Implement evidence staleness (freshness windows)",
+      "description": "Old evidence harder to verify",
+      "acceptanceCriteria": [
+        "Track evidence age from collection time",
+        "Fresh evidence (< 60s): Easy to verify",
+        "Stale evidence (> 120s): Verification requires explanation",
+        "Very stale (> 180s): Cannot be newly verified, only historical",
+        "Staleness shown in evidence detail",
+        "gdlint src/ passes"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": "Prevents retroactive fake verification"
+    },
+    {
+      "id": "FW-036-15",
+      "title": "Add verification timestamp tracking",
+      "description": "When was evidence verified",
+      "acceptanceCriteria": [
+        "Store verification_timestamp when state changes",
+        "Store verifier_id for who verified",
+        "Display in evidence detail: 'Verified by [Player] at [Time]'",
+        "Multiple verifications tracked in list",
+        "gdlint src/ passes"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": "Audit trail for evidence"
+    },
+    {
+      "id": "FW-036-16",
+      "title": "Create verification helper UI",
+      "description": "UI to help players verify evidence",
+      "acceptanceCriteria": [
+        "Add 'Verify' button on unverified evidence",
+        "Button shows requirements for verification",
+        "For cooperative equipment: 'Need third player to watch'",
+        "For triggered tests: 'Need witness to setup'",
+        "Button initiates verification process",
+        "gdlint src/ passes"
+      ],
+      "priority": 28,
+      "passes": false,
+      "notes": "Guide players through verification"
+    },
+    {
+      "id": "FW-036-17",
+      "title": "Emit EventBus signals for verification events",
+      "description": "Global signals for verification state changes",
+      "acceptanceCriteria": [
+        "Emit evidence_verified(uid, verifier_id) signal",
+        "Emit evidence_contested(uid, conflict_desc) signal",
+        "Emit behavioral_conflict_detected(equipment_uid, behavior_uid) signal",
+        "Signals added to EventBus",
+        "gdlint src/ passes"
+      ],
+      "priority": 29,
+      "passes": false,
+      "notes": "File: src/core/managers/event_bus.gd"
+    },
+    {
+      "id": "FW-036-18",
+      "title": "Write unit tests for verification rules",
+      "description": "Test verification logic per trust level",
+      "acceptanceCriteria": [
+        "Create tests/unit/test_verification_rules.gd",
+        "Test UNFALSIFIABLE auto-verification",
+        "Test HIGH trust verification with 2 witnesses",
+        "Test VARIABLE trust asymmetric verification",
+        "Test LOW trust repeat requirement",
+        "Test SABOTAGE_RISK buddy system",
+        "All tests pass",
+        "gdlint tests/ passes"
+      ],
+      "priority": 30,
+      "passes": false,
+      "notes": "File: tests/unit/test_verification_rules.gd"
+    },
+    {
+      "id": "FW-036-19",
+      "title": "Write unit tests for conflict detection",
+      "description": "Test behavioral conflict detection",
+      "acceptanceCriteria": [
+        "Create tests/unit/test_conflict_detector.gd",
+        "Test Prism vs behavior conflict detection",
+        "Test Aura vs behavior conflict detection",
+        "Test conflict resolution when evidence re-verified",
+        "Test multiple conflicts on same evidence",
+        "All tests pass",
+        "gdlint tests/ passes"
+      ],
+      "priority": 31,
+      "passes": false,
+      "notes": "File: tests/unit/test_conflict_detector.gd"
+    },
+    {
+      "id": "FW-036-20",
+      "title": "Write integration tests for evidence board",
+      "description": "Test evidence board UI integration",
+      "acceptanceCriteria": [
+        "Create tests/integration/test_evidence_board_integration.gd",
+        "Test evidence display updates",
+        "Test verification state UI updates",
+        "Test entity matrix elimination",
+        "Test keyboard navigation",
+        "All tests pass",
+        "gdlint tests/ passes"
+      ],
+      "priority": 32,
+      "passes": false,
+      "notes": "File: tests/integration/test_evidence_board_integration.gd"
+    }
+  ]
+}

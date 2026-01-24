@@ -1,0 +1,64 @@
+{
+  "project": "Player Search Feature",
+  "branchName": "ralph/player-search",
+  "description": "Add search and filtering to admin players page",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Add search input to admin players page",
+      "description": "As an admin, I want to search players by name so I can quickly find specific players.",
+      "acceptanceCriteria": [
+        "Search input appears at top of players table",
+        "Filters players by firstName and lastName (case-insensitive)",
+        "Updates results in real-time as user types",
+        "Type checking passes: npm run check-types"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "File: apps/web/src/app/orgs/[orgId]/admin/players/page.tsx"
+    },
+    {
+      "id": "US-002",
+      "title": "Add team filter dropdown",
+      "description": "As an admin, I want to filter players by team so I can view team rosters.",
+      "acceptanceCriteria": [
+        "Dropdown shows 'All Teams' plus all team names",
+        "Filters players to show only members of selected team",
+        "Works in combination with search input",
+        "Type checking passes: npm run check-types"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Use existing getTeamsForOrg query"
+    },
+    {
+      "id": "US-003",
+      "title": "Add age group filter dropdown",
+      "description": "As an admin, I want to filter players by age group so I can view specific age divisions.",
+      "acceptanceCriteria": [
+        "Dropdown shows 'All Age Groups' plus all age groups",
+        "Filters players by their enrollment age group",
+        "Works with search and team filters",
+        "Type checking passes: npm run check-types"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Use ageGroup from orgPlayerEnrollments"
+    },
+    {
+      "id": "US-004",
+      "title": "Persist filters in URL params",
+      "description": "As an admin, I want filters to persist in URL so I can bookmark filtered views.",
+      "acceptanceCriteria": [
+        "Search term stored in ?search= param",
+        "Team filter stored in ?team= param",
+        "Age group filter stored in ?ageGroup= param",
+        "Filters restore from URL on page load",
+        "Type checking passes: npm run check-types"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Use Next.js useSearchParams hook"
+    }
+  ]
+}

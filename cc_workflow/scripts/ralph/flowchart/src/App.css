@@ -1,0 +1,244 @@
+.app-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  padding: 20px;
+  background: #1a1a1a;
+  border-bottom: 2px solid #3b82f6;
+  text-align: center;
+}
+
+.header h1 {
+  margin: 0 0 10px 0;
+  font-size: 2rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header p {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 0.95rem;
+}
+
+.controls {
+  padding: 15px 20px;
+  background: #1e1e1e;
+  border-bottom: 1px solid #333;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.controls button {
+  padding: 10px 20px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.controls button:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.controls button:disabled {
+  background: #374151;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.controls .step-info {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  margin-left: auto;
+}
+
+.controls .legend {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.flow-container {
+  flex: 1;
+  position: relative;
+}
+
+/* React Flow Custom Node Styles */
+.react-flow__node {
+  font-family: inherit;
+}
+
+.react-flow__node.setup {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: 2px solid #1d4ed8;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-weight: 500;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.react-flow__node.loop {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  border: 2px solid #374151;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-weight: 500;
+  box-shadow: 0 4px 6px -1px rgba(107, 114, 128, 0.3);
+}
+
+.react-flow__node.decision {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  border: 2px solid #b45309;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-weight: 500;
+  box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.3);
+}
+
+.react-flow__node.done {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: 2px solid #047857;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-weight: 500;
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+}
+
+.react-flow__node.learning {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: 2px solid #6d28d9;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-weight: 500;
+  box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.3);
+}
+
+.react-flow__edge-path {
+  stroke: #4b5563;
+  stroke-width: 2;
+}
+
+.react-flow__edge.animated .react-flow__edge-path {
+  stroke: #3b82f6;
+  stroke-width: 2.5;
+}
+
+.annotation {
+  position: absolute;
+  background: rgba(26, 26, 26, 0.95);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 15px;
+  max-width: 350px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  z-index: 5;
+}
+
+.annotation h3 {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  color: #3b82f6;
+}
+
+.annotation p {
+  margin: 0 0 8px 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #d1d5db;
+}
+
+.annotation code {
+  background: #1e1e1e;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  color: #8b5cf6;
+  font-family: "Courier New", monospace;
+}
+
+.annotation ul {
+  margin: 8px 0;
+  padding-left: 20px;
+  font-size: 0.85rem;
+  color: #d1d5db;
+}
+
+.annotation li {
+  margin: 4px 0;
+}
+
+@media (prefers-color-scheme: light) {
+  .header {
+    background: #f9fafb;
+    border-bottom: 2px solid #3b82f6;
+  }
+
+  .header h1 {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header p {
+    color: #6b7280;
+  }
+
+  .controls {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .controls .step-info,
+  .legend-item {
+    color: #6b7280;
+  }
+
+  .annotation {
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid #e5e7eb;
+  }
+
+  .annotation p,
+  .annotation ul,
+  .annotation li {
+    color: #374151;
+  }
+
+  .annotation code {
+    background: #f3f4f6;
+  }
+}

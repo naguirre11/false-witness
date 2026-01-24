@@ -1,0 +1,19 @@
+# Ralph state files (created during runs)
+prd.json
+progress.txt
+session-history.txt
+.last-branch
+insights/
+archive/
+
+# Node modules (for flowchart)
+flowchart/node_modules/
+flowchart/dist/
+flowchart/dist-ssr/
+
+# System files
+.DS_Store
+*.log
+
+# Backup files
+*.bak

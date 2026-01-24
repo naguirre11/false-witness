@@ -1,0 +1,53 @@
+# Codebase Patterns
+# Auto-generated knowledge base for False Witness project.
+# Most important patterns first. Read FIRST every iteration.
+# Last updated: 2026-01-23
+
+## GDScript Critical Rules
+- NEVER use RefCounted - always use Node or Resource
+- Autoloads MUST extend Node, never use class_name in autoloads
+- Use load() instead of preload() to break circular dependencies
+- Lambda closures capture primitives by VALUE - use dict for reference capture
+- Use explicit type annotations when calling methods that return primitives
+
+## Testing Patterns
+- Run smoke tests before committing: ./cc_workflow/scripts/run-tests.ps1 -Mode smoke
+- Use state dict for signal testing: var state = {"received": false}
+- GUT tests: tests/unit/ for pure logic, tests/integration/ for managers
+- Run specific test: ./cc_workflow/scripts/run-tests.ps1 -Mode file -File test_name.gd
+
+## Ticket Workflow
+- Only ONE ticket in dev_in_progress at a time
+- Move tickets with: cc_workflow/scripts/ticket-move.ps1 FW-XXX status
+- Update STATUS.md after moving tickets
+- Tickets marked NEXT in PRIORITIZATION_ROADMAP.md have priority
+
+## Git Conventions
+- No Claude references in commits (no Co-Authored-By)
+- Use conventional commits: feat:, fix:, docs:, refactor:
+- Never force push without explicit permission
+- Commit message format: type(scope): description
+
+## File Paths on Windows
+- Edit/Write tools: Use backslashes (C:\Users\...)
+- Bash paths: Use forward slashes (C:/Users/...)
+- PowerShell preferred over Git Bash
+
+## Code Quality
+- gdlint src/ tests/ - before committing
+- gdformat --check src/ tests/ - verify formatting
+- Max line length: 100 characters
+- Use %UniqueNodeName for long node paths
+
+## Task System
+- Tasks persist in ~/.claude/tasks/false-witness/
+- Mark in_progress when starting, completed when done
+- Use blockedBy for dependencies between tasks
+- Check TaskList before creating duplicate tasks
+
+## Project Structure
+- src/core/ - Core systems and managers
+- src/ui/ - UI components
+- src/entity/ - Game entities
+- tests/unit/ - Unit tests
+- tests/integration/ - Integration tests

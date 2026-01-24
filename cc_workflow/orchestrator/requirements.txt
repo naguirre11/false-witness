@@ -1,0 +1,18 @@
+# Task Orchestrator Dependencies
+# Install with: pip install -r cc_workflow/orchestrator/requirements.txt
+
+# No external dependencies required!
+# The orchestrator uses only Python standard library:
+# - subprocess (for running claude CLI)
+# - json (for parsing task files)
+# - pathlib (for file operations)
+# - dataclasses (for data structures)
+# - datetime (for timestamps)
+# - re (for parsing responses)
+# - argparse (for CLI)
+# - enum (for enumerations)
+
+# Optional: For future enhancements
+# anthropic>=0.40.0  # Direct SDK access (currently using CLI)
+# click>=8.0.0       # Alternative CLI framework
+# pydantic>=2.0.0    # Schema validation

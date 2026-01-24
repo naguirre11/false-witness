@@ -1,235 +1,240 @@
 {
   "project": "False Witness",
-  "branchName": "ralph/design-tokens",
-  "description": "Centralized design token system and UI refactor for consistent theming",
-  "tickets": ["FW-086", "FW-087"],
+  "branchName": "ralph/photo-evidence",
+  "description": "Photo Camera equipment for capturing visual manifestations as permanent evidence",
+  "tickets": ["FW-040c"],
   "userStories": [
     {
-      "id": "FW-086-01",
-      "title": "Create DesignTokens autoload with color palette",
-      "description": "Create the design tokens singleton with color constants",
+      "id": "FW-040c-01",
+      "title": "Create PhotoCamera equipment base",
+      "description": "Create the photo camera equipment class extending Equipment",
       "acceptanceCriteria": [
-        "Create themes/design_tokens.gd extending Node",
-        "Add const COLORS dictionary with all color tokens",
-        "Background colors: bg_primary, bg_secondary, bg_surface, bg_overlay",
-        "Text colors: text_primary, text_secondary, text_muted, text_danger",
-        "Accent colors: accent_primary, accent_secondary, accent_warning, accent_success",
-        "Horror colors: horror_blood, horror_ethereal, horror_corruption",
-        "Register as autoload 'DesignTokens' in project.godot",
+        "Create src/equipment/photo_camera.gd extending Equipment",
+        "Set equipment_type to EquipmentType.VIDEO_CAMERA (reuse existing enum)",
+        "Set equipment_name to 'Photo Camera'",
+        "Set use_mode to UseMode.INSTANT (single capture per use)",
+        "Add max_film: int = 5 (limited shots per game)",
+        "Add current_film: int tracking remaining shots",
+        "Add film_depleted signal",
         "$GODOT --headless --import succeeds",
-        "gdlint themes/ passes"
+        "gdlint src/ passes"
       ],
       "priority": 1,
-      "passes": true,
-      "notes": "File: themes/design_tokens.gd. Colors extracted from existing UI files."
+      "passes": false,
+      "notes": "File: src/equipment/photo_camera.gd. Reuses VIDEO_CAMERA enum value."
     },
     {
-      "id": "FW-086-02",
-      "title": "Add trust level and evidence category colors",
-      "description": "Add game-specific color tokens for evidence system",
+      "id": "FW-040c-02",
+      "title": "Implement photo capture mechanic",
+      "description": "Camera captures current view when used",
       "acceptanceCriteria": [
-        "Add trust level colors to COLORS dictionary:",
-        "  trust_unfalsifiable (gold), trust_high (green), trust_variable (yellow)",
-        "  trust_low (orange), trust_sabotage (red)",
-        "Add evidence category colors:",
-        "  evidence_equipment, evidence_apparent, evidence_triggered, evidence_behavior",
-        "Add PLAYER_COLORS array with 8 distinct colors for player attribution",
-        "Colors match existing values in evidence_slot.gd",
-        "gdlint themes/ passes"
+        "Override _use_impl() to trigger capture",
+        "Capture decrements current_film by 1",
+        "Capture fails (returns early) if current_film == 0",
+        "Add photo_captured(photo_data: Dictionary) signal",
+        "Photo data includes: timestamp, location (Vector3), player_id",
+        "Emit film_depleted when film reaches 0",
+        "gdlint src/ passes"
       ],
       "priority": 2,
-      "passes": true,
-      "notes": "Trust colors: gold (unfalsifiable), green (high), yellow (variable), orange (low), red (sabotage)"
+      "passes": false,
+      "notes": "File: src/equipment/photo_camera.gd"
     },
     {
-      "id": "FW-086-03",
-      "title": "Add spacing and font size constants",
-      "description": "Add spacing and typography tokens",
+      "id": "FW-040c-03",
+      "title": "Add entity detection during photo capture",
+      "description": "Detect if entity is visible in frame when photo taken",
       "acceptanceCriteria": [
-        "Add const SPACING dictionary with: xs (4), sm (8), md (16), lg (24), xl (32), xxl (48)",
-        "Add const FONT_SIZES dictionary with: xs (12), sm (14), md (16), lg (20), xl (24), xxl (32), display (48)",
-        "All values are integers for pixel measurements",
-        "gdlint themes/ passes"
+        "Add _check_entity_in_frame() -> bool method",
+        "Check if entity is within camera FOV (60 degrees)",
+        "Check line-of-sight raycast to entity",
+        "Check entity is currently manifesting (visible)",
+        "Photo data includes: contains_entity (bool), entity_type (if captured)",
+        "gdlint src/ passes"
       ],
       "priority": 3,
-      "passes": true,
-      "notes": "File: themes/design_tokens.gd"
+      "passes": false,
+      "notes": "Entity must be manifesting AND in frame for evidence"
     },
     {
-      "id": "FW-086-04",
-      "title": "Add animation timing and border constants",
-      "description": "Add motion and border styling tokens",
+      "id": "FW-040c-04",
+      "title": "Create PhotoEvidence resource",
+      "description": "Data class for captured photo evidence",
       "acceptanceCriteria": [
-        "Add const ANIMATION dictionary with:",
-        "  Standard: duration_instant (0.1), duration_fast (0.15), duration_normal (0.25), duration_slow (0.4)",
-        "  Horror: duration_tension (0.6), duration_reveal (0.8), duration_startle (0.05)",
-        "Add const BORDERS dictionary with:",
-        "  Radii: radius_none (0), radius_sm (2), radius_md (4), radius_lg (8), radius_full (9999)",
-        "  Widths: width_thin (1), width_normal (2), width_thick (4)",
-        "gdlint themes/ passes"
+        "Create src/evidence/photo_evidence.gd extending Resource",
+        "Add class_name PhotoEvidence",
+        "Properties: timestamp, location, photographer_id, contains_entity, entity_type",
+        "Add manifestation_type: ManifestationType (FULL_BODY, PARTIAL, etc.)",
+        "Add get_evidence_quality() -> ReadingQuality method",
+        "gdlint src/ passes"
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "File: themes/design_tokens.gd"
+      "passes": false,
+      "notes": "File: src/evidence/photo_evidence.gd. Photos are permanent records."
     },
     {
-      "id": "FW-086-05",
-      "title": "Create horror_theme.tres base styles",
-      "description": "Create Theme resource with base Control styles",
+      "id": "FW-040c-05",
+      "title": "Generate VISUAL_MANIFESTATION evidence from photos",
+      "description": "Create evidence when photo captures entity",
       "acceptanceCriteria": [
-        "Create themes/horror_theme.tres Theme resource",
-        "Style Panel with bg_surface color and radius_md corners",
-        "Style Button with accent_primary color, hover/pressed states",
-        "Style Label with text_primary color, md font size",
-        "Style LineEdit with bg_secondary color, text_primary text",
-        "Theme file loads without errors in editor",
-        "gdlint themes/ passes"
+        "When photo contains_entity == true, create Evidence",
+        "Evidence type = VISUAL_MANIFESTATION",
+        "Trust level = HIGH (photo is shared display)",
+        "Quality = STRONG (photo is permanent record)",
+        "Use EvidenceManager.collect_evidence() to submit",
+        "Store PhotoEvidence reference in Evidence metadata",
+        "gdlint src/ passes"
       ],
       "priority": 5,
-      "passes": true,
-      "notes": "File: themes/horror_theme.tres. Create StyleBoxFlat resources programmatically if needed."
+      "passes": false,
+      "notes": "Photos provide permanent proof unlike fleeting sightings"
     },
     {
-      "id": "FW-086-06",
-      "title": "Add theme type variations",
-      "description": "Create specialized button and panel variations",
+      "id": "FW-040c-06",
+      "title": "Create camera viewfinder UI",
+      "description": "SubViewport showing camera view when aiming",
       "acceptanceCriteria": [
-        "Add DangerButton type variation with accent_warning/horror_blood colors",
-        "Add GhostButton type variation with transparent background, text_secondary color",
-        "Add CorruptedPanel type variation with horror_corruption tint",
-        "Style OptionButton, HSlider, CheckBox base types",
-        "Theme variations accessible via type_variation property",
-        "gdlint themes/ passes"
+        "Create src/ui/camera_viewfinder.gd extending Control",
+        "Create scenes/ui/camera_viewfinder.tscn",
+        "Show SubViewportContainer with camera feed",
+        "Display film counter (e.g., '3/5 shots')",
+        "Show capture reticle/frame guides",
+        "Show 'No Film' warning when depleted",
+        "gdlint src/ passes"
       ],
       "priority": 6,
-      "passes": true,
-      "notes": "File: themes/horror_theme.tres"
+      "passes": false,
+      "notes": "Files: src/ui/camera_viewfinder.gd, scenes/ui/camera_viewfinder.tscn"
     },
     {
-      "id": "FW-086-07",
-      "title": "Write unit tests for DesignTokens",
-      "description": "Verify token accessibility and values",
+      "id": "FW-040c-07",
+      "title": "Implement camera raise/lower animation state",
+      "description": "Camera raised to eye when equipped and active",
       "acceptanceCriteria": [
-        "Create tests/unit/test_design_tokens.gd",
-        "Test DesignTokens autoload is accessible",
-        "Test COLORS dictionary contains all required keys",
-        "Test SPACING values are positive integers",
-        "Test ANIMATION values are positive floats",
-        "Test PLAYER_COLORS array has 8 entries",
+        "Override _on_equipped() to prepare viewfinder",
+        "Show viewfinder UI when equipment becomes active",
+        "Hide viewfinder when switching equipment",
+        "Add brief raise/lower transition (0.2s)",
+        "Player movement speed reduced while aiming (optional)",
+        "gdlint src/ passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Viewfinder visible only when camera is active equipment"
+    },
+    {
+      "id": "FW-040c-08",
+      "title": "Add photo flash visual effect",
+      "description": "Flash effect when photo taken",
+      "acceptanceCriteria": [
+        "Add OmniLight3D child for flash",
+        "Flash briefly when photo taken (0.1s)",
+        "Flash visible to all players (network synced)",
+        "Creates noise event that entity can hear",
+        "Flash disabled during hunt (silent mode)",
+        "gdlint src/ passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "Risk/reward: flash attracts entity but captures evidence"
+    },
+    {
+      "id": "FW-040c-09",
+      "title": "Create photo gallery storage",
+      "description": "Store captured photos in player inventory",
+      "acceptanceCriteria": [
+        "Add _captured_photos: Array[PhotoEvidence] to PhotoCamera",
+        "Photos persist until match end",
+        "Add get_photos() -> Array[PhotoEvidence] method",
+        "Add get_photo_count() -> int method",
+        "Photos accessible via evidence board detail view",
+        "gdlint src/ passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "Photos stored locally; evidence submitted to EvidenceManager"
+    },
+    {
+      "id": "FW-040c-10",
+      "title": "Implement photo sharing mechanic",
+      "description": "Players can show photos to teammates",
+      "acceptanceCriteria": [
+        "Add show_photo_to_nearby() method",
+        "Detect players within 3m radius",
+        "Display photo on shared UI for nearby players",
+        "Photo view shows: image placeholder, timestamp, location",
+        "Network sync photo display state",
+        "gdlint src/ passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "Photos are shared display - everyone sees same thing"
+    },
+    {
+      "id": "FW-040c-11",
+      "title": "Add camera to equipment select UI",
+      "description": "Camera appears in equipment selection",
+      "acceptanceCriteria": [
+        "Add Photo Camera to equipment_select.gd grid",
+        "Show camera icon (placeholder)",
+        "Tooltip explains: 'Capture visual manifestations'",
+        "Shows evidence type: VISUAL_MANIFESTATION",
+        "Camera selectable as one of 3 equipment slots",
+        "gdlint src/ passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": "File: src/ui/equipment_select.gd"
+    },
+    {
+      "id": "FW-040c-12",
+      "title": "Create placeholder camera 3D model",
+      "description": "Visual representation of camera equipment",
+      "acceptanceCriteria": [
+        "Create scenes/equipment/photo_camera.tscn",
+        "Add placeholder mesh (box with lens cylinder)",
+        "Add flash light node (initially off)",
+        "First-person view offset configured",
+        "Visible to other players when held",
+        "gdlint scenes/ passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": "File: scenes/equipment/photo_camera.tscn. Placeholder mesh for now."
+    },
+    {
+      "id": "FW-040c-13",
+      "title": "Write unit tests for PhotoCamera",
+      "description": "Test camera equipment mechanics",
+      "acceptanceCriteria": [
+        "Create tests/unit/test_photo_camera.gd",
+        "Test film decrement on capture",
+        "Test capture fails when no film",
+        "Test entity detection in frame",
+        "Test photo data structure",
         "All tests pass",
         "gdlint tests/ passes"
       ],
-      "priority": 7,
-      "passes": true,
-      "notes": "File: tests/unit/test_design_tokens.gd"
-    },
-    {
-      "id": "FW-087-01",
-      "title": "Refactor results_screen.gd to use tokens",
-      "description": "Replace hardcoded colors in results screen",
-      "acceptanceCriteria": [
-        "Replace all Color() constructors with DesignTokens.COLORS.*",
-        "Replace timing literals with DesignTokens.ANIMATION.*",
-        "Apply horror_theme.tres to scene root (if applicable)",
-        "No Color() constructors with numeric literals remain",
-        "Visual appearance unchanged",
-        "gdlint src/ui/ passes"
-      ],
-      "priority": 8,
-      "passes": true,
-      "notes": "File: src/ui/results_screen.gd (16 colors, 6 modulates)"
-    },
-    {
-      "id": "FW-087-02",
-      "title": "Refactor evidence_slot.gd to use tokens",
-      "description": "Replace hardcoded colors in evidence slot",
-      "acceptanceCriteria": [
-        "Replace trust level colors with DesignTokens.COLORS.trust_*",
-        "Replace evidence category colors with DesignTokens.COLORS.evidence_*",
-        "Replace player attribution colors with DesignTokens.PLAYER_COLORS array",
-        "No Color() constructors with numeric literals remain",
-        "Visual appearance unchanged",
-        "gdlint src/ui/ passes"
-      ],
-      "priority": 9,
-      "passes": true,
-      "notes": "File: src/ui/evidence_slot.gd (7 colors, 6 modulates)"
-    },
-    {
-      "id": "FW-087-03",
-      "title": "Refactor evidence_detail_popup.gd to use tokens",
-      "description": "Replace hardcoded colors in evidence detail popup",
-      "acceptanceCriteria": [
-        "Replace all hardcoded colors with token references",
-        "Apply consistent styling with evidence_slot.gd",
-        "No Color() constructors with numeric literals remain",
-        "Visual appearance unchanged",
-        "gdlint src/ui/ passes"
-      ],
-      "priority": 10,
-      "passes": true,
-      "notes": "File: src/ui/evidence_detail_popup.gd (3 colors, 8 modulates)"
-    },
-    {
-      "id": "FW-087-04",
-      "title": "Refactor hud.gd to use tokens",
-      "description": "Replace hardcoded colors in HUD",
-      "acceptanceCriteria": [
-        "Replace timer warning colors (red <60s, orange <2min) with tokens",
-        "Replace equipment highlight color with token",
-        "Replace death overlay color with token",
-        "No Color() constructors with numeric literals remain",
-        "Visual appearance unchanged",
-        "gdlint src/ui/ passes"
-      ],
-      "priority": 11,
-      "passes": true,
-      "notes": "File: src/ui/hud.gd (4 colors, 6 modulates)"
-    },
-    {
-      "id": "FW-087-05",
-      "title": "Refactor entity_matrix.gd to use tokens",
-      "description": "Replace hardcoded colors in entity matrix",
-      "acceptanceCriteria": [
-        "Replace eliminated entity styling with tokens",
-        "Replace remaining count coloring with tokens",
-        "No Color() constructors with numeric literals remain",
-        "Visual appearance unchanged",
-        "gdlint src/ui/ passes"
-      ],
-      "priority": 12,
-      "passes": true,
-      "notes": "File: src/ui/entity_matrix.gd (3 colors, 5 modulates)"
-    },
-    {
-      "id": "FW-087-06",
-      "title": "Refactor voting_ui.gd to use tokens",
-      "description": "Replace hardcoded colors in voting UI",
-      "acceptanceCriteria": [
-        "Replace vote status colors with tokens",
-        "Replace button state colors with tokens",
-        "No Color() constructors with numeric literals remain",
-        "Visual appearance unchanged",
-        "gdlint src/ui/ passes"
-      ],
       "priority": 13,
-      "passes": true,
-      "notes": "File: src/ui/voting_ui.gd (4 colors, 4 modulates)"
+      "passes": false,
+      "notes": "File: tests/unit/test_photo_camera.gd"
     },
     {
-      "id": "FW-087-07",
-      "title": "Verify refactored files and run smoke tests",
-      "description": "Final verification of token refactoring",
+      "id": "FW-040c-14",
+      "title": "Write integration tests for photo evidence",
+      "description": "Test photo evidence flow",
       "acceptanceCriteria": [
-        "All 6 refactored files compile without errors",
-        "Run grep to verify no Color() with numeric literals in refactored files",
-        "Smoke tests pass: ./cc_workflow/scripts/run-tests.ps1 -Mode smoke",
-        "Visual comparison shows no regressions",
-        "gdlint src/ui/ passes"
+        "Create tests/integration/test_photo_evidence.gd",
+        "Test photo with entity creates evidence",
+        "Test photo without entity creates no evidence",
+        "Test evidence submitted to EvidenceManager",
+        "Test photo storage and retrieval",
+        "All tests pass",
+        "gdlint tests/ passes"
       ],
       "priority": 14,
-      "passes": true,
-      "notes": "Search pattern: grep -n 'Color([0-9]' src/ui/results_screen.gd src/ui/evidence_slot.gd ..."
+      "passes": false,
+      "notes": "File: tests/integration/test_photo_evidence.gd"
     }
   ]
 }

@@ -4,6 +4,17 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 
 **NEXT**: FW-035e-evidence-board-polish (UI polish/cleanup)
 
+**Ready backlog (Phase 2)**:
+- FW-103: Equipment constants cleanup (small)
+- FW-040d: Photo Gallery UI (small)
+- FW-045: Wraith entity (medium)
+- FW-047: Shade entity (medium)
+- FW-048: Revenant entity (medium)
+- FW-049: Demon entity (medium)
+- FW-050: Banshee entity (medium)
+- FW-072: Office Building map (large)
+- FW-088: Settings menu (medium)
+
 | Ticket | Title | Status |
 |--------|-------|--------|
 | FW-001-godot-project-init | Initialize Godot 4.4 project | completed |
@@ -20,7 +31,7 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-031-evidence-core | Core evidence system | completed |
 | FW-032-emf-evidence | EMF Reader | completed |
 | FW-033-thermometer-evidence | Thermometer | completed |
-| FW-034-spirit-box-evidence | Spirit Box (DEFERRED) | draft |
+| FW-034-spirit-box-evidence | Spirit Box (DEFERRED - needs voice) | draft |
 | FW-035-evidence-board-ui | Evidence board UI (Epic) | completed |
 | FW-035a-evidence-board-core | Evidence Board Core UI | completed |
 | FW-035b-trust-visualization | Trust Level Visualization | completed |
@@ -44,6 +55,7 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-040a-manifestation-evidence | Manifestation Evidence Capture | completed |
 | FW-040b-physical-interaction-framework | Physical Interaction Framework | completed |
 | FW-040c-photo-evidence-system | Photo Evidence System | completed |
+| FW-040d-photo-gallery | Photo Gallery UI | ready |
 | FW-041-entity-core | Core entity AI with behavioral tells | completed |
 | FW-042-hunt-mechanics | Hunt mechanics with depth (Epic) | completed |
 | FW-042a-warning-phase | Hunt warning phase | completed |
@@ -56,7 +68,12 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-043c-echo-restrictions | Echo restrictions and entity reactions | completed |
 | FW-043d-revival-mechanic | Revival mechanic | completed |
 | FW-044-first-entity-phantom | First entity: Phantom | completed |
+| FW-045-wraith-entity | Wraith entity | ready |
 | FW-046-listener-entity | Listener entity (voice-reactive) | completed |
+| FW-047-shade-entity | Shade entity | ready |
+| FW-048-revenant-entity | Revenant entity | ready |
+| FW-049-demon-entity | Demon entity | ready |
+| FW-050-banshee-entity | Banshee entity | ready |
 | FW-051-cultist-role-assignment | Cultist role assignment | completed |
 | FW-052-cultist-abilities | Cultist abilities with decay | completed |
 | FW-053-cultist-discovery | Cultist discovery | completed |
@@ -65,6 +82,7 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-063-results-screen | Results screen | completed |
 | FW-064-banishment-phase | Banishment phase endgame | draft |
 | FW-071-first-map-house | First map: Abandoned House | completed |
+| FW-072-office-building-map | Second map: Office Building | ready |
 | FW-081-main-menu | Main menu and lobby UI | completed |
 | FW-082-equipment-select-ui | Equipment selection UI | completed |
 | FW-083-hud-system | In-game HUD | completed |
@@ -72,9 +90,10 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-085-cultist-tutorial | Cultist School tutorial | draft |
 | FW-086-design-token-system | Design token system | completed |
 | FW-087-ui-token-refactor | UI token refactor | completed |
+| FW-088-settings-menu | Settings and options menu | ready |
 | FW-091-audio-foundation | Audio system foundation | completed |
 | FW-092-entity-audio | Entity audio | completed |
 | FW-100-test-reorganization | Test suite reorganization | completed |
 | FW-101-portent-deck | Portent Deck match modifiers | draft |
 | FW-102-basic-physics | Basic physics interactions | draft |
-| FW-103-equipment-constants-cleanup | Clean up stale equipment type constants | draft |
+| FW-103-equipment-constants-cleanup | Clean up stale equipment type constants | ready |

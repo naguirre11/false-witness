@@ -1,3 +1,4 @@
+# GameManager: Central coordinator for game state, phases, and win conditions.
 extends Node
 ## Central game state machine and match lifecycle manager.
 ## Autoload: GameManager

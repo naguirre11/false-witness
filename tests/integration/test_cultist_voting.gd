@@ -28,8 +28,9 @@ func after_each() -> void:
 func _setup_match_with_cultist() -> void:
 	# Set up a 4-player match with one Cultist
 	var player_ids: Array[int] = [1, 2, 3, 4]
+	var evidence_types: Array[String] = ["EMF_SIGNATURE"]
 	_cultist_manager.seed_rng(12345)  # Deterministic for testing
-	_cultist_manager.assign_roles(player_ids, "TestEntity", ["EMF_SIGNATURE"])
+	_cultist_manager.assign_roles(player_ids, "TestEntity", evidence_types)
 
 
 # --- Emergency Vote Calling Tests ---

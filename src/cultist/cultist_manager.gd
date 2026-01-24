@@ -141,6 +141,10 @@ func _ready() -> void:
 
 	# Initialize max charges from CultistEnums
 	_init_ability_max_charges()
+
+	# Seed RNG with random value for gameplay (can be overridden by seed_rng() for tests)
+	_rng.randomize()
+
 	print("[CultistManager] Initialized")
 
 
@@ -276,8 +280,7 @@ func assign_roles(
 	if player_count == 6:
 		cultist_count = _cultist_count_6p
 
-	# Randomly select Cultists
-	_rng.randomize()
+	# Randomly select Cultists (uses RNG seeded in _ready or via seed_rng())
 	var shuffled := player_ids.duplicate()
 	_shuffle_array(shuffled)
 

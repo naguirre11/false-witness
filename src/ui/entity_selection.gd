@@ -5,6 +5,11 @@ extends Control
 ## - Eliminated entities (gray, based on evidence)
 ## - Possible entities (highlighted, match collected evidence)
 
+# --- Signals ---
+
+signal entity_selected(entity_type: String)
+signal cancelled
+
 # --- Constants ---
 
 ## All entity types available in the game
@@ -42,11 +47,6 @@ const ENTITY_EVIDENCE: Dictionary = {
 	"Mare": ["SPIRIT_BOX", "GHOST_ORBS", "GHOST_WRITING"],
 	"Demon": ["FINGERPRINTS", "GHOST_WRITING", "FREEZING_TEMPERATURE"],
 }
-
-# --- Signals ---
-
-signal entity_selected(entity_type: String)
-signal cancelled
 
 # --- State ---
 

@@ -7,14 +7,14 @@ extends CanvasLayer
 ## - Current proposal status (if any)
 ## - Evidence board access
 
-# --- Constants ---
-
-const DELIBERATION_STATE: int = 5
-
 # --- Signals ---
 
 signal propose_identification_pressed
 signal evidence_board_toggle_pressed
+
+# --- Constants ---
+
+const DELIBERATION_STATE: int = 5
 
 # --- State Variables ---
 

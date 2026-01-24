@@ -8,16 +8,16 @@ extends Node
 ## - Tracking which players are in the area
 ## - Coordinating with GameManager state transitions
 
-# --- Constants ---
-
-const DELIBERATION_STATE: int = 5  # GameManager.GameState.DELIBERATION
-const DeliberationArea := preload("res://src/deliberation/deliberation_area.gd")
-
 # --- Signals ---
 
 signal player_teleported(player: Node3D, spawn_index: int)
 signal all_players_teleported
 signal player_boundary_violation(player: Node3D)
+
+# --- Constants ---
+
+const DELIBERATION_STATE: int = 5  # GameManager.GameState.DELIBERATION
+const DeliberationArea := preload("res://src/deliberation/deliberation_area.gd")
 
 # --- State Variables ---
 
@@ -233,5 +233,8 @@ func _teleport_player(player: Node3D, spawn_index: int) -> void:
 	if player.has_method("set") and "velocity" in player:
 		player.velocity = Vector3.ZERO
 
-	print("[DeliberationManager] Teleported player to spawn %d at %s" % [spawn_index, spawn_transform.origin])
+	print(
+		"[DeliberationManager] Teleported player to spawn %d at %s"
+		% [spawn_index, spawn_transform.origin]
+	)
 	player_teleported.emit(player, spawn_index)

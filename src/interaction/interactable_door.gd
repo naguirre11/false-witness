@@ -154,7 +154,7 @@ func _physics_process(delta: float) -> void:
 # --- Player Interaction ---
 
 
-func _interact_impl(player: Node) -> bool:
+func _interact_impl(_player: Node) -> bool:
 	if _door_state == DoorState.LOCKED:
 		_play_locked_sound()
 		return false
@@ -195,26 +195,23 @@ func get_interaction_prompt() -> String:
 ## Called by entities to manipulate the door.
 ## Returns true if the action was initiated.
 func entity_manipulate(action: EntityDoorAction, entity_type: String) -> bool:
-	if _door_state == DoorState.LOCKED:
-		return false
-
-	if _door_state in [DoorState.OPENING, DoorState.CLOSING]:
+	# Cannot manipulate locked or moving doors
+	if _door_state in [DoorState.LOCKED, DoorState.OPENING, DoorState.CLOSING]:
 		return false
 
 	_is_entity_action = true
 	_last_entity_type = entity_type
 
-	match action:
-		EntityDoorAction.SLAM_SHUT:
-			return _slam_shut()
-		EntityDoorAction.SLAM_OPEN:
-			return _slam_open()
-		EntityDoorAction.SLOW_OPEN:
-			return _slow_open()
-		EntityDoorAction.SLOW_CLOSE:
-			return _slow_close()
-		_:
-			return false
+	var action_handlers := {
+		EntityDoorAction.SLAM_SHUT: _slam_shut,
+		EntityDoorAction.SLAM_OPEN: _slam_open,
+		EntityDoorAction.SLOW_OPEN: _slow_open,
+		EntityDoorAction.SLOW_CLOSE: _slow_close,
+	}
+
+	if action in action_handlers:
+		return action_handlers[action].call()
+	return false
 
 
 func _slam_shut() -> bool:

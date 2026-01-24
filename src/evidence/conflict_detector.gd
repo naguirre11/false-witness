@@ -1,6 +1,6 @@
-class_name ConflictDetector
 extends Node
 ## Detects behavioral conflicts between equipment readings and observed entity behavior.
+## Autoload: ConflictDetector
 ##
 ## The key "gotcha" mechanism for catching Cultist lies: if a player reports
 ## equipment readings that don't match the observed entity behavior during hunts,
@@ -10,7 +10,7 @@ extends Node
 ## - Prism readings (shape implies behavior type) vs observed behavior
 ## - Aura readings (color implies aggression level) vs observed behavior
 ##
-## Note: No class_name to avoid conflicts with autoload singleton name if used as autoload.
+## Note: No class_name to avoid conflicts with autoload singleton name.
 
 # --- Signals ---
 

@@ -106,7 +106,7 @@ func test_enable_disable_movement_restriction() -> void:
 
 func test_submit_identification_creates_pending() -> void:
 	# Enable deliberation mode
-	_evidence_manager._deliberation_mode = true
+	_evidence_manager._deliberation_active = true
 
 	# Submit identification
 	var success: bool = _evidence_manager.submit_identification("Phantom", 1001)
@@ -125,7 +125,7 @@ func test_submit_identification_creates_pending() -> void:
 
 func test_voting_for_identification() -> void:
 	# Setup
-	_evidence_manager._deliberation_mode = true
+	_evidence_manager._deliberation_active = true
 	_evidence_manager.submit_identification("Phantom", 1001)
 
 	# Vote for
@@ -141,7 +141,7 @@ func test_voting_for_identification() -> void:
 
 func test_voting_against_identification() -> void:
 	# Setup
-	_evidence_manager._deliberation_mode = true
+	_evidence_manager._deliberation_active = true
 	_evidence_manager.submit_identification("Phantom", 1001)
 
 	# Vote against
@@ -169,7 +169,7 @@ func _calculate_majority(total_players: int) -> int:
 
 
 func test_clear_pending_identification() -> void:
-	_evidence_manager._deliberation_mode = true
+	_evidence_manager._deliberation_active = true
 	_evidence_manager.submit_identification("Phantom", 1001)
 
 	assert_true(
@@ -209,7 +209,7 @@ func test_no_proposal_on_timer_expiry_cultist_wins() -> void:
 	# Expected: Cultist wins with TIME_EXPIRED condition
 	# Actual logic is in MatchManager, so we test the preconditions
 
-	_evidence_manager._deliberation_mode = true
+	_evidence_manager._deliberation_active = true
 
 	# No proposal submitted
 	assert_false(

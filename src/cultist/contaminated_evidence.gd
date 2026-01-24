@@ -28,6 +28,9 @@ signal expired()
 ## Whether this evidence has expired.
 @export var is_expired: bool = false
 
+## Always true for contaminated evidence (helps distinguish from regular Evidence).
+var is_contaminated: bool = true
+
 # --- Runtime State ---
 
 ## Current decay state (not exported - computed from timestamp).

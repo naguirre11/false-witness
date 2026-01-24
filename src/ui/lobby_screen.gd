@@ -2,9 +2,17 @@ extends Control
 ## Lobby screen UI showing players, ready states, and host controls.
 ## Connects to LobbyManager to display and update lobby state.
 
+# --- Constants ---
+
 const PlayerSlotUI = preload("res://scenes/ui/player_slot_ui.tscn")
 const MAX_SLOTS: int = 6
 
+# --- State Variables ---
+
+var _player_slots: Array = []
+var _is_ready: bool = false
+
+# --- Node References ---
 
 @onready var _lobby_code_label: Label = %LobbyCodeLabel
 @onready var _player_slots_container: VBoxContainer = %PlayerSlotsContainer
@@ -13,10 +21,6 @@ const MAX_SLOTS: int = 6
 @onready var _leave_btn: Button = %LeaveButton
 @onready var _ready_btn: Button = %ReadyButton
 @onready var _start_btn: Button = %StartGameButton
-
-
-var _player_slots: Array = []
-var _is_ready: bool = false
 
 
 func _ready() -> void:

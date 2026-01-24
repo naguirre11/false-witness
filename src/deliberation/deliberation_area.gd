@@ -8,12 +8,14 @@ extends Node3D
 ## - No entity access (Entity collision mask excludes this area)
 ## - Evidence board viewing point
 
-const MAX_SPAWN_POINTS: int = 6
-
 # --- Signals ---
 
 signal player_spawned(player: Node3D, spawn_index: int)
 signal player_exited_boundary(player: Node3D)
+
+# --- Constants ---
+
+const MAX_SPAWN_POINTS: int = 6
 
 # --- Exported Configuration ---
 

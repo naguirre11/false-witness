@@ -2,16 +2,20 @@ extends Control
 ## Main menu screen with navigation buttons.
 ## Handles: Host Game, Join Game, Settings, Quit
 
+# --- Constants ---
+
 const JOIN_DIALOG_SCENE = preload("res://scenes/ui/join_dialog.tscn")
 
+# --- State Variables ---
+
+var _join_dialog: Control = null
+
+# --- Node References ---
 
 @onready var _host_btn: Button = %HostGameButton
 @onready var _join_btn: Button = %JoinGameButton
 @onready var _settings_btn: Button = %SettingsButton
 @onready var _quit_btn: Button = %QuitButton
-
-
-var _join_dialog: Control = null
 
 
 func _ready() -> void:

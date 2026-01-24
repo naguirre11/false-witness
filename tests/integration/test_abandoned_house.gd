@@ -188,11 +188,13 @@ func test_hiding_spots_are_areas() -> void:
 
 func test_hiding_spots_capacity() -> void:
 	var hiding_spots := _map.get_node_or_null("HidingSpots")
-	if hiding_spots:
-		for child in hiding_spots.get_children():
-			if child.has_method("get_capacity"):
-				var capacity: int = child.get_capacity()
-				assert_eq(capacity, 1, "Hiding spot capacity should be 1")
+	assert_not_null(hiding_spots, "HidingSpots container should exist")
+	# Hiding spots are Area3D nodes - verify they exist
+	var spot_count := 0
+	for child in hiding_spots.get_children():
+		if child is Area3D:
+			spot_count += 1
+	assert_gte(spot_count, 4, "Should have at least 4 hiding spot areas")
 
 
 # =============================================================================
@@ -276,11 +278,16 @@ func test_rooms_container_has_children() -> void:
 
 
 func test_get_room_by_name() -> void:
-	if _map.has_method("get_room"):
-		# May return null if room names differ from test expectations
-		var room: Node3D = _map.get_room("LivingRoom")
-		# Just verify the method works without crashing
-		pass
+	# Test that rooms container has named room children
+	var rooms := _map.get_node_or_null("Rooms")
+	assert_not_null(rooms, "Rooms container should exist")
+	# Verify at least one expected room exists
+	var living_room := rooms.get_node_or_null("LivingRoom")
+	var basement := rooms.get_node_or_null("Basement")
+	assert_true(
+		living_room != null or basement != null,
+		"Should have at least one expected room (LivingRoom or Basement)"
+	)
 
 
 # =============================================================================
@@ -314,11 +321,13 @@ func test_apply_network_state() -> void:
 
 
 func test_world_environment_exists() -> void:
-	var world_env := _map.get_node_or_null("WorldEnvironment")
+	# WorldEnvironment is under Lighting container
+	var world_env := _map.get_node_or_null("Lighting/WorldEnvironment")
 	assert_not_null(world_env, "WorldEnvironment should exist for ambient lighting")
 
 
 func test_world_environment_has_environment() -> void:
-	var world_env := _map.get_node_or_null("WorldEnvironment") as WorldEnvironment
+	var world_env := _map.get_node_or_null("Lighting/WorldEnvironment") as WorldEnvironment
+	assert_not_null(world_env, "WorldEnvironment should exist")
 	if world_env:
 		assert_not_null(world_env.environment, "Environment resource should be assigned")

@@ -172,7 +172,7 @@ static func _get_player_position(player: Node) -> Vector3:
 
 
 ## Checks if player has electronics equipment in hand.
-## Electronics include: EMF Reader, Spirit Box, Thermometer, Video Camera, etc.
+## Electronics include: EMF Reader, Thermometer, Video Camera, Calibrator, Lens Reader, Aura Imager.
 static func _player_has_electronics_equipped(player: Node) -> bool:
 	# Try to get EquipmentManager from player (use Variant for duck typing)
 	var equipment_manager = null  # Untyped to support both Node and mock objects
@@ -205,10 +205,8 @@ static func _is_electronic_equipment(equipment_type: int) -> bool:
 	# Electronic equipment types from Equipment.EquipmentType enum
 	const ELECTRONIC_TYPES := [
 		0,  # EMF_READER
-		1,  # SPIRIT_BOX
 		3,  # THERMOMETER
 		6,  # VIDEO_CAMERA
-		7,  # PARABOLIC_MIC
 		8,  # SPECTRAL_PRISM_CALIBRATOR
 		9,  # SPECTRAL_PRISM_LENS
 		11,  # AURA_IMAGER

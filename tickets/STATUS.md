@@ -139,7 +139,7 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-100-test-reorganization | Test suite reorganization | completed |
 | FW-101-portent-deck | Portent Deck match modifiers | draft |
 | FW-102-basic-physics | Basic physics interactions | draft |
-| FW-103-equipment-constants-cleanup | Clean up stale equipment type constants | ready |
+| FW-103-equipment-constants-cleanup | Clean up stale equipment type constants | for_review |
 
 ---
 

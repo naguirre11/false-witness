@@ -313,6 +313,9 @@ func _rpc_request_capture() -> void:
 		_rpc_capture_result.rpc_id(sender_id, false, {})
 		return
 
+	# Calculate player position for photo capture
+	var player_pos: Vector3 = _owning_player.global_position + Vector3(0, 1.6, 0)  # Head height
+
 	# Server-side validation
 	if _film_remaining <= 0:
 		_rpc_capture_result.rpc_id(sender_id, false, {})

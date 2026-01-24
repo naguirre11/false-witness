@@ -191,13 +191,55 @@ func test_get_type_name_parabolic_mic() -> void:
 	assert_eq(slot.get_type_name(), "Parabolic Mic")
 
 
+func test_get_type_name_spectral_calibrator() -> void:
+	slot.assign(8)
+	assert_eq(slot.get_type_name(), "Spectral Calibrator")
+
+
+func test_get_type_name_spectral_lens_reader() -> void:
+	slot.assign(9)
+	assert_eq(slot.get_type_name(), "Spectral Lens Reader")
+
+
+func test_get_type_name_dowsing_rods() -> void:
+	slot.assign(10)
+	assert_eq(slot.get_type_name(), "Dowsing Rods")
+
+
+func test_get_type_name_aura_imager() -> void:
+	slot.assign(11)
+	assert_eq(slot.get_type_name(), "Aura Imager")
+
+
+func test_get_type_name_ghost_writing_book() -> void:
+	slot.assign(12)
+	assert_eq(slot.get_type_name(), "Ghost Writing Book")
+
+
+func test_get_type_name_crucifix() -> void:
+	slot.assign(13)
+	assert_eq(slot.get_type_name(), "Crucifix")
+
+
+func test_get_type_name_sage_bundle() -> void:
+	slot.assign(14)
+	assert_eq(slot.get_type_name(), "Sage Bundle")
+
+
+func test_get_type_name_salt() -> void:
+	slot.assign(15)
+	assert_eq(slot.get_type_name(), "Salt")
+
+
 # --- Static Helper Tests ---
 
 
 func test_type_to_name_returns_correct_names() -> void:
 	assert_eq(EquipmentSlot.type_to_name(0), "EMF Reader")
-	assert_eq(EquipmentSlot.type_to_name(1), "Spirit Box")
-	assert_eq(EquipmentSlot.type_to_name(7), "Parabolic Mic")
+	assert_eq(EquipmentSlot.type_to_name(3), "Thermometer")
+	assert_eq(EquipmentSlot.type_to_name(8), "Spectral Calibrator")
+	assert_eq(EquipmentSlot.type_to_name(12), "Ghost Writing Book")
+	assert_eq(EquipmentSlot.type_to_name(15), "Salt")
 
 
 func test_type_to_name_unknown_type() -> void:
@@ -206,8 +248,10 @@ func test_type_to_name_unknown_type() -> void:
 
 func test_name_to_type_returns_correct_types() -> void:
 	assert_eq(EquipmentSlot.name_to_type("EMF Reader"), 0)
-	assert_eq(EquipmentSlot.name_to_type("Spirit Box"), 1)
-	assert_eq(EquipmentSlot.name_to_type("Parabolic Mic"), 7)
+	assert_eq(EquipmentSlot.name_to_type("Thermometer"), 3)
+	assert_eq(EquipmentSlot.name_to_type("Spectral Calibrator"), 8)
+	assert_eq(EquipmentSlot.name_to_type("Ghost Writing Book"), 12)
+	assert_eq(EquipmentSlot.name_to_type("Salt"), 15)
 
 
 func test_name_to_type_unknown_name() -> void:

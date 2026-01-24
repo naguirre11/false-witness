@@ -87,9 +87,14 @@ static func type_to_name(type: int) -> String:
 		5: "DOTS Projector",
 		6: "Video Camera",
 		7: "Parabolic Mic",
-		8: "Crucifix",
-		9: "Sage Bundle",
-		10: "Salt",
+		8: "Spectral Calibrator",
+		9: "Spectral Lens Reader",
+		10: "Dowsing Rods",
+		11: "Aura Imager",
+		12: "Ghost Writing Book",
+		13: "Crucifix",
+		14: "Sage Bundle",
+		15: "Salt",
 	}
 	return names.get(type, "Unknown")
 
@@ -105,9 +110,14 @@ static func name_to_type(equipment_name: String) -> int:
 		"DOTS Projector": 5,
 		"Video Camera": 6,
 		"Parabolic Mic": 7,
-		"Crucifix": 8,
-		"Sage Bundle": 9,
-		"Salt": 10,
+		"Spectral Calibrator": 8,
+		"Spectral Lens Reader": 9,
+		"Dowsing Rods": 10,
+		"Aura Imager": 11,
+		"Ghost Writing Book": 12,
+		"Crucifix": 13,
+		"Sage Bundle": 14,
+		"Salt": 15,
 	}
 	return types.get(equipment_name, -1)
 
@@ -116,15 +126,15 @@ static func name_to_type(equipment_name: String) -> int:
 static func get_scene_path(type: int) -> String:
 	var paths: Dictionary = {
 		0: "res://scenes/equipment/emf_reader.tscn",
-		1: "res://scenes/equipment/spirit_box.tscn",
-		2: "res://scenes/equipment/journal.tscn",
 		3: "res://scenes/equipment/thermometer.tscn",
-		4: "res://scenes/equipment/uv_flashlight.tscn",
-		5: "res://scenes/equipment/dots_projector.tscn",
 		6: "res://scenes/equipment/video_camera.tscn",
-		7: "res://scenes/equipment/parabolic_mic.tscn",
-		8: "res://scenes/equipment/crucifix.tscn",
-		9: "res://scenes/equipment/sage_bundle.tscn",
-		10: "res://scenes/equipment/salt.tscn",
+		8: "res://scenes/equipment/spectral_prism/calibrator.tscn",
+		9: "res://scenes/equipment/spectral_prism/lens_reader.tscn",
+		10: "res://scenes/equipment/aura/dowsing_rods.tscn",
+		11: "res://scenes/equipment/aura/aura_imager.tscn",
+		12: "res://scenes/equipment/ghost_writing_book.tscn",
+		13: "res://scenes/equipment/crucifix.tscn",
+		14: "res://scenes/equipment/sage_bundle.tscn",
+		15: "res://scenes/equipment/salt.tscn",
 	}
 	return paths.get(type, "")

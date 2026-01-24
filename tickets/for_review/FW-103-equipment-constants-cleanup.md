@@ -61,3 +61,48 @@ The `EquipmentSlot` class contains equipment type constants from the original GD
 - Adding new equipment functionality
 - Changing equipment behavior
 - UI updates (handled by FW-082)
+
+---
+
+## Implementation Notes (2026-01-24)
+
+### Approach Taken
+
+Instead of renumbering equipment types as originally planned, the implementation chose to **sync with the existing `Equipment.EquipmentType` enum** (0-15). This preserves backward compatibility with serialized data and ensures consistency across the codebase.
+
+### Changes Made
+
+1. **equipment_slot.gd**:
+   - `type_to_name()`: Now maps all 16 equipment types (0-15) to display names
+   - `name_to_type()`: Reverse mapping for all 16 types
+   - `get_scene_path()`: Scene paths for 11 implemented equipment, empty string for 5 unimplemented
+
+2. **hunt_detection.gd**:
+   - Removed Spirit Box (1) and Parabolic Mic (7) from ELECTRONIC_TYPES array (not implemented)
+   - Updated comment at line 175 to list actual implemented electronics
+
+3. **test_equipment_slot.gd**:
+   - Added 8 new tests for equipment types 8-15
+   - Updated static helper tests to cover broader range
+
+4. **test_hunt_detection.gd**:
+   - Updated electronics test to use implemented types only: [0, 3, 6, 8, 9, 11]
+
+5. **video_camera.gd** (bonus fix):
+   - Fixed pre-existing bug where `player_pos` was undefined in `_rpc_request_capture()`
+
+### Test Results
+
+- **Smoke tests**: 17/17 passing
+- **Full suite**: 2242 tests, 2 pre-existing failures unrelated to FW-103
+- **Equipment slot tests**: All passing
+- **Hunt detection tests**: 31/31 passing
+
+### Design Decision
+
+The ticket originally suggested renumbering equipment types (e.g., Thermometer becoming type 1). However, this would require:
+- Modifying the `Equipment.EquipmentType` enum
+- Updating all equipment implementations
+- Potential serialization/network compatibility issues
+
+Instead, the implementation keeps the enum values intact and simply adds the missing mappings for implemented equipment (types 8-15), while keeping placeholder names for unimplemented equipment (types 1, 2, 4, 5, 7) for backward compatibility.

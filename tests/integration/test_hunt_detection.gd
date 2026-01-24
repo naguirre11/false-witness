@@ -126,8 +126,8 @@ func test_get_detection_radius_non_electronic_equipment_no_bonus() -> void:
 
 
 func test_various_electronic_equipment_types_add_bonus() -> void:
-	# Test several electronic types
-	var electronic_types := [0, 1, 3, 6, 7]  # EMF, Spirit Box, Thermometer, Video, Parabolic
+	# Test implemented electronic types only (Spirit Box/Parabolic Mic not implemented)
+	var electronic_types := [0, 3, 6, 8, 9, 11]  # EMF, Thermometer, Video, Calibrator, Lens, Aura Imager
 
 	for eq_type in electronic_types:
 		var equipment := MockEquipment.new()

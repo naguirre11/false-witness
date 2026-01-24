@@ -4,16 +4,48 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 
 **NEXT**: FW-035e-evidence-board-polish (UI polish/cleanup)
 
-**Ready backlog (Phase 2)**:
-- FW-103: Equipment constants cleanup (small)
-- FW-040d: Photo Gallery UI (small)
-- FW-045: Wraith entity (medium)
-- FW-047: Shade entity (medium)
-- FW-048: Revenant entity (medium)
-- FW-049: Demon entity (medium)
-- FW-050: Banshee entity (medium)
-- FW-072: Office Building map (large)
-- FW-088: Settings menu (medium)
+## Ready Backlog (19 tickets)
+
+### Small (3)
+| Ticket | Title |
+|--------|-------|
+| FW-035e | Evidence Board Polish |
+| FW-103 | Equipment Constants Cleanup |
+| FW-040d | Photo Gallery UI |
+| FW-097 | Loading Screens |
+| FW-098 | Pause Menu |
+
+### Medium - Entities (8)
+| Ticket | Title |
+|--------|-------|
+| FW-045 | Wraith Entity |
+| FW-047 | Shade Entity |
+| FW-048 | Revenant Entity |
+| FW-049 | Demon Entity |
+| FW-050 | Banshee Entity |
+| FW-054 | Poltergeist Entity |
+| FW-055 | Mare Entity |
+| FW-056 | Goryo Entity |
+
+### Medium - Systems (6)
+| Ticket | Title |
+|--------|-------|
+| FW-088 | Settings Menu |
+| FW-089 | Keybind System |
+| FW-093 | Environmental Audio |
+| FW-094 | Player Customization |
+| FW-095 | Balance Tuning |
+| FW-096 | Playtesting Tools |
+
+### Large - Maps (2)
+| Ticket | Title |
+|--------|-------|
+| FW-072 | Office Building Map |
+| FW-073 | Hospital Wing Map |
+
+---
+
+## Full Ticket List
 
 | Ticket | Title | Status |
 |--------|-------|--------|
@@ -77,12 +109,16 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-051-cultist-role-assignment | Cultist role assignment | completed |
 | FW-052-cultist-abilities | Cultist abilities with decay | completed |
 | FW-053-cultist-discovery | Cultist discovery | completed |
+| FW-054-poltergeist-entity | Poltergeist entity | ready |
+| FW-055-mare-entity | Mare entity | ready |
+| FW-056-goryo-entity | Goryo entity | ready |
 | FW-061-win-conditions | Win/loss conditions | completed |
 | FW-062-deliberation-phase | Deliberation phase | completed |
 | FW-063-results-screen | Results screen | completed |
 | FW-064-banishment-phase | Banishment phase endgame | draft |
 | FW-071-first-map-house | First map: Abandoned House | completed |
 | FW-072-office-building-map | Second map: Office Building | ready |
+| FW-073-hospital-map | Third map: Hospital Wing | ready |
 | FW-081-main-menu | Main menu and lobby UI | completed |
 | FW-082-equipment-select-ui | Equipment selection UI | completed |
 | FW-083-hud-system | In-game HUD | completed |
@@ -91,9 +127,27 @@ Quick-reference for ticket statuses. Updated by `cc_workflow/scripts/ticket-move
 | FW-086-design-token-system | Design token system | completed |
 | FW-087-ui-token-refactor | UI token refactor | completed |
 | FW-088-settings-menu | Settings and options menu | ready |
+| FW-089-keybind-system | Keybind remapping system | ready |
 | FW-091-audio-foundation | Audio system foundation | completed |
 | FW-092-entity-audio | Entity audio | completed |
+| FW-093-environmental-audio | Environmental audio system | ready |
+| FW-094-player-customization | Player customization system | ready |
+| FW-095-balance-tuning | Balance tuning pass | ready |
+| FW-096-playtesting-tools | Playtesting and debug tools | ready |
+| FW-097-loading-screens | Loading screens and transitions | ready |
+| FW-098-pause-menu | Pause menu | ready |
 | FW-100-test-reorganization | Test suite reorganization | completed |
 | FW-101-portent-deck | Portent Deck match modifiers | draft |
 | FW-102-basic-physics | Basic physics interactions | draft |
 | FW-103-equipment-constants-cleanup | Clean up stale equipment type constants | ready |
+
+---
+
+## Summary
+
+| Status | Count |
+|--------|-------|
+| completed | 64 |
+| ready | 19 |
+| draft | 6 |
+| **Total** | **89** |
